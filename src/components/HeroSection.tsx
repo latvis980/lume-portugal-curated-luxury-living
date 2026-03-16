@@ -32,12 +32,19 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="relative font-display text-5xl md:text-7xl lg:text-8xl font-light text-warm-white tracking-wider overflow-hidden"
+          className="font-display text-5xl md:text-7xl lg:text-8xl font-light tracking-wider"
+          style={{
+            color: 'transparent',
+            backgroundImage: 'linear-gradient(90deg, hsl(var(--warm-white)) 0%, hsl(var(--warm-white)) 100%)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            position: 'relative',
+          }}
         >
-          <span className="relative z-10">LUME</span>
           <motion.span
-            initial={{ left: "-100%" }}
-            animate={{ left: "200%" }}
+            aria-hidden
+            initial={{ backgroundPosition: '-200% center' }}
+            animate={{ backgroundPosition: ['−200% center', '300% center'] }}
             transition={{
               duration: 3,
               delay: 2,
@@ -45,8 +52,18 @@ const HeroSection = () => {
               repeatDelay: 5,
               ease: "easeInOut",
             }}
-            className="absolute top-0 h-full w-1/3 bg-gradient-to-r from-transparent via-warm-white/25 to-transparent skew-x-[-20deg] pointer-events-none"
-          />
+            className="absolute inset-0 font-display text-5xl md:text-7xl lg:text-8xl font-light tracking-wider pointer-events-none"
+            style={{
+              background: 'linear-gradient(90deg, transparent 0%, transparent 40%, rgba(255,255,255,0.7) 50%, transparent 60%, transparent 100%)',
+              backgroundSize: '200% 100%',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              color: 'transparent',
+            }}
+          >
+            LUME
+          </motion.span>
+          LUME
         </motion.h1>
 
         <motion.div
