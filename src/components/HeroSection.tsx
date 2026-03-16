@@ -1,16 +1,19 @@
 import { motion } from "framer-motion";
-import heroImage from "@/assets/hero-villa.jpg";
 
 const HeroSection = () => {
   return (
     <section id="hero" className="relative h-screen w-full overflow-hidden">
-      {/* Background image as video placeholder */}
+      {/* Background video */}
       <div className="absolute inset-0">
-        <img
-          src={heroImage}
-          alt="Luxury villa in Portugal overlooking the Atlantic"
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
           className="w-full h-full object-cover"
-        />
+        >
+          <source src="/hero-video.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-charcoal/40" />
       </div>
 
