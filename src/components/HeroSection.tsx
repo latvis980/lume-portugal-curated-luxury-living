@@ -32,9 +32,21 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="font-display text-5xl md:text-7xl lg:text-8xl font-light text-warm-white tracking-wider"
+          className="relative font-display text-5xl md:text-7xl lg:text-8xl font-light text-warm-white tracking-wider overflow-hidden"
         >
-          LUME
+          <span className="relative z-10">LUME</span>
+          <motion.span
+            initial={{ left: "-100%" }}
+            animate={{ left: "200%" }}
+            transition={{
+              duration: 3,
+              delay: 2,
+              repeat: Infinity,
+              repeatDelay: 5,
+              ease: "easeInOut",
+            }}
+            className="absolute top-0 h-full w-1/3 bg-gradient-to-r from-transparent via-warm-white/25 to-transparent skew-x-[-20deg] pointer-events-none"
+          />
         </motion.h1>
 
         <motion.div
