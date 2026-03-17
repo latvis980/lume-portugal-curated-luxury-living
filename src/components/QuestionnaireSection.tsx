@@ -5,22 +5,27 @@ const questions = [
   {
     id: 1,
     question: "What brings you to Portugal?",
-    options: ["Relocation", "Investment", "Second Home", "Retirement"],
+    options: ["Relocation", "Second Home", "Investment", "Just Exploring"],
   },
   {
     id: 2,
-    question: "What is your preferred region?",
-    options: ["Lisbon & Cascais", "Algarve", "Porto & North", "Silver Coast"],
+    question: "My preferred lifestyle",
+    options: ["Ocean", "City", "Countryside", "Wine Region"],
   },
   {
     id: 3,
-    question: "What type of property are you looking for?",
-    options: ["Modern Apartment", "Traditional Villa", "Penthouse", "Country Estate"],
+    question: "Who are you moving with?",
+    options: ["Just Me", "With Partner", "With Children", "With Extended Family"],
   },
   {
     id: 4,
-    question: "What is your budget range?",
-    options: ["€500K – €1M", "€1M – €2.5M", "€2.5M – €5M", "€5M+"],
+    question: "Timeline",
+    options: ["Now", "3–6 Months", "6–12 Months", "Just Exploring"],
+  },
+  {
+    id: 5,
+    question: "What matters most?",
+    options: ["Schools & Lifestyle", "Tranquillity & Nature", "Investment Opportunities", "Healthcare Availability"],
   },
 ];
 
