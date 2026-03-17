@@ -26,14 +26,14 @@ const CuratorSection = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">The Lume Difference</p>
+          <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">The portugal4you Difference</p>
           <h2 className="font-display text-3xl md:text-5xl font-light text-foreground mb-6">
             Your Residential Curator
           </h2>
           <div className="w-16 h-px bg-primary mb-8" />
           <div className="space-y-5">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Every Lume client is paired with a dedicated Residential Curator — a single point of contact who understands your vision, preferences, and lifestyle needs.
+              Every portugal4you client is paired with a dedicated Residential Curator — a single point of contact who understands your vision, preferences, and lifestyle needs.
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
               From your first enquiry to settling into your new home, your Curator orchestrates every detail: property sourcing, legal coordination, interior design, school enrollment, and beyond.

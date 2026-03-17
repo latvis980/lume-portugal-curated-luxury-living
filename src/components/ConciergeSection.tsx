@@ -24,7 +24,7 @@ const ConciergeSection = () => {
           viewport={{ once: true }}
           className="text-center mb-20"
         >
-          <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">Lume Concierge</p>
+          <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">portugal4you Concierge</p>
           <h2 className="font-display text-3xl md:text-5xl font-light text-foreground">
             The Club Card
           </h2>
@@ -38,7 +38,7 @@ const ConciergeSection = () => {
           >
             <img
               src={clubCardImg}
-              alt="Lume Membership Card"
+              alt="portugal4you Membership Card"
               className="w-full max-w-lg mx-auto"
             />
           </motion.div>
@@ -50,7 +50,7 @@ const ConciergeSection = () => {
             transition={{ delay: 0.2 }}
           >
             <p className="text-sm text-muted-foreground leading-relaxed mb-8">
-              The Lume Club Card grants you access to our full concierge network — 
+              The portugal4you Club Card grants you access to our full concierge network — 
               a curated collection of Portugal's finest experiences, reserved exclusively for our members.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
