@@ -136,7 +136,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: shimmer-text 3s ease-in-out 2s infinite;
+  animation: shimmer-text 6s ease-in-out 2s infinite;
   animation-delay: 2s;
   animation-iteration-count: infinite;
   animation-fill-mode: backwards;
