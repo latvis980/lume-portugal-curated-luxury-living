@@ -50,7 +50,7 @@ const ConciergeSection = () => {
             transition={{ delay: 0.2 }}
           >
             <p className="text-sm text-muted-foreground leading-relaxed mb-8">
-              The Lume Club Card grants you access to our full concierge network — 
+              The portugal4you Club Card grants you access to our full concierge network — 
               a curated collection of Portugal's finest experiences, reserved exclusively for our members.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

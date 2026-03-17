@@ -34,7 +34,7 @@ const HeroSection = () => {
           transition={{ duration: 1, delay: 0.5 }}
           className="logo-shimmer font-display text-5xl md:text-7xl lg:text-8xl font-light tracking-wider"
         >
-          LUME
+          portugal4you
         </motion.h1>
 
         <motion.div
