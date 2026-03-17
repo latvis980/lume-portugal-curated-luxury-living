@@ -62,9 +62,12 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
           className="text-center mb-16"
         >
           <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">Discover Your Match</p>
-          <h2 className="font-display text-3xl md:text-5xl font-light text-foreground">
+          <h2 className="font-display text-3xl md:text-5xl font-light text-foreground mb-4">
             Tell Us What You Seek
           </h2>
+          <p className="text-sm text-muted-foreground/70 font-light max-w-md mx-auto">
+            Answer a few quick questions to unlock exclusive listings and services tailored to you.
+          </p>
         </motion.div>
 
         {/* Progress bar */}
