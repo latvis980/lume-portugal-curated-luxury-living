@@ -26,7 +26,7 @@ const CuratorSection = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">The portugal4you Difference</p>
+          <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">The LUME Difference</p>
           <h2 className="font-display text-3xl md:text-5xl font-light text-foreground mb-6">
             Your Residential Curator
           </h2>
