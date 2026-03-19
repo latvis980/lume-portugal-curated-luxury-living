@@ -24,7 +24,7 @@ const ConciergeSection = () => {
           viewport={{ once: true }}
           className="text-center mb-20"
         >
-          <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">portugal4you Concierge</p>
+          <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">LUME Concierge</p>
           <h2 className="font-display text-3xl md:text-5xl font-light text-foreground">
             The Club Card
           </h2>
