@@ -32,9 +32,14 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="logo-shimmer font-display text-5xl md:text-7xl lg:text-8xl font-light tracking-wider"
+          className="flex flex-col items-center"
         >
-          portugal4you
+          <span className="logo-shimmer font-display text-5xl md:text-7xl lg:text-8xl font-light tracking-wider">
+            LUME
+          </span>
+          <span className="font-body text-xs md:text-sm tracking-[0.3em] uppercase text-sand-light/60 mt-2 font-medium">
+            by Mark
+          </span>
         </motion.h1>
 
         <motion.div
