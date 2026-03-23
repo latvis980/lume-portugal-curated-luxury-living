@@ -1,10 +1,19 @@
 # Project Overview
 
-A React + TypeScript + Vite frontend application built with shadcn/ui components and Tailwind CSS. Originally created in Lovable, migrated to Replit.
+A full-stack application with a React + TypeScript frontend and a Python (FastAPI) backend.
+
+## Architecture
+
+```
+/
+├── frontend/     React + Vite + TypeScript + shadcn/ui
+└── backend/      Python FastAPI REST API
+```
 
 ## Tech Stack
 
-- **Frontend**: React 18, TypeScript, Vite 8
+### Frontend (`frontend/`)
+- **Framework**: React 18, TypeScript, Vite 8
 - **Styling**: Tailwind CSS, shadcn/ui (Radix UI primitives)
 - **Routing**: React Router v6
 - **State/Data**: TanStack React Query
@@ -12,29 +21,33 @@ A React + TypeScript + Vite frontend application built with shadcn/ui components
 - **Charts**: Recharts
 - **Animations**: Framer Motion
 
-## Project Structure
-
-```
-src/
-  App.tsx          - Root app with routing and providers
-  main.tsx         - Entry point
-  pages/           - Page-level components (Index, NotFound)
-  components/      - Reusable UI components (shadcn/ui + custom)
-  hooks/           - Custom React hooks
-  lib/             - Utility functions
-  assets/          - Static assets
-```
+### Backend (`backend/`)
+- **Framework**: FastAPI (Python 3.11)
+- **Server**: Uvicorn (with hot reload in dev)
+- **API prefix**: All routes use `/api/...`
 
 ## Running the App
 
-```bash
-npm run dev       # Start dev server on port 5000
-npm run build     # Build for production
-npm run preview   # Preview production build
-```
+Two workflows run in parallel:
 
-## Notes
+| Workflow | Command | Port |
+|---|---|---|
+| Start application | `cd frontend && npm run dev` | 5000 (webview) |
+| Backend API | `cd backend && uvicorn main:app --reload` | 8000 (console) |
 
-- `lovable-tagger` dev dependency was removed as it conflicts with Vite 8 and is Lovable-specific
-- Vite dev server is configured to bind to `0.0.0.0:5000` for Replit compatibility
-- `allowedHosts: true` is set for Replit's proxied preview pane
+The Vite dev server proxies `/api/*` requests from port 5000 → 8000, so the frontend can call `/api/...` and it reaches the backend automatically.
+
+## Key Files
+
+- `frontend/src/App.tsx` — Root component with routes
+- `frontend/src/pages/` — Page-level components
+- `frontend/src/components/` — Reusable UI components (shadcn/ui + custom)
+- `frontend/vite.config.ts` — Vite config including proxy setup
+- `backend/main.py` — FastAPI application entry point
+- `backend/requirements.txt` — Python dependencies
+
+## Development Notes
+
+- Frontend API calls should use relative `/api/...` paths (proxied to backend by Vite in dev)
+- All backend routes must be prefixed with `/api`
+- `allowedHosts: true` is set in Vite for Replit's proxied preview pane

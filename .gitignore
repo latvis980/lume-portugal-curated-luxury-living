@@ -1,3 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+*.egg-info/
+.eggs/
+
 # Logs
 logs
 *.log
