@@ -36,7 +36,7 @@ const HeroSection = () => {
         >
           <span className="logo-shimmer font-display text-5xl md:text-7xl lg:text-8xl font-light tracking-wider inline-flex items-baseline">
             LU
-            <span className="relative">
+            <span className="relative inline-block">
               M
               <span className="sun-dot" />
             </span>
