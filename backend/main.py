@@ -40,7 +40,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
-from routes import public_router
+from routes.public import router as public_router
+
 from routes.public import robots, llms_txt, sitemap
 from seo import inject_seo
 
