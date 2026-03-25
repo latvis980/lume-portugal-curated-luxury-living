@@ -39,6 +39,8 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [email, setEmail] = useState("");
   const [showEmail, setShowEmail] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const handleAnswer = (answer: string) => {
     setAnswers({ ...answers, [currentQuestion]: answer });
@@ -49,9 +51,42 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) onComplete();
+    if (!email || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setError("");
+
+    // Convert answers from {0: "Relocation", 1: "Ocean"} 
+    // to {"1": "Relocation", "2": "Ocean"} (1-indexed string keys for the backend)
+    const formattedAnswers: Record<string, string> = {};
+    for (const [key, value] of Object.entries(answers)) {
+      formattedAnswers[String(Number(key) + 1)] = value;
+    }
+
+    try {
+      const res = await fetch("/api/submit/questionnaire", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          answers: formattedAnswers,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || "Something went wrong. Please try again.");
+      }
+
+      // Success — trigger the parent's completion handler
+      onComplete();
+    } catch (err: any) {
+      setError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const progress = ((currentQuestion + (showEmail ? 1 : 0)) / (questions.length + 1)) * 100;
@@ -140,15 +175,20 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your@email.com"
                     required
-                    className="flex-1 px-4 py-3 bg-background border border-border text-foreground text-sm tracking-wider placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary transition-colors"
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-3 bg-background border border-border text-foreground text-sm tracking-wider placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
                   />
                   <button
                     type="submit"
-                    className="px-8 py-3 bg-primary text-primary-foreground text-xs tracking-[0.2em] uppercase hover:bg-primary/90 transition-colors"
+                    disabled={isSubmitting}
+                    className="px-8 py-3 bg-primary text-primary-foreground text-xs tracking-[0.2em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
                   >
-                    Reveal
+                    {isSubmitting ? "Sending…" : "Reveal"}
                   </button>
                 </div>
+                {error && (
+                  <p className="text-sm text-red-500 mt-4">{error}</p>
+                )}
               </motion.form>
             )}
           </AnimatePresence>
