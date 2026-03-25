@@ -1,0 +1,264 @@
+# backend/routes/public.py
+"""
+Public routes for LUME by Mark.
+
+Includes:
+- robots.txt (search engine crawl rules)
+- llms.txt (LLM discovery — helps ChatGPT/Claude understand the site)
+- sitemap.xml (dynamic sitemap from Supabase data)
+- Public API endpoints for listings
+"""
+
+import os
+import re
+from datetime import date, datetime
+from typing import Optional
+
+from fastapi import APIRouter, Query
+from fastapi.responses import PlainTextResponse, Response
+
+router = APIRouter(prefix="/api", tags=["public"])
+
+SITE_URL = os.getenv("SITE_URL", "https://lumebymark.com")
+
+
+# ---------------------------------------------------------------------------
+# Slug generation (shared utility)
+# ---------------------------------------------------------------------------
+
+_SLUG_RE = re.compile(r"[^a-z0-9]+")
+
+
+def generate_slug(text: str) -> str:
+    """Convert a title into a URL-safe slug."""
+    if not text:
+        return ""
+    slug = text.lower().strip()
+    slug = _SLUG_RE.sub("-", slug)
+    return slug.strip("-")
+
+
+# ---------------------------------------------------------------------------
+# robots.txt
+# ---------------------------------------------------------------------------
+
+@router.get("/robots.txt", response_class=PlainTextResponse)
+async def robots():
+    """
+    Search engine crawl rules.
+    
+    Allows all crawlers, points to sitemap, blocks admin pages.
+    """
+    content = f"""User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: {SITE_URL}/sitemap.xml
+
+# AI crawlers welcome
+User-agent: GPTBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+"""
+    return PlainTextResponse(content=content, media_type="text/plain")
+
+
+# ---------------------------------------------------------------------------
+# llms.txt — LLM-readable site description
+# ---------------------------------------------------------------------------
+
+@router.get("/llms.txt", response_class=PlainTextResponse)
+async def llms_txt():
+    """
+    LLM discovery file.
+    
+    Helps AI assistants (ChatGPT, Claude, Perplexity) understand
+    what this site offers and how to navigate it.
+    """
+    content = f"""# LUME by Mark — Luxury Real Estate & Investment in Portugal
+
+> LUME by Mark curates luxury real estate, seamless relocation, and strategic
+> investment opportunities across Portugal. Each client is paired with a
+> dedicated Residential Curator who orchestrates every detail.
+
+## What we offer
+
+- **Luxury real estate**: Handpicked properties in Lisbon, Porto, Cascais, 
+  Algarve, and Portugal's most prestigious addresses
+- **Relocation services**: End-to-end support for moving to Portugal — 
+  visas, tax advisory, school enrollment, and settling in
+- **Investment advisory**: Investment homes, second homes, and strategic 
+  development opportunities with professional management
+- **Concierge services**: The LUME Club Card — access to Portugal's finest 
+  experiences, from private yacht charters to wine estate tours
+
+## How to browse
+
+- All properties: {SITE_URL}/properties
+- Property detail pages: {SITE_URL}/properties/[slug]
+- Properties by location: {SITE_URL}/locations/[city-slug]
+- Services: {SITE_URL}/services
+- About LUME: {SITE_URL}/about
+- Contact: {SITE_URL}/contact
+
+## API access (for structured data)
+
+- Property listings: {SITE_URL}/api/properties
+- Single property: {SITE_URL}/api/properties/[slug]
+- Locations: {SITE_URL}/api/locations
+- Sitemap: {SITE_URL}/sitemap.xml
+
+## Contact
+
+- Website: {SITE_URL}
+- Location: Portugal
+"""
+    return PlainTextResponse(content=content, media_type="text/plain")
+
+
+# ---------------------------------------------------------------------------
+# sitemap.xml — dynamic from database
+# ---------------------------------------------------------------------------
+
+@router.get("/sitemap.xml")
+async def sitemap():
+    """
+    Dynamic XML sitemap generated from Supabase data.
+    
+    Includes all property listings, location pages, service pages,
+    and static pages with appropriate priority levels.
+    """
+    today = date.today().isoformat()
+
+    urls = []
+
+    # Static pages
+    static_pages = [
+        ("/", "1.0", "daily"),
+        ("/properties", "0.9", "daily"),
+        ("/services", "0.7", "weekly"),
+        ("/about", "0.5", "monthly"),
+        ("/contact", "0.5", "monthly"),
+        ("/investment", "0.7", "weekly"),
+    ]
+    for path, priority, freq in static_pages:
+        full_url = SITE_URL if path == "/" else f"{SITE_URL}{path}"
+        urls.append(
+            f"  <url>"
+            f"<loc>{full_url}</loc>"
+            f"<lastmod>{today}</lastmod>"
+            f"<changefreq>{freq}</changefreq>"
+            f"<priority>{priority}</priority>"
+            f"</url>"
+        )
+
+    # Dynamic property pages from database
+    try:
+        from database import get_all_property_slugs
+        slugs = get_all_property_slugs() or []
+        for item in slugs:
+            slug = item.get("slug") or ""
+            updated = item.get("updated_at") or item.get("created_at") or today
+            if isinstance(updated, datetime):
+                updated = updated.date().isoformat()
+            elif not isinstance(updated, str):
+                updated = today
+            urls.append(
+                f"  <url>"
+                f"<loc>{SITE_URL}/properties/{slug}</loc>"
+                f"<lastmod>{updated}</lastmod>"
+                f"<changefreq>weekly</changefreq>"
+                f"<priority>0.8</priority>"
+                f"</url>"
+            )
+    except Exception as e:
+        print(f"[Sitemap] Error fetching property slugs: {e}")
+
+    # Dynamic location pages
+    try:
+        from database import get_all_location_slugs
+        loc_slugs = get_all_location_slugs() or []
+        for item in loc_slugs:
+            slug = item.get("slug") or ""
+            urls.append(
+                f"  <url>"
+                f"<loc>{SITE_URL}/locations/{slug}</loc>"
+                f"<lastmod>{today}</lastmod>"
+                f"<changefreq>weekly</changefreq>"
+                f"<priority>0.7</priority>"
+                f"</url>"
+            )
+    except Exception as e:
+        print(f"[Sitemap] Error fetching location slugs: {e}")
+
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "\n".join(urls)
+        + "\n</urlset>"
+    )
+
+    return Response(content=xml, media_type="application/xml")
+
+
+# ---------------------------------------------------------------------------
+# Public API — property listings
+# ---------------------------------------------------------------------------
+
+@router.get("/properties")
+async def list_properties(
+    city: Optional[str] = Query(None, description="Filter by city"),
+    type: Optional[str] = Query(None, description="Filter by property type"),
+    min_price: Optional[float] = Query(None, description="Minimum price"),
+    max_price: Optional[float] = Query(None, description="Maximum price"),
+    bedrooms: Optional[int] = Query(None, description="Minimum bedrooms"),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+):
+    """List properties with optional filters."""
+    try:
+        from database import query_properties
+        results = query_properties(
+            city=city,
+            property_type=type,
+            min_price=min_price,
+            max_price=max_price,
+            min_bedrooms=bedrooms,
+            limit=limit,
+            offset=offset,
+        )
+        return {"properties": results, "count": len(results)}
+    except Exception as e:
+        return {"properties": [], "count": 0, "error": str(e)}
+
+
+@router.get("/properties/{slug}")
+async def get_property(slug: str):
+    """Get a single property by slug."""
+    try:
+        from database import get_property_by_slug
+        prop = get_property_by_slug(slug)
+        if not prop:
+            return {"error": "Property not found"}, 404
+        return prop
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@router.get("/locations")
+async def list_locations():
+    """List all available locations."""
+    try:
+        from database import get_all_locations
+        return {"locations": get_all_locations() or []}
+    except Exception as e:
+        return {"locations": [], "error": str(e)}
