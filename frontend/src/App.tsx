@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import ListingPage from "./pages/ListingPage.tsx";
 
 // Admin pages
 import AdminLogin from "./pages/admin/AdminLogin.tsx";
@@ -26,6 +27,7 @@ const App = () => (
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Index />} />
+          <Route path="/properties/:slug" element={<ListingPage />} />
 
           {/* Admin routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
