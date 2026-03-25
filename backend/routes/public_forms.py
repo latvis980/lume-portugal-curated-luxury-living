@@ -64,8 +64,8 @@ async def submit_questionnaire(body: QuestionnaireSubmission):
         # If email already exists, update the questionnaire answers
         if "duplicate" in error_msg.lower() or "unique" in error_msg.lower():
             try:
-                from database import _get_client
-                client = _get_client()
+                from database import _get_admin_client
+                client = _get_admin_client()
                 client.table("contacts").update({
                     "questionnaire_answers": body.answers,
                     "source": "questionnaire",

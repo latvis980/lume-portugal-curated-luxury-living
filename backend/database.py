@@ -68,7 +68,7 @@ def _get_admin_client():
 def test_connection() -> bool:
     """Test database connectivity."""
     try:
-        client = _get_client()
+        client = _get_admin_client()
         client.table("listings").select("id").limit(1).execute()
         return True
     except Exception as e:
