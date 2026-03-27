@@ -332,15 +332,18 @@ export default function PropertiesPage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-background border-b border-border pb-8 pt-28">
+      <section className="relative overflow-hidden border-b border-border pb-10 pt-32"
+        style={{ background: "linear-gradient(180deg, hsl(var(--sand-light)) 0%, hsl(var(--background)) 100%)" }}
+      >
         <div className="mx-auto max-w-7xl px-6 md:px-12">
           <div className="flex items-end justify-between">
             <div>
-              <p className="mb-1 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground font-body">LUME by Mark</p>
-              <h1 className="font-display text-3xl font-light tracking-tight text-foreground sm:text-4xl">Properties</h1>
+              <div className="mb-3 h-px w-12 bg-primary/60" />
+              <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.25em] text-muted-foreground font-body">Curated Collection</p>
+              <h1 className="font-display text-4xl font-light tracking-tight text-foreground sm:text-5xl">Properties</h1>
             </div>
             {total > 0 && !isLoading && (
-              <p className="text-sm text-muted-foreground font-body">
+              <p className="text-sm text-muted-foreground/70 font-body tracking-wide">
                 {total.toLocaleString()} {total === 1 ? "property" : "properties"}
               </p>
             )}
@@ -349,23 +352,26 @@ export default function PropertiesPage() {
       </section>
 
       {/* Filter Bar */}
-      <section className="sticky top-0 z-20 border-b border-border bg-background shadow-sm">
+      <section className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur-md shadow-sm">
         <div className="mx-auto max-w-7xl px-6 md:px-12 py-4">
-          <div className="flex flex-wrap items-end gap-3">
+          {/* Row 1: Primary filters */}
+          <div className="flex flex-wrap items-center gap-3">
 
             {/* Listing type */}
-            <div className="flex overflow-hidden rounded border border-border">
+            <div className="flex overflow-hidden rounded-sm border border-border">
               {["sale", "rent", "seasonal_rent"].map((lt) => (
                 <button key={lt} onClick={() => updateBasic("listing_type", lt)}
-                  className={`px-3 py-2 text-xs font-medium font-body transition-colors ${filters.listing_type === lt ? activeClass : inactiveClass}`}
+                  className={`px-3.5 py-2 text-xs font-medium font-body tracking-wide transition-colors ${filters.listing_type === lt ? activeClass : inactiveClass}`}
                 >
                   {lt === "sale" ? "Sale" : lt === "rent" ? "Rent" : "Seasonal"}
                 </button>
               ))}
             </div>
 
+            <span className="hidden sm:block h-6 w-px bg-border" />
+
             <div className="flex items-center gap-1.5 min-w-[140px]">
-              <MapPin className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+              <MapPin className="h-3.5 w-3.5 text-primary flex-shrink-0" />
               <SelectDropdown value={filters.region} options={regionOptions} onChange={(v) => updateBasic("region", v)} placeholder="Region" />
             </div>
 
@@ -379,7 +385,9 @@ export default function PropertiesPage() {
               </div>
             )}
 
-            <div className="min-w-[140px]">
+            <span className="hidden sm:block h-6 w-px bg-border" />
+
+            <div className="min-w-[130px]">
               <SelectDropdown
                 value={filters.type}
                 options={(facets?.property_types ?? []).map(t => ({ value: t, label: PROPERTY_TYPE_LABELS[t] ?? t }))}
@@ -390,35 +398,37 @@ export default function PropertiesPage() {
 
             {/* Bedrooms */}
             <div>
-              <p className="mb-1.5 text-[10px] uppercase tracking-widest text-muted-foreground font-body">Beds</p>
-              <div className="flex gap-1">
+              <p className="mb-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60 font-body">Beds</p>
+              <div className="flex gap-0.5">
                 {["Any", "1", "2", "3", "4", "5+"].map((opt) => {
                   const val = opt === "Any" ? "" : opt === "5+" ? "5" : opt;
                   const isActive = (opt === "Any" && !filters.min_bedrooms) || (!!val && filters.min_bedrooms === val);
                   return (
                     <button key={opt} onClick={() => updateBasic("min_bedrooms", val)}
-                      className={`rounded border px-2.5 py-1.5 text-xs font-medium font-body transition-colors ${isActive ? activeClass : "border-border bg-background text-muted-foreground hover:border-foreground/30"}`}
+                      className={`rounded-sm border px-2 py-1.5 text-[11px] font-medium font-body transition-colors ${isActive ? activeClass : "border-border bg-background text-muted-foreground hover:border-foreground/30"}`}
                     >{opt}</button>
                   );
                 })}
               </div>
             </div>
 
+            <span className="hidden lg:block h-6 w-px bg-border" />
+
             {/* Price */}
             <div className="flex items-center gap-1.5">
               <div className="relative">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">€</span>
-                <input type="number" placeholder="Min price" value={filters.min_price}
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">€</span>
+                <input type="number" placeholder="Min" value={filters.min_price}
                   onChange={(e) => updateBasic("min_price", e.target.value)}
-                  className="w-28 rounded border border-border bg-background py-2 pl-6 pr-2 text-xs text-foreground font-body outline-none transition focus:border-foreground/30 placeholder:text-muted-foreground/40"
+                  className="w-24 rounded-sm border border-border bg-background py-2 pl-6 pr-2 text-xs text-foreground font-body outline-none transition focus:border-primary/50 focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35"
                 />
               </div>
-              <span className="text-muted-foreground/30 text-sm">–</span>
+              <span className="text-muted-foreground/25 text-xs">–</span>
               <div className="relative">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">€</span>
-                <input type="number" placeholder="Max price" value={filters.max_price}
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">€</span>
+                <input type="number" placeholder="Max" value={filters.max_price}
                   onChange={(e) => updateBasic("max_price", e.target.value)}
-                  className="w-28 rounded border border-border bg-background py-2 pl-6 pr-2 text-xs text-foreground font-body outline-none transition focus:border-foreground/30 placeholder:text-muted-foreground/40"
+                  className="w-24 rounded-sm border border-border bg-background py-2 pl-6 pr-2 text-xs text-foreground font-body outline-none transition focus:border-primary/50 focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35"
                 />
               </div>
             </div>
@@ -426,19 +436,19 @@ export default function PropertiesPage() {
             <div className="ml-auto flex items-center gap-2">
               <SelectDropdown value={filters.sort_by} options={SORT_OPTIONS} onChange={(v) => updateBasic("sort_by", v || "featured")} placeholder="Sort" />
               <button onClick={() => { setDraftFilters(filters); setDrawerOpen(true); }}
-                className="relative flex items-center gap-2 rounded border border-border bg-background px-4 py-2 text-sm font-medium font-body text-foreground transition hover:bg-muted"
+                className="relative flex items-center gap-2 rounded-sm border border-border bg-background px-4 py-2 text-xs font-medium font-body tracking-wide text-foreground transition hover:bg-muted hover:border-foreground/20"
               >
-                <SlidersHorizontal className="h-4 w-4" />
-                All Filters
+                <SlidersHorizontal className="h-3.5 w-3.5" />
+                Filters
                 {activeFilterCount > 0 && (
-                  <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-foreground text-[10px] text-background">
+                  <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                     {activeFilterCount}
                   </span>
                 )}
               </button>
               {activeFilterCount > 0 && (
-                <button onClick={resetAll} className="flex items-center gap-1.5 rounded px-3 py-2 text-xs text-muted-foreground font-body transition hover:text-foreground">
-                  <RotateCcw className="h-3.5 w-3.5" /> Clear
+                <button onClick={resetAll} className="flex items-center gap-1.5 rounded px-2.5 py-2 text-xs text-muted-foreground font-body transition hover:text-foreground">
+                  <RotateCcw className="h-3 w-3" /> Clear
                 </button>
               )}
             </div>
@@ -447,28 +457,28 @@ export default function PropertiesPage() {
       </section>
 
       {/* Results */}
-      <main className="mx-auto w-full max-w-7xl flex-1 px-6 md:px-12 py-8" ref={resultsRef}>
-        <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-6 md:px-12 py-10" ref={resultsRef}>
+        <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
           <div className="flex-1"><FilterChips filters={filters} onRemove={removeChip} /></div>
-          <div className="flex items-center gap-1 rounded border border-border bg-background p-1">
-            <button onClick={() => setViewMode("grid")} className={`rounded p-1.5 transition ${viewMode === "grid" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>
-              <LayoutGrid className="h-4 w-4" />
+          <div className="flex items-center gap-0.5 rounded-sm border border-border bg-background p-0.5">
+            <button onClick={() => setViewMode("grid")} className={`rounded-sm p-1.5 transition ${viewMode === "grid" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>
+              <LayoutGrid className="h-3.5 w-3.5" />
             </button>
-            <button onClick={() => setViewMode("list")} className={`rounded p-1.5 transition ${viewMode === "list" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>
-              <List className="h-4 w-4" />
+            <button onClick={() => setViewMode("list")} className={`rounded-sm p-1.5 transition ${viewMode === "list" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>
+              <List className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
 
         {isLoading && (
-          <div className={viewMode === "grid" ? "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" : "flex flex-col gap-4"}>
+          <div className={viewMode === "grid" ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" : "flex flex-col gap-4"}>
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="animate-pulse overflow-hidden rounded border border-border bg-card">
+              <div key={i} className="animate-pulse overflow-hidden rounded-sm border border-border bg-card">
                 <div className="aspect-[4/3] bg-muted" />
-                <div className="p-4 space-y-2">
-                  <div className="h-3 w-1/3 rounded bg-muted" />
+                <div className="p-5 space-y-3">
+                  <div className="h-2.5 w-1/4 rounded bg-muted" />
                   <div className="h-4 w-2/3 rounded bg-muted" />
-                  <div className="h-3 w-1/2 rounded bg-muted" />
+                  <div className="h-2.5 w-1/2 rounded bg-muted" />
                 </div>
               </div>
             ))}
@@ -477,7 +487,7 @@ export default function PropertiesPage() {
 
         {!isLoading && properties.length > 0 && (
           <motion.div key={`${page}-${viewMode}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className={viewMode === "grid" ? "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" : "flex flex-col gap-4"}
+            className={viewMode === "grid" ? "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" : "flex flex-col gap-4"}
           >
             {properties.map((listing: Listing) => (
               <PropertyCard key={listing.id} listing={listing} view={viewMode} />
@@ -486,12 +496,16 @@ export default function PropertiesPage() {
         )}
 
         {!isLoading && properties.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <MapPin className="mb-4 h-10 w-10 text-muted-foreground/30" />
-            <h2 className="mb-2 font-display text-lg font-light text-muted-foreground">No properties found</h2>
-            <p className="mb-6 text-sm text-muted-foreground font-body">Try adjusting your filters to see more results.</p>
-            <button onClick={resetAll} className="rounded border border-border px-5 py-2.5 text-sm font-body text-foreground transition hover:bg-muted">
-              Clear all filters
+          <div className="flex flex-col items-center justify-center py-32 text-center">
+            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <MapPin className="h-7 w-7 text-primary/50" />
+            </div>
+            <h2 className="mb-2 font-display text-xl font-light text-foreground">No properties found</h2>
+            <p className="mb-8 max-w-sm text-sm leading-relaxed text-muted-foreground font-body">
+              Adjust your filters or explore our full collection to discover your perfect property.
+            </p>
+            <button onClick={resetAll} className="rounded-sm border border-foreground/20 bg-foreground px-6 py-2.5 text-sm font-body font-medium text-background transition hover:bg-foreground/90">
+              View all properties
             </button>
           </div>
         )}
