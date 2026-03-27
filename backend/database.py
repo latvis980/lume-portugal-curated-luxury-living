@@ -286,9 +286,9 @@ def get_property_facets() -> Dict[str, Any]:
         result = client.table("listings").select(
             "region, city, area, property_type, listing_type, "
             "price, interior_living_area, bedrooms, bathrooms, "
-            "property_condition, views"
+            "condition, views"
         ).eq("status", "available").execute()
-
+        
         rows = result.data or []
         if not rows:
             return {
@@ -341,7 +341,7 @@ def get_property_facets() -> Dict[str, Any]:
         # Enums
         property_types = sorted({r["property_type"] for r in rows if r.get("property_type")})
         listing_types  = sorted({r["listing_type"]  for r in rows if r.get("listing_type")})
-        conditions     = sorted({r["property_condition"] for r in rows if r.get("property_condition")})
+        conditions = sorted({r["condition"] for r in rows if r.get("condition")})
 
         # Views — flatten the arrays
         all_views: set = set()

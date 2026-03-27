@@ -200,10 +200,10 @@ export async function fetchListings(params: ListingsQuery = {}): Promise<Listing
 
 export interface PropertyFacets {
   regions: string[];
-  all_cities: string[];                         // ← ADDED: flat city list for independent City dropdown
+  all_cities: string[];                         
   cities_by_region: Record<string, string[]>;
   areas_by_city: Record<string, string[]>;
-  areas_by_region: Record<string, string[]>;    // ← ADDED: areas keyed by region (used when no city selected)
+  areas_by_region: Record<string, string[]>;   
   property_types: string[];
   listing_types: string[];
   price_range: { min: number; max: number };
