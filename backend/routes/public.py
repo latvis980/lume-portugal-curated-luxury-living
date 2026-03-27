@@ -296,6 +296,23 @@ async def list_properties(
     except Exception as e:
         return {"properties": [], "total": 0, "error": str(e)}
 
+@router.get("/properties/{slug}")
+async def get_property(slug: str):
+    """Fetch a single available listing by its URL slug."""
+    try:
+        from database import get_property_by_slug
+        listing = get_property_by_slug(slug)
+        if not listing:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Property not found")
+        return listing
+    except Exception as e:
+        from fastapi import HTTPException
+        # Re-raise HTTP exceptions (like our 404) as-is
+        if hasattr(e, "status_code"):
+            raise
+        return {"error": str(e)}
+
 @router.get("/services")
 async def list_services_public():
     """List all active services, grouped by category."""
