@@ -293,8 +293,10 @@ def get_property_facets() -> Dict[str, Any]:
         if not rows:
             return {
                 "regions": [],
+                "all_cities": [],
                 "cities_by_region": {},
                 "areas_by_city": {},
+                "areas_by_region": {},
                 "property_types": [],
                 "listing_types": [],
                 "price_range": {"min": 0, "max": 5000000},
@@ -324,6 +326,18 @@ def get_property_facets() -> Dict[str, Any]:
                 areas_by_city.setdefault(cit, set()).add(ar)
         areas_by_city = {k: sorted(v) for k, v in areas_by_city.items()}
 
+        # Flat city list for independent city dropdown
+        all_cities = sorted({r["city"] for r in rows if r.get("city")})
+
+        # Areas indexed by region (for Area dropdown when no city is picked yet)
+        areas_by_region: Dict[str, Any] = {}
+        for r in rows:
+            reg = r.get("region") or ""
+            ar  = r.get("area") or ""
+            if reg and ar:
+                areas_by_region.setdefault(reg, set()).add(ar)
+        areas_by_region = {k: sorted(v) for k, v in areas_by_region.items()}
+
         # Enums
         property_types = sorted({r["property_type"] for r in rows if r.get("property_type")})
         listing_types  = sorted({r["listing_type"]  for r in rows if r.get("listing_type")})
@@ -344,8 +358,10 @@ def get_property_facets() -> Dict[str, Any]:
 
         return {
             "regions": regions,
+            "all_cities": all_cities,
             "cities_by_region": cities_by_region,
             "areas_by_city": areas_by_city,
+            "areas_by_region": areas_by_region,
             "property_types": property_types,
             "listing_types": listing_types,
             "price_range": {
