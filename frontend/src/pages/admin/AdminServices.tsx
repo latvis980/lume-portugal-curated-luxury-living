@@ -1,4 +1,7 @@
 // frontend/src/pages/admin/AdminServices.tsx
+// ⚠️  Category values MUST match the Postgres enum exactly:
+//     administrative | healthcare_family | home | investment_advisory
+
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -9,12 +12,11 @@ import {
   type Service,
 } from "@/lib/admin-api";
 
-// ─── Category config — must match the ServicesSection column titles ───────────
 const CATEGORIES = [
-  { value: "administrative", label: "Administrative" },
-  { value: "healthcare",     label: "Healthcare & Family" },
-  { value: "home",           label: "Home" },
-  { value: "investment",     label: "Investment Advisory" },
+  { value: "administrative",      label: "Administrative" },
+  { value: "healthcare_family",   label: "Healthcare & Family" },
+  { value: "home",                label: "Home" },
+  { value: "investment_advisory", label: "Investment Advisory" },
 ] as const;
 
 type CategoryValue = (typeof CATEGORIES)[number]["value"];
@@ -23,27 +25,28 @@ const CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
   CATEGORIES.map((c) => [c.value, c.label])
 );
 
-// ─── Empty form state ─────────────────────────────────────────────────────────
-const EMPTY_FORM = { title: "", category: "administrative" as CategoryValue, sort_order: 0, is_active: true };
+const EMPTY_FORM = {
+  title: "",
+  category: "administrative" as CategoryValue,
+  sort_order: 0,
+  is_active: true,
+};
 
 export default function AdminServices() {
   const queryClient = useQueryClient();
 
-  // Modal state
   const [modal, setModal] = useState<"add" | "edit" | null>(null);
   const [editing, setEditing] = useState<Service | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
-  // ─── Data ───────────────────────────────────────────────────────────────────
   const { data, isLoading } = useQuery({
     queryKey: ["admin-services"],
     queryFn: getServices,
   });
   const services = data?.services || [];
 
-  // Group by category for the table view
   const grouped = CATEGORIES.map((cat) => ({
     ...cat,
     items: services
@@ -51,8 +54,8 @@ export default function AdminServices() {
       .sort((a, b) => a.sort_order - b.sort_order),
   }));
 
-  // ─── Mutations ───────────────────────────────────────────────────────────────
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["admin-services"] });
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: ["admin-services"] });
 
   const createM = useMutation({
     mutationFn: createService,
@@ -75,7 +78,6 @@ export default function AdminServices() {
   const toggleActive = (s: Service) =>
     updateService(s.id, { is_active: !s.is_active }).then(invalidate);
 
-  // ─── Modal helpers ────────────────────────────────────────────────────────────
   function openAdd() {
     setEditing(null);
     setForm(EMPTY_FORM);
@@ -85,7 +87,12 @@ export default function AdminServices() {
 
   function openEdit(s: Service) {
     setEditing(s);
-    setForm({ title: s.title, category: s.category as CategoryValue, sort_order: s.sort_order, is_active: s.is_active });
+    setForm({
+      title: s.title,
+      category: s.category as CategoryValue,
+      sort_order: s.sort_order,
+      is_active: s.is_active,
+    });
     setError("");
     setModal("edit");
   }
@@ -108,10 +115,8 @@ export default function AdminServices() {
 
   const isPending = createM.isPending || updateM.isPending;
 
-  // ─── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="p-8 max-w-5xl">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-light text-admin-text">Services</h1>
@@ -127,14 +132,12 @@ export default function AdminServices() {
         </button>
       </div>
 
-      {/* Content */}
       {isLoading ? (
         <div className="py-20 text-center text-sm text-admin-text-muted">Loading…</div>
       ) : (
         <div className="space-y-8">
           {grouped.map((cat) => (
             <div key={cat.value}>
-              {/* Category header */}
               <div className="flex items-center gap-3 mb-3">
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-admin-text-muted">
                   {cat.label}
@@ -144,7 +147,6 @@ export default function AdminServices() {
                 </span>
               </div>
 
-              {/* Services table */}
               <div className="rounded-lg border border-admin-border bg-admin-surface overflow-hidden">
                 {cat.items.length === 0 ? (
                   <p className="px-5 py-4 text-sm text-admin-text-muted italic">
@@ -162,12 +164,9 @@ export default function AdminServices() {
                               : ""
                           }`}
                         >
-                          {/* Order badge */}
                           <span className="w-5 text-center text-xs text-admin-text-muted select-none">
                             {s.sort_order || i + 1}
                           </span>
-
-                          {/* Title */}
                           <span
                             className={`flex-1 ${
                               s.is_active
@@ -177,8 +176,6 @@ export default function AdminServices() {
                           >
                             {s.title}
                           </span>
-
-                          {/* Active toggle */}
                           <button
                             onClick={() => toggleActive(s)}
                             title={s.is_active ? "Active — click to hide" : "Hidden — click to show"}
@@ -190,16 +187,12 @@ export default function AdminServices() {
                           >
                             {s.is_active ? "Active" : "Hidden"}
                           </button>
-
-                          {/* Edit */}
                           <button
                             onClick={() => openEdit(s)}
                             className="text-xs text-admin-text-muted hover:text-admin-text-secondary transition px-2 py-1 rounded hover:bg-admin-bg"
                           >
                             Edit
                           </button>
-
-                          {/* Delete */}
                           <button
                             onClick={() => setDeleteId(s.id)}
                             className="text-xs text-red-400 hover:text-red-600 transition px-2 py-1 rounded hover:bg-red-50"
@@ -217,7 +210,7 @@ export default function AdminServices() {
         </div>
       )}
 
-      {/* ── Add / Edit Modal ─────────────────────────────────────────────────── */}
+      {/* Add / Edit Modal */}
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-xl border border-admin-border bg-admin-surface shadow-2xl p-6">
@@ -231,7 +224,6 @@ export default function AdminServices() {
               </div>
             )}
 
-            {/* Service name */}
             <div className="mb-4">
               <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
                 Service name <span className="text-red-400">*</span>
@@ -246,7 +238,6 @@ export default function AdminServices() {
               />
             </div>
 
-            {/* Section / Category */}
             <div className="mb-4">
               <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
                 Section <span className="text-red-400">*</span>
@@ -265,11 +256,10 @@ export default function AdminServices() {
                 ))}
               </select>
               <p className="mt-1.5 text-xs text-admin-text-muted">
-                This determines which column the service appears in on the website.
+                Controls which column this service appears in on the website.
               </p>
             </div>
 
-            {/* Sort order */}
             <div className="mb-4">
               <label className="block text-xs font-medium text-admin-text-secondary mb-1.5">
                 Display order
@@ -284,11 +274,10 @@ export default function AdminServices() {
                 className="w-32 rounded-md border border-admin-border bg-admin-bg px-3 py-2 text-sm text-admin-text outline-none transition focus:border-admin-text-muted"
               />
               <p className="mt-1.5 text-xs text-admin-text-muted">
-                Lower numbers appear first. Items with the same order are sorted alphabetically.
+                Lower numbers appear first.
               </p>
             </div>
 
-            {/* Active toggle */}
             <div className="mb-6 flex items-center gap-3">
               <button
                 type="button"
@@ -308,7 +297,6 @@ export default function AdminServices() {
               </span>
             </div>
 
-            {/* Actions */}
             <div className="flex justify-end gap-3">
               <button
                 onClick={closeModal}
@@ -328,7 +316,7 @@ export default function AdminServices() {
         </div>
       )}
 
-      {/* ── Delete Confirm ────────────────────────────────────────────────────── */}
+      {/* Delete Confirm */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-xl border border-admin-border bg-admin-surface shadow-2xl p-6">

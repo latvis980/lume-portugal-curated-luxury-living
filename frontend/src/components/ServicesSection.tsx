@@ -1,17 +1,19 @@
 // frontend/src/components/ServicesSection.tsx
+// ⚠️  Category values MUST match the Postgres enum exactly:
+//     administrative | healthcare_family | home | investment_advisory
+
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Scale, Heart, Home, TrendingUp, LucideIcon } from "lucide-react";
 
-// ─── Category config ──────────────────────────────────────────────────────────
 const CATEGORY_META: Record<
   string,
   { label: string; icon: LucideIcon; order: number }
 > = {
-  administrative: { label: "Administrative",       icon: Scale,       order: 0 },
-  healthcare:     { label: "Healthcare & Family",  icon: Heart,       order: 1 },
-  home:           { label: "Home",                 icon: Home,        order: 2 },
-  investment:     { label: "Investment Advisory",  icon: TrendingUp,  order: 3 },
+  administrative:      { label: "Administrative",       icon: Scale,       order: 0 },
+  healthcare_family:   { label: "Healthcare & Family",  icon: Heart,       order: 1 },
+  home:                { label: "Home",                  icon: Home,        order: 2 },
+  investment_advisory: { label: "Investment Advisory",  icon: TrendingUp,  order: 3 },
 };
 
 interface Service {
@@ -22,12 +24,7 @@ interface Service {
   is_active: boolean;
 }
 
-interface ServicesResponse {
-  services: Service[];
-}
-
-// ─── Fetch from public API (no auth needed) ───────────────────────────────────
-async function fetchPublicServices(): Promise<ServicesResponse> {
+async function fetchPublicServices(): Promise<{ services: Service[] }> {
   const res = await fetch("/api/services");
   if (!res.ok) throw new Error("Failed to load services");
   return res.json();
@@ -37,13 +34,11 @@ const ServicesSection = () => {
   const { data } = useQuery({
     queryKey: ["public-services"],
     queryFn: fetchPublicServices,
-    // Don't block the page if this fails — we fall back to empty lists
     retry: 1,
   });
 
   const services = data?.services ?? [];
 
-  // Group and sort by category
   const categories = Object.entries(CATEGORY_META)
     .sort(([, a], [, b]) => a.order - b.order)
     .map(([key, meta]) => ({
