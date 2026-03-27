@@ -490,6 +490,22 @@ def get_all_services() -> List[Dict[str, Any]]:
         print(f"[DB] Error fetching services: {e}")
         return []
 
+def get_all_regions() -> List[Dict[str, Any]]:
+    """Fetch all active regions for dropdowns and Q2 lifestyle filter."""
+    try:
+        client = _get_client()
+        result = (
+            client.table("regions")
+            .select("id, name, display_name, lifestyle_tags, sort_order")
+            .eq("active", True)
+            .order("sort_order")
+            .execute()
+        )
+        return result.data or []
+    except Exception as e:
+        print(f"[DB] Error fetching regions: {e}")
+        return []
+
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ADMIN QUERIES — used by CMS routes

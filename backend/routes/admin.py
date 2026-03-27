@@ -358,3 +358,13 @@ async def delete_service(service_id: str, admin=Depends(require_admin)):
     if not success:
         raise HTTPException(status_code=404, detail="Service not found")
     return {"detail": "Service deleted"}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# REGIONS
+# ═══════════════════════════════════════════════════════════════════════════
+
+@router.get("/regions")
+async def list_regions(admin=Depends(require_admin)):
+    """Return all active regions for the listing form dropdown."""
+    from database import get_all_regions
+    return {"regions": get_all_regions()}
