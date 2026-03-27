@@ -17,9 +17,9 @@ export function SelectDropdown({
   placeholder = "Any",
 }: SelectDropdownProps) {
   return (
-    <div className="relative">
+    <div>
       {label && (
-        <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground font-body">
+        <p className="mb-1.5 text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60 font-body">
           {label}
         </p>
       )}
@@ -27,7 +27,7 @@ export function SelectDropdown({
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full appearance-none rounded border border-border bg-background px-3 py-2 pr-8 text-sm text-foreground font-body outline-none transition focus:border-foreground/30"
+          className="h-9 w-full appearance-none rounded-sm border border-border bg-background px-3 pr-8 text-xs text-foreground font-body outline-none transition focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
         >
           <option value="">{placeholder}</option>
           {options.map((o) => (
@@ -36,7 +36,7 @@ export function SelectDropdown({
             </option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground/50" />
       </div>
     </div>
   );
