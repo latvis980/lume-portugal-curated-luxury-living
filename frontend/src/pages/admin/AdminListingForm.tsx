@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getListing, createListing, updateListing } from "@/lib/admin-api";
+import { getToken } from "@/lib/admin-api"; 
 
 // Enum options (must match Supabase enums)
 const PROPERTY_TYPES = ["apartment","penthouse","villa","townhouse","estate","farmhouse","quinta","land","new_development_unit"];
@@ -79,12 +80,12 @@ export default function AdminListingForm() {
     queryKey: ["admin-regions"],
     queryFn: async () => {
       const res = await fetch("/api/admin/regions", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("admin_token")}` },
+        headers: { Authorization: `Bearer ${getToken()}` },  // ← was localStorage.getItem("admin_token")
       });
       if (!res.ok) throw new Error("Failed to load regions");
       return res.json();
     },
-    staleTime: 1000 * 60 * 10, // cache 10 min — regions rarely change
+    staleTime: 1000 * 60 * 10,
   });
 
   // ["", "Lisbon", "Porto", "Algarve", ...]
