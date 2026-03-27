@@ -275,7 +275,6 @@ export default function PropertiesPage() {
   const applyFilters = useCallback((f: Filters) => {
     setSearchParams(filtersToSearchParams(f));
     setPage(0); setDrawerOpen(false);
-    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [setSearchParams]);
 
   // Region and City are independent — picking a region does NOT clear city
