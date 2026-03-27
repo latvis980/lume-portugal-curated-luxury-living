@@ -397,7 +397,7 @@ export default function PropertiesPage() {
 
             {/* Bedrooms — uses shared ToggleGroup, inline mode */}
             <ToggleGroup
-              label="Beds"
+              inline
               options={[1, 2, 3, 4, 5]}
               value={filters.min_bedrooms}
               onChange={(v) => updateBasic("min_bedrooms", v)}
