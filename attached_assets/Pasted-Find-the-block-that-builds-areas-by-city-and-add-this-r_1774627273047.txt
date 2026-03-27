@@ -1,0 +1,160 @@
+Find the block that builds areas_by_city and add this right after it:
+
+
+python
+        # --- ADD THIS after the areas_by_city block ---
+
+        # Flat city list for independent city dropdown
+        all_cities = sorted({r["city"] for r in rows if r.get("city")})
+
+        # Areas indexed by region (for Area dropdown when no city is picked yet)
+        areas_by_region: Dict[str, Any] = {}
+        for r in rows:
+            reg = r.get("region") or ""
+            ar  = r.get("area") or ""
+            if reg and ar:
+                areas_by_region.setdefault(reg, set()).add(ar)
+        areas_by_region = {k: sorted(v) for k, v in areas_by_region.items()}
+Then in the return dict, add the two new keys (and also update the empty-rows fallback):
+
+
+python
+        return {
+            "regions": regions,
+            "all_cities": all_cities,               # ← NEW
+            "cities_by_region": cities_by_region,
+            "areas_by_city": areas_by_city,
+            "areas_by_region": areas_by_region,      # ← NEW
+            # ... rest stays the same
+        }
+And in the empty fallback at the top:
+
+
+python
+            return {
+                "regions": [],
+                "all_cities": [],                    # ← NEW
+                "cities_by_region": {},
+                "areas_by_city": {},
+                "areas_by_region": {},               # ← NEW
+                # ... rest stays the same
+            }
+
+Change 2: Frontend types — update PropertyFacets interface
+In frontend/src/lib/public-api.ts, add the two new fields:
+
+
+typescript
+export interface PropertyFacets {
+  regions: string[];
+  all_cities: string[];                          // ← NEW
+  cities_by_region: Record<string, string[]>;
+  areas_by_city: Record<string, string[]>;
+  areas_by_region: Record<string, string[]>;     // ← NEW
+  property_types: string[];
+  listing_types: string[];
+  price_range: { min: number; max: number };
+  area_range: { min: number; max: number };
+  bedroom_counts: number[];
+  bathroom_counts: number[];
+  conditions: string[];
+  views: string[];
+}
+
+Change 3: Frontend — update PropertiesPage.tsx filter logic
+Three things change here:
+3a. City options — always show all cities alphabetically
+Find the cityOptions and regionOptions lines (around where resetAll is defined):
+
+
+typescript
+// BEFORE:
+const cityOptions = facets
+  ? (filters.region ? (facets.cities_by_region ?? {})[filters.region] ?? [] : Object.values(facets.cities_by_region ?? {}).flat())
+      .filter((v, i, a) => a.indexOf(v) === i).sort().map(c => ({ value: c, label: c }))
+  : [];
+
+// AFTER:
+const cityOptions = (facets?.all_cities ?? []).map(c => ({ value: c, label: c }));
+That's it — one clean line instead of the deduplicate-and-flatten logic.
+3b. Area options — show when region OR city is set, only if >1 area
+
+
+typescript
+// BEFORE:
+const areaOptions = facets && filters.city
+  ? (facets.areas_by_city[filters.city] ?? []).map(a => ({ value: a, label: a }))
+  : [];
+
+// AFTER:
+const areaOptionsList = facets
+  ? (filters.city
+      ? facets.areas_by_city[filters.city] ?? []
+      : filters.region
+        ? facets.areas_by_region[filters.region] ?? []
+        : []
+    )
+  : [];
+const areaOptions = areaOptionsList.length > 1
+  ? areaOptionsList.map(a => ({ value: a, label: a }))
+  : [];
+The logic: if a city is selected, show areas for that city. Otherwise if only a region is selected, show all areas in that region. And the > 1 check means: if there's only one area, the dropdown adds nothing useful, so we hide it.
+3c. Stop clearing city when region changes
+In the updateBasic callback:
+
+
+typescript
+// BEFORE:
+const updateBasic = useCallback((key: keyof Filters, value: string | string[] | boolean) => {
+  const next = { ...filters, [key]: value };
+  if (key === "region") { next.city = ""; next.area = ""; }
+  if (key === "city")   { next.area = ""; }
+  applyFilters(next);
+}, [filters, applyFilters]);
+
+// AFTER:
+const updateBasic = useCallback((key: keyof Filters, value: string | string[] | boolean) => {
+  const next = { ...filters, [key]: value };
+  if (key === "region") { next.area = ""; }           // keep city — they're independent
+  if (key === "city")   { next.area = ""; }
+  applyFilters(next);
+}, [filters, applyFilters]);
+And the same change in updateDraft (for the filters drawer):
+
+
+typescript
+// BEFORE:
+const updateDraft = useCallback((key: keyof Filters, value: string | string[] | boolean) => {
+  setDraftFilters(prev => {
+    const next = { ...prev, [key]: value };
+    if (key === "region") { next.city = ""; next.area = ""; }
+    if (key === "city")   { next.area = ""; }
+    return next;
+  });
+}, []);
+
+// AFTER:
+const updateDraft = useCallback((key: keyof Filters, value: string | string[] | boolean) => {
+  setDraftFilters(prev => {
+    const next = { ...prev, [key]: value };
+    if (key === "region") { next.area = ""; }          // keep city
+    if (key === "city")   { next.area = ""; }
+    return next;
+  });
+}, []);
+3d. Update the Area dropdown visibility condition in the top bar
+In the filter bar JSX, find:
+
+
+tsx
+{(filters.city || areaOptions.length > 0) && (
+Replace with:
+
+
+tsx
+{areaOptions.length > 0 && (
+The areaOptions array already handles all the logic (empty when neither region nor city is set, empty when ≤1 area), so we just check its length.
+3e. Same fix in the drawer
+In the drawer's Location section, the City dropdown currently has a conditional that checks if cities exist. Simplify it to always show (since all_cities is always populated):
+The City SelectDropdown should always render (no wrapping conditional), and for the Area dropdown, apply the same > 1 logic using the combined areaOptionsList approach.
+
