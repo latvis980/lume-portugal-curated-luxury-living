@@ -214,33 +214,6 @@ async def sitemap():
 # Public API — property listings
 # ---------------------------------------------------------------------------
 
-@router.get("/properties")
-async def list_properties(
-    city: Optional[str] = Query(None, description="Filter by city"),
-    type: Optional[str] = Query(None, description="Filter by property type"),
-    min_price: Optional[float] = Query(None, description="Minimum price"),
-    max_price: Optional[float] = Query(None, description="Maximum price"),
-    bedrooms: Optional[int] = Query(None, description="Minimum bedrooms"),
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0),
-):
-    """List properties with optional filters."""
-    try:
-        from database import query_properties
-        results = query_properties(
-            city=city,
-            property_type=type,
-            min_price=min_price,
-            max_price=max_price,
-            min_bedrooms=bedrooms,
-            limit=limit,
-            offset=offset,
-        )
-        return {"properties": results, "count": len(results)}
-    except Exception as e:
-        return {"properties": [], "count": 0, "error": str(e)}
-
-
 @router.get("/properties/facets")
 async def get_property_facets():
     """

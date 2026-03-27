@@ -1,18 +1,18 @@
 // frontend/src/pages/PropertiesPage.tsx
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   SlidersHorizontal, X, LayoutGrid, List, ChevronDown,
-  Search, RotateCcw, MapPin
+  RotateCcw, MapPin
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
 import {
   fetchListings, fetchPropertyFacets,
-  type ListingsQuery, type PropertyFacets,
+  type ListingsQuery, type PropertyFacets, type Listing,
 } from "@/lib/public-api";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -303,8 +303,8 @@ function SelectDropdown({
 // ─── Active Filter Chips ──────────────────────────────────────────────────────
 
 function FilterChips({
-  filters, facets, onRemove,
-}: { filters: Filters; facets: PropertyFacets | null | undefined; onRemove: (k: string, v?: string) => void }) {
+  filters, onRemove,
+}: { filters: Filters; onRemove: (k: string, v?: string) => void }) {
   const chips: { key: string; label: string; subKey?: string }[] = [];
 
   if (filters.region)       chips.push({ key: "region",   label: filters.region });
@@ -352,7 +352,7 @@ function FilterChips({
 export default function PropertiesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState<Filters>(() => searchParamsToFilters(searchParams));
-  const [draftFilters, setDraftFilters] = useState<Filters>(filters); // drawer draft
+  const [draftFilters, setDraftFilters] = useState<Filters>(filters);
   const [page, setPage] = useState(0);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -367,7 +367,7 @@ export default function PropertiesPage() {
   }, [searchParams]);
 
   // Facets (loaded once)
-  const { data: facets } = useQuery({
+  const { data: facets } = useQuery<PropertyFacets | null>({
     queryKey: ["property-facets"],
     queryFn: fetchPropertyFacets,
     staleTime: 5 * 60 * 1000,
@@ -375,10 +375,10 @@ export default function PropertiesPage() {
 
   // Listings
   const queryKey = ["listings", filters, page];
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey,
     queryFn: () => fetchListings(filtersToQuery(filters, page * PAGE_SIZE)),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 
   const properties = data?.properties ?? [];
@@ -396,7 +396,6 @@ export default function PropertiesPage() {
 
   const updateBasic = useCallback((key: keyof Filters, value: string | string[] | boolean) => {
     const next = { ...filters, [key]: value };
-    // Cascade: reset city/area when region changes
     if (key === "region") { next.city = ""; next.area = ""; }
     if (key === "city")   { next.area = ""; }
     applyFilters(next);
@@ -438,7 +437,7 @@ export default function PropertiesPage() {
   const regionOptions = (facets?.regions ?? []).map(r => ({ value: r, label: r }));
 
   const cityOptions = facets
-  ? (filters.region ? (facets.cities_by_region ?? {})[filters.region] ?? [] : Object.values(facets.cities_by_region ?? {}).flat())
+    ? (filters.region ? (facets.cities_by_region ?? {})[filters.region] ?? [] : Object.values(facets.cities_by_region ?? {}).flat())
         .filter((v, i, a) => a.indexOf(v) === i)
         .sort()
         .map(c => ({ value: c, label: c }))
@@ -502,8 +501,9 @@ export default function PropertiesPage() {
             </div>
 
             {/* Region */}
-            {regionOptions.length > 1 && (
-              <div className="min-w-[130px]">
+            {regionOptions.length > 0 && (
+              <div className="flex items-center gap-1.5 min-w-[140px]">
+                <MapPin className="h-3.5 w-3.5 text-stone-400 flex-shrink-0" />
                 <SelectDropdown
                   value={filters.region}
                   options={regionOptions}
@@ -513,8 +513,8 @@ export default function PropertiesPage() {
               </div>
             )}
 
-            {/* City — only show if there are options */}
-            {cityOptions.length > 1 && (
+            {/* City */}
+            {cityOptions.length > 0 && (
               <div className="min-w-[130px]">
                 <SelectDropdown
                   value={filters.city}
@@ -525,7 +525,7 @@ export default function PropertiesPage() {
               </div>
             )}
 
-            {/* Area — only show if city chosen and there are multiple areas */}
+            {/* Area */}
             {filters.city && areaOptions.length > 1 && (
               <div className="min-w-[130px]">
                 <SelectDropdown
@@ -556,14 +556,14 @@ export default function PropertiesPage() {
               <div className="flex gap-1">
                 {["Any", "1", "2", "3", "4", "5+"].map((opt) => {
                   const val = opt === "Any" ? "" : opt === "5+" ? "5" : opt;
-                  const active = filters.min_bedrooms === val && !(opt === "Any" && filters.min_bedrooms !== "");
                   const isAnyActive = opt === "Any" && !filters.min_bedrooms;
+                  const isActive = isAnyActive || (!!val && filters.min_bedrooms === val);
                   return (
                     <button
                       key={opt}
                       onClick={() => updateBasic("min_bedrooms", val)}
                       className={`rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                        (isAnyActive || (val && filters.min_bedrooms === val))
+                        isActive
                           ? "border-stone-900 bg-stone-900 text-white"
                           : "border-stone-200 bg-white text-stone-500 hover:border-stone-300"
                       }`}
@@ -644,7 +644,7 @@ export default function PropertiesPage() {
         {/* Active chips + view toggle row */}
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div className="flex-1">
-            <FilterChips filters={filters} facets={facets} onRemove={removeChip} />
+            <FilterChips filters={filters} onRemove={removeChip} />
           </div>
           <div className="flex items-center gap-1 rounded-lg border border-stone-200 bg-white p-1">
             <button
@@ -692,7 +692,7 @@ export default function PropertiesPage() {
               : "flex flex-col gap-4"
             }
           >
-            {properties.map((listing) => (
+            {properties.map((listing: Listing) => (
               <PropertyCard key={listing.id} listing={listing} view={viewMode} />
             ))}
           </motion.div>
@@ -799,7 +799,10 @@ export default function PropertiesPage() {
                     onChange={(v) => updateDraft("region", v)}
                     placeholder="Any region"
                   />
-                  {(draftFilters.region ? facets?.cities_by_region[draftFilters.region] ?? [] : Object.values(facets?.cities_by_region ?? {}).flat().filter((v, i, a) => a.indexOf(v) === i).sort()).length > 0 && (
+                  {(draftFilters.region
+                    ? facets?.cities_by_region[draftFilters.region] ?? []
+                    : Object.values(facets?.cities_by_region ?? {}).flat().filter((v, i, a) => a.indexOf(v) === i).sort()
+                  ).length > 0 && (
                     <SelectDropdown
                       label="City"
                       value={draftFilters.city}
@@ -861,13 +864,13 @@ export default function PropertiesPage() {
                   <h3 className="text-xs font-semibold uppercase tracking-widest text-stone-400">Rooms</h3>
                   <ToggleGroup
                     label="Bedrooms (min)"
-                    options={facets?.bedroom_counts.length ? facets.bedroom_counts : [0,1,2,3,4,5]}
+                    options={facets?.bedroom_counts.length ? facets.bedroom_counts : [0, 1, 2, 3, 4, 5]}
                     value={draftFilters.min_bedrooms}
                     onChange={(v) => updateDraft("min_bedrooms", v)}
                   />
                   <ToggleGroup
                     label="Bathrooms (min)"
-                    options={facets?.bathroom_counts.length ? facets.bathroom_counts : [1,2,3,4]}
+                    options={facets?.bathroom_counts.length ? facets.bathroom_counts : [1, 2, 3, 4]}
                     value={draftFilters.min_bathrooms}
                     onChange={(v) => updateDraft("min_bathrooms", v)}
                   />

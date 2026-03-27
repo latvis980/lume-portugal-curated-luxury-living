@@ -15,7 +15,7 @@ import {
 const CATEGORIES = [
   { value: "administrative",      label: "Administrative" },
   { value: "healthcare_family",   label: "Healthcare & Family" },
-  { value: "home",                label: "Home" },
+  { value: "home",                label: "Home & Lifestyle" },
   { value: "investment_advisory", label: "Investment Advisory" },
 ] as const;
 
