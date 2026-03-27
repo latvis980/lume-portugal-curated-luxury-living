@@ -353,41 +353,40 @@ export default function PropertiesPage() {
 
       {/* Filter Bar */}
       <section className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur-md shadow-sm">
-        <div className="mx-auto max-w-7xl px-6 md:px-12 py-4">
-          {/* Row 1: Primary filters */}
-          <div className="flex flex-wrap items-center gap-3">
+        <div className="mx-auto max-w-7xl px-6 md:px-12 py-3">
+          <div className="flex flex-wrap items-end gap-3">
 
-            {/* Listing type */}
-            <div className="flex overflow-hidden rounded-sm border border-border">
+            {/* Listing type — h-9 to match dropdowns */}
+            <div className="flex overflow-hidden rounded-sm border border-border h-9">
               {["sale", "rent", "seasonal_rent"].map((lt) => (
                 <button key={lt} onClick={() => updateBasic("listing_type", lt)}
-                  className={`px-3.5 py-2 text-xs font-medium font-body tracking-wide transition-colors ${filters.listing_type === lt ? activeClass : inactiveClass}`}
+                  className={`px-3.5 text-[11px] font-medium font-body tracking-wide transition-colors ${filters.listing_type === lt ? activeClass : inactiveClass}`}
                 >
                   {lt === "sale" ? "Sale" : lt === "rent" ? "Rent" : "Seasonal"}
                 </button>
               ))}
             </div>
 
-            <span className="hidden sm:block h-6 w-px bg-border" />
+            <span className="hidden sm:block h-6 w-px bg-border self-center" />
 
             <div className="flex items-center gap-1.5 min-w-[140px]">
               <MapPin className="h-3.5 w-3.5 text-primary flex-shrink-0" />
               <SelectDropdown value={filters.region} options={regionOptions} onChange={(v) => updateBasic("region", v)} placeholder="Region" />
             </div>
 
-            <div className="min-w-[130px]">
+            <div className="min-w-[120px]">
               <SelectDropdown value={filters.city} options={cityOptions} onChange={(v) => updateBasic("city", v)} placeholder="City" />
             </div>
 
             {(filters.city || areaOptions.length > 0) && (
-              <div className="min-w-[130px]">
+              <div className="min-w-[120px]">
                 <SelectDropdown value={filters.area} options={areaOptions} onChange={(v) => updateBasic("area", v)} placeholder="Area" />
               </div>
             )}
 
-            <span className="hidden sm:block h-6 w-px bg-border" />
+            <span className="hidden sm:block h-6 w-px bg-border self-center" />
 
-            <div className="min-w-[130px]">
+            <div className="min-w-[120px]">
               <SelectDropdown
                 value={filters.type}
                 options={(facets?.property_types ?? []).map(t => ({ value: t, label: PROPERTY_TYPE_LABELS[t] ?? t }))}
@@ -396,47 +395,40 @@ export default function PropertiesPage() {
               />
             </div>
 
-            {/* Bedrooms */}
-            <div>
-              <p className="mb-1 text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60 font-body">Beds</p>
-              <div className="flex gap-0.5">
-                {["Any", "1", "2", "3", "4", "5+"].map((opt) => {
-                  const val = opt === "Any" ? "" : opt === "5+" ? "5" : opt;
-                  const isActive = (opt === "Any" && !filters.min_bedrooms) || (!!val && filters.min_bedrooms === val);
-                  return (
-                    <button key={opt} onClick={() => updateBasic("min_bedrooms", val)}
-                      className={`rounded-sm border px-2 py-1.5 text-[11px] font-medium font-body transition-colors ${isActive ? activeClass : "border-border bg-background text-muted-foreground hover:border-foreground/30"}`}
-                    >{opt}</button>
-                  );
-                })}
-              </div>
-            </div>
+            {/* Bedrooms — uses shared ToggleGroup, inline mode */}
+            <ToggleGroup
+              label="Beds"
+              options={[1, 2, 3, 4, 5]}
+              value={filters.min_bedrooms}
+              onChange={(v) => updateBasic("min_bedrooms", v)}
+              formatOption={(v) => v === "5" ? "5+" : v}
+            />
 
-            <span className="hidden lg:block h-6 w-px bg-border" />
+            <span className="hidden lg:block h-6 w-px bg-border self-center" />
 
-            {/* Price */}
-            <div className="flex items-center gap-1.5">
+            {/* Price — h-9 inputs to match */}
+            <div className="flex items-end gap-1.5">
               <div className="relative">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">€</span>
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground/50">€</span>
                 <input type="number" placeholder="Min" value={filters.min_price}
                   onChange={(e) => updateBasic("min_price", e.target.value)}
-                  className="w-24 rounded-sm border border-border bg-background py-2 pl-6 pr-2 text-xs text-foreground font-body outline-none transition focus:border-primary/50 focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35"
+                  className="h-9 w-[5.5rem] rounded-sm border border-border bg-background pl-6 pr-2 text-xs text-foreground font-body outline-none transition focus:border-primary/50 focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35"
                 />
               </div>
-              <span className="text-muted-foreground/25 text-xs">–</span>
+              <span className="text-muted-foreground/25 text-xs leading-9">–</span>
               <div className="relative">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground/50">€</span>
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground/50">€</span>
                 <input type="number" placeholder="Max" value={filters.max_price}
                   onChange={(e) => updateBasic("max_price", e.target.value)}
-                  className="w-24 rounded-sm border border-border bg-background py-2 pl-6 pr-2 text-xs text-foreground font-body outline-none transition focus:border-primary/50 focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35"
+                  className="h-9 w-[5.5rem] rounded-sm border border-border bg-background pl-6 pr-2 text-xs text-foreground font-body outline-none transition focus:border-primary/50 focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/35"
                 />
               </div>
             </div>
 
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex items-end gap-2">
               <SelectDropdown value={filters.sort_by} options={SORT_OPTIONS} onChange={(v) => updateBasic("sort_by", v || "featured")} placeholder="Sort" />
               <button onClick={() => { setDraftFilters(filters); setDrawerOpen(true); }}
-                className="relative flex items-center gap-2 rounded-sm border border-border bg-background px-4 py-2 text-xs font-medium font-body tracking-wide text-foreground transition hover:bg-muted hover:border-foreground/20"
+                className="relative flex h-9 items-center gap-2 rounded-sm border border-border bg-background px-4 text-xs font-medium font-body tracking-wide text-foreground transition hover:bg-muted hover:border-foreground/20"
               >
                 <SlidersHorizontal className="h-3.5 w-3.5" />
                 Filters
@@ -447,7 +439,7 @@ export default function PropertiesPage() {
                 )}
               </button>
               {activeFilterCount > 0 && (
-                <button onClick={resetAll} className="flex items-center gap-1.5 rounded px-2.5 py-2 text-xs text-muted-foreground font-body transition hover:text-foreground">
+                <button onClick={resetAll} className="flex h-9 items-center gap-1.5 rounded px-2.5 text-xs text-muted-foreground font-body transition hover:text-foreground">
                   <RotateCcw className="h-3 w-3" /> Clear
                 </button>
               )}
