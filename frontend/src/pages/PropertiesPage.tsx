@@ -252,6 +252,10 @@ export default function PropertiesPage() {
   const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const f = searchParamsToFilters(searchParams);
     setFilters(f); setDraftFilters(f); setPage(0);
   }, [searchParams]);
