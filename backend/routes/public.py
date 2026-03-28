@@ -234,6 +234,8 @@ async def list_properties(
     region:          Optional[str]   = Query(None),
     city:            Optional[str]   = Query(None),
     area:            Optional[str]   = Query(None),
+    lifestyle:       Optional[str]   = Query(None, description="ocean | city | countryside | wine_region"),  # ← here
+
     # Property classification
     type:            Optional[str]   = Query(None, description="property_type enum"),
     listing_type:    Optional[str]   = Query(None, description="sale | rent"),
@@ -269,6 +271,7 @@ async def list_properties(
             region=region,
             city=city,
             area=area,
+            lifestyle=lifestyle,
             property_type=type,
             listing_type=listing_type,
             min_price=min_price,

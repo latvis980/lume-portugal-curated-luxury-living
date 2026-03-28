@@ -182,6 +182,7 @@ def query_properties(
     region: Optional[str] = None,
     city: Optional[str] = None,
     area: Optional[str] = None,
+    lifestyle: Optional[str] = None,
     property_type: Optional[str] = None,
     listing_type: Optional[str] = None,
     min_price: Optional[float] = None,
@@ -208,9 +209,32 @@ def query_properties(
         count_q = client.table("listings").select("id", count="exact").eq("status", "available")
         data_q  = client.table("listings").select(_LISTING_CARD_FIELDS).eq("status", "available")
 
+        # Resolve lifestyle → matching region names from the regions table
+        lifestyle_regions: Optional[List[str]] = None
+        if lifestyle and not region:  # only apply if user hasn't already picked a region
+            try:
+                regions_result = (
+                    _get_client()
+                    .table("regions")
+                    .select("name")
+                    .contains("lifestyle_tags", [lifestyle])# cs = "contains"
+                    .eq("active", True)
+                    .execute()
+                )
+                lifestyle_regions = [r["name"] for r in (regions_result.data or [])]
+                print(f"[DB] lifestyle={lifestyle} → regions: {lifestyle_regions}")
+            except Exception as e:
+                print(f"[DB] Error resolving lifestyle regions: {e}")
+        
         def apply_filters(q):
             if region:
                 q = q.ilike("region", f"%{region}%")
+            elif lifestyle_regions is not None:          # ← add this block
+                if lifestyle_regions:
+                    q = q.in_("region", lifestyle_regions)
+                else:
+                    # No regions matched — return nothing (don't show all listings)
+                    q = q.eq("region", "__no_match__")
             if city:
                 q = q.ilike("city", f"%{city}%")
             if area:
