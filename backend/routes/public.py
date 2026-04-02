@@ -72,57 +72,75 @@ Allow: /
     return PlainTextResponse(content=content, media_type="text/plain")
 
 
-# ---------------------------------------------------------------------------
-# llms.txt — LLM-readable site description
-# ---------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------
+    # llms.txt — LLM-readable site description
+    # ---------------------------------------------------------------------------
+    # Paste this into backend/routes/public.py right AFTER the robots() function.
+    #
+    # Your main.py already has the root-level mount:
+    #   @app.get("/llms.txt")
+    #   async def root_llms():
+    #       return await llms_txt()
+    #
+    # And the import:
+    #   from routes.public import robots, llms_txt, sitemap
+    #
+    # So once you add this function, it should just work.
+    # ---------------------------------------------------------------------------
 
-@router.get("/llms.txt", response_class=PlainTextResponse)
-async def llms_txt():
+    @router.get("/llms.txt", response_class=PlainTextResponse)
+    async def llms_txt():
+        """
+        LLM discovery file.
+
+        Helps AI assistants (ChatGPT, Claude, Perplexity) understand
+        what this site offers and how to navigate it.
+        """
+        content = f"""# LUME by OneMark — Homes, Life in Portugal & Art & Antiques Advisory
+
+    > LUME by OneMark helps discerning individuals find their home, build their
+    > life, and collect with meaning in Portugal. Each client is paired with a
+    > dedicated Curator who orchestrates every detail.
+
+    ## What we offer
+
+    - **Homes**: Handpicked properties in Lisbon, Porto, Cascais, Algarve,
+      and Portugal's most prestigious addresses
+    - **Life in Portugal**: End-to-end lifestyle management — from NIF and
+      visas to schools, healthcare, interior design, home management, and
+      everything in between
+    - **Art & Antiques Advisory**: A dedicated Collection Curator who guides
+      clients in building personal art and antiques collections — sourcing
+      contemporary Portuguese artists, antique azulejo panels, navigating
+      auction houses and private dealers, authentication, provenance,
+      installation, and long-term collection management
+    - **Investment**: Investment homes, second homes, and strategic
+      development opportunities with professional management
+    - **Concierge**: The LUME Club Card — access to Portugal's finest
+      experiences, from private yacht charters to wine estate tours
+
+    ## How to browse
+
+    - All properties: {SITE_URL}/properties
+    - Property detail pages: {SITE_URL}/properties/[slug]
+    - Properties by location: {SITE_URL}/locations/[city-slug]
+    - Services: {SITE_URL}/services
+    - About LUME: {SITE_URL}/about
+    - Contact: {SITE_URL}/contact
+
+    ## API access (for structured data)
+
+    - Property listings: {SITE_URL}/api/properties
+    - Single property: {SITE_URL}/api/properties/[slug]
+    - Locations: {SITE_URL}/api/locations
+    - Sitemap: {SITE_URL}/sitemap.xml
+
+    ## Contact
+
+    - Website: {SITE_URL}
+    - Location: Portugal
     """
-    LLM discovery file.
-    
-    Helps AI assistants (ChatGPT, Claude, Perplexity) understand
-    what this site offers and how to navigate it.
-    """
-    content = f"""# LUME by Mark — Luxury Real Estate & Investment in Portugal
-
-> LUME by Mark curates luxury real estate, seamless relocation, and strategic
-> investment opportunities across Portugal. Each client is paired with a
-> dedicated Residential Curator who orchestrates every detail.
-
-## What we offer
-
-- **Luxury real estate**: Handpicked properties in Lisbon, Porto, Cascais, 
-  Algarve, and Portugal's most prestigious addresses
-- **Relocation services**: End-to-end support for moving to Portugal — 
-  visas, tax advisory, school enrollment, and settling in
-- **Investment advisory**: Investment homes, second homes, and strategic 
-  development opportunities with professional management
-- **Concierge services**: The LUME Club Card — access to Portugal's finest 
-  experiences, from private yacht charters to wine estate tours
-
-## How to browse
-
-- All properties: {SITE_URL}/properties
-- Property detail pages: {SITE_URL}/properties/[slug]
-- Properties by location: {SITE_URL}/locations/[city-slug]
-- Services: {SITE_URL}/services
-- About LUME: {SITE_URL}/about
-- Contact: {SITE_URL}/contact
-
-## API access (for structured data)
-
-- Property listings: {SITE_URL}/api/properties
-- Single property: {SITE_URL}/api/properties/[slug]
-- Locations: {SITE_URL}/api/locations
-- Sitemap: {SITE_URL}/sitemap.xml
-
-## Contact
-
-- Website: {SITE_URL}
-- Location: Portugal
-"""
-    return PlainTextResponse(content=content, media_type="text/plain")
+        return PlainTextResponse(content=content, media_type="text/plain")
 
 
 # ---------------------------------------------------------------------------
