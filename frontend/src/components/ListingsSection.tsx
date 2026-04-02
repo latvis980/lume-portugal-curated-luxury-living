@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchListings, type Listing } from "@/lib/public-api";
-import { answersToQuery, answersToLabel, type QuestionnaireAnswers } from "@/lib/questionnaire-filter";
+import { answersToQuery, type QuestionnaireAnswers } from "@/lib/questionnaire-filter";
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -76,9 +76,6 @@ const ListingsSection = ({ answers }: ListingsSectionProps) => {
   // Build the query from answers. If answers is null/undefined, use defaults.
   const queryParams = answers ? answersToQuery(answers) : { limit: 6 };
 
-  // The subtitle under the heading reflects the active filters
-  const filterLabel = answers ? answersToLabel(answers) : "Curated for you";
-
   // TanStack query — re-fetches automatically when answers change
   const { data, isLoading } = useQuery({
     queryKey: ["public-listings", queryParams],
@@ -106,8 +103,8 @@ const ListingsSection = ({ answers }: ListingsSectionProps) => {
             Your Curated Selection
           </h2>
           {/* Dynamic filter subtitle */}
-          <p className="text-sm font-light text-muted-foreground/70">
-            {filterLabel}
+          <p className="max-w-2xl mx-auto text-sm font-light text-muted-foreground/70">
+            This curated selection reflects the preferences you shared with us. Browse our full portfolio or reach out for a personally tailored presentation.
           </p>
         </motion.div>
 
