@@ -14,7 +14,7 @@ const CuratorSection = () => {
         >
           <img
             src={curatorImg}
-            alt="Your dedicated Residential Curator"
+            alt="LUME Art & Antiques Advisory — curated collecting in Portugal"
             className="w-full max-w-md mx-auto lg:mx-0 aspect-[3/4] object-cover"
           />
         </motion.div>
@@ -25,20 +25,20 @@ const CuratorSection = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">The LUME Difference</p>
+          <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">A LUME Exclusive</p>
           <h2 className="font-display text-3xl md:text-5xl font-light text-foreground mb-6">
-            Your Residential Curator
+            Art &amp; Antiques Advisory
           </h2>
           <div className="w-16 h-px bg-primary mb-8" />
           <div className="space-y-5">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Every LUME client is paired with a dedicated Residential Curator — a single point of contact who understands your vision, preferences, and lifestyle needs.
+              Beyond real estate and relocation, LUME offers something rare — a dedicated Collection Curator who guides you in building a personal art and antiques collection that reflects your taste, heritage, and the story of your new life in Portugal.
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              From your first enquiry to settling into your new home, your Curator orchestrates every detail: property sourcing, legal coordination, interior design, school enrollment, and beyond.
+              From sourcing contemporary Portuguese artists and antique azulejo panels to navigating international auction houses and private dealers, your Curator handles every detail: authentication, provenance, logistics, installation, and long-term collection management.
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              This is not a service. It's a relationship built on trust, discretion, and an intimate knowledge of Portugal's finest addresses.
+              This is not a catalogue. It's a deeply personal journey — discovering pieces that transform a house into a home with meaning, and an investment portfolio with soul.
             </p>
           </div>
           <a

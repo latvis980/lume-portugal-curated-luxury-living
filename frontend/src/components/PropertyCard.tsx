@@ -14,11 +14,6 @@ function formatPrice(price: number, currency = "EUR", listingType = "sale"): str
 }
 
 function getTag(listing: Listing): string {
-  if (listing.views && listing.views.length > 0) {
-    const label = listing.views[0].replace(/_/g, " ");
-    return label.charAt(0).toUpperCase() + label.slice(1) + " View";
-  }
-  if (listing.featured) return "Featured";
   return listing.property_type
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
