@@ -74,13 +74,6 @@ function VerticalCard({ listing }: { listing: Listing }) {
           </span>
         </div>
 
-        {/* Top-right: listing type */}
-        <div className="absolute top-4 right-4">
-          <span className="px-3 py-1 bg-foreground/80 text-background text-[10px] tracking-[0.2em] uppercase font-body backdrop-blur-sm">
-            {saleLabel}
-          </span>
-        </div>
-
         {/* Featured badge (bottom-left) */}
         {featured && (
           <div className="absolute bottom-4 left-4">
@@ -150,13 +143,6 @@ function HorizontalCard({ listing }: { listing: Listing }) {
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
-
-        {/* Listing type badge */}
-        <div className="absolute top-4 left-4">
-          <span className="px-3 py-1 bg-background/90 text-foreground text-[10px] tracking-[0.2em] uppercase font-body">
-            {saleLabel}
-          </span>
-        </div>
 
         {/* Featured */}
         {featured && (

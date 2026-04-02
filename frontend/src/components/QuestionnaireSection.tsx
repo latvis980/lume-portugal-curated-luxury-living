@@ -89,6 +89,8 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
 
   const progress = ((currentQuestion + (showEmail ? 1 : 0)) / (questions.length + 1)) * 100;
 
+  if (isCompleted) return null;
+
   return (
     <section id="questionnaire" className="min-h-screen flex items-center bg-card section-padding">
       <div className="max-w-3xl mx-auto w-full">
@@ -117,90 +119,78 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
           />
         </div>
 
-        {!isCompleted ? (
-          <AnimatePresence mode="wait">
-            {!showEmail ? (
-              <motion.div
-                key={currentQuestion}
-                initial={{ opacity: 0, x: 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -40 }}
-                transition={{ duration: 0.4 }}
-                className="text-center"
-              >
-                <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
-                  Question {currentQuestion + 1} of {questions.length}
-                </p>
-                <h3 className="font-display text-2xl md:text-3xl font-light text-foreground mb-12">
-                  {questions[currentQuestion].question}
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
-                  {questions[currentQuestion].options.map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => handleAnswer(option)}
-                      className={`px-6 py-4 border text-sm tracking-wider transition-all duration-300 ${
-                        answers[currentQuestion] === option
-                          ? "border-primary bg-primary/10 text-foreground"
-                          : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            ) : (
-              <motion.form
-                key="email"
-                initial={{ opacity: 0, x: 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -40 }}
-                transition={{ duration: 0.4 }}
-                onSubmit={handleSubmit}
-                className="text-center max-w-md mx-auto"
-              >
-                <h3 className="font-display text-2xl md:text-3xl font-light text-foreground mb-4">
-                  Unlock Your Curated Selection
-                </h3>
-                <p className="text-sm text-muted-foreground mb-8">
-                  Enter your email to reveal properties and services matched to your preferences.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    required
-                    disabled={isSubmitting}
-                    className="flex-1 px-4 py-3 bg-background border border-border text-foreground text-sm tracking-wider placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
-                  />
+        <AnimatePresence mode="wait">
+          {!showEmail ? (
+            <motion.div
+              key={currentQuestion}
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.4 }}
+              className="text-center"
+            >
+              <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
+                Question {currentQuestion + 1} of {questions.length}
+              </p>
+              <h3 className="font-display text-2xl md:text-3xl font-light text-foreground mb-12">
+                {questions[currentQuestion].question}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
+                {questions[currentQuestion].options.map((option) => (
                   <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="px-8 py-3 bg-primary text-primary-foreground text-xs tracking-[0.2em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
+                    key={option}
+                    onClick={() => handleAnswer(option)}
+                    className={`px-6 py-4 border text-sm tracking-wider transition-all duration-300 ${
+                      answers[currentQuestion] === option
+                        ? "border-primary bg-primary/10 text-foreground"
+                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                    }`}
                   >
-                    {isSubmitting ? "Sending…" : "Reveal"}
+                    {option}
                   </button>
-                </div>
-                {error && (
-                  <p className="text-sm text-red-500 mt-4">{error}</p>
-                )}
-              </motion.form>
-            )}
-          </AnimatePresence>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center"
-          >
-            <p className="font-display text-2xl font-light text-primary italic">
-              Your curated experience awaits below
-            </p>
-          </motion.div>
-        )}
+                ))}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.form
+              key="email"
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.4 }}
+              onSubmit={handleSubmit}
+              className="text-center max-w-md mx-auto"
+            >
+              <h3 className="font-display text-2xl md:text-3xl font-light text-foreground mb-4">
+                Unlock Your Curated Selection
+              </h3>
+              <p className="text-sm text-muted-foreground mb-8">
+                Enter your email to reveal properties and services matched to your preferences.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  required
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-3 bg-background border border-border text-foreground text-sm tracking-wider placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-8 py-3 bg-primary text-primary-foreground text-xs tracking-[0.2em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {isSubmitting ? "Sending…" : "Reveal"}
+                </button>
+              </div>
+              {error && (
+                <p className="text-sm text-red-500 mt-4">{error}</p>
+              )}
+            </motion.form>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

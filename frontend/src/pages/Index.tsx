@@ -55,6 +55,7 @@ const Index = () => {
 
       <ServicesSection />
       <InvestmentSection />
+
       <PrivateAccessSection />
       <Footer />
       <CookieConsent />
