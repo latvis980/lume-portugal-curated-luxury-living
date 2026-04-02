@@ -36,6 +36,7 @@ export interface Listing {
   interior_living_area: number;
   plot_size?: number | null;
   views: string[];
+  nearby: string[];
   build_year?: number | null;
   renovation_year?: number | null;
   condition?: string | null;

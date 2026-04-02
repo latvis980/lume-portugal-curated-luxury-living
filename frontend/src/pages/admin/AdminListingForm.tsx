@@ -14,6 +14,18 @@ const CONDITIONS      = ["new", "excellent", "renovated", "good", "to_refurbish"
 const PRIORITIES      = ["low", "medium", "high"];
 const VISIBILITY      = ["exact", "approximate", "hidden"];
 const VIEW_TYPES      = ["sea","ocean","river","golf","city","countryside","mountain","garden","marina","panoramic"];
+const NEARBY_OPTIONS = [
+  ["beach","Beach"],["airport","Airport"],["golf_course","Golf Course"],
+  ["marina","Marina"],["yacht_club","Yacht Club"],["tennis_court","Tennis Court"],
+  ["equestrian","Equestrian Centre"],["fine_dining","Fine Dining"],
+  ["wine_region","Wine Region"],["spa_wellness","Spa & Wellness"],
+  ["international_school","International School"],["private_hospital","Private Hospital"],
+  ["historic_center","Historic Centre"],["cultural_district","Cultural District"],
+  ["river_waterfront","River / Waterfront"],["park_nature","Park & Nature Reserve"],
+  ["surf_spot","Surf Spot"],["cycling_paths","Cycling Paths"],
+  ["peace_quiet","Peace & Quiet"],["public_transport","Public Transport"],
+  ["coworking_space","Coworking Space"],["ski_resort","Ski Resort"],
+];
 
 const NEEDS_FLOOR = ["apartment", "penthouse"];
 const NEEDS_PLOT  = ["villa", "estate", "farmhouse", "quinta", "land"];
@@ -39,6 +51,7 @@ function emptyForm() {
     bedrooms: "", bathrooms: "", interior_living_area: "", plot_size: "",
     build_year: "", renovation_year: "", condition: "", energy_rating: "",
     views: [] as string[],
+    nearby: [] as string[],
     floors: "", floor_number: "", living_rooms: "", suites: "", guest_wc: "",
     office: false, storage_room: false,
     garage: false, parking_spaces: "", elevator: false,
@@ -102,7 +115,7 @@ export default function AdminListingForm() {
     Object.keys(f).forEach((key) => {
       const val = (existing as any)[key];
       if (val === null || val === undefined) return;
-      if (key === "views")
+      if (key === "views" || key === "nearby")
         (f as any)[key] = Array.isArray(val) ? val : [];
       else if (["lifestyle_tags", "key_selling_points", "gallery"].includes(key))
         (f as any)[key] = Array.isArray(val) ? val.join(", ") : val;
@@ -116,6 +129,9 @@ export default function AdminListingForm() {
   const set = (k: string, v: any) => setForm((prev) => ({ ...prev, [k]: v }));
   const toggleView = (v: string) =>
     set("views", form.views.includes(v) ? form.views.filter((x) => x !== v) : [...form.views, v]);
+  const toggleNearby = (v: string) =>
+    set("nearby", form.nearby.includes(v)
+      ? form.nearby.filter((x: string) => x !== v) : [...form.nearby, v]);
 
   const needsFloor = NEEDS_FLOOR.includes(form.property_type);
   const needsPlot  = NEEDS_PLOT.includes(form.property_type);
@@ -168,6 +184,7 @@ export default function AdminListingForm() {
 
     // Arrays
     payload.views = form.views;
+    payload.nearby = form.nearby;
     payload.lifestyle_tags = form.lifestyle_tags
       ? form.lifestyle_tags.split(",").map((s: string) => s.trim()).filter(Boolean)
       : [];
@@ -433,6 +450,25 @@ export default function AdminListingForm() {
             ["security","Security"],["concierge","Concierge"],["furnished","Furnished"],
             ["office","Office"],["storage_room","Storage Room"],
           ]} form={form} set={set} />
+
+          {/* Close To / Nearby */}
+          <h3 className="mb-3 text-xs uppercase tracking-wider text-admin-text-muted">Close To</h3>
+          <div className="mb-6 flex flex-wrap gap-2">
+            {NEARBY_OPTIONS.map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => toggleNearby(key)}
+                className={`rounded-full border px-3 py-1 text-xs transition ${
+                  form.nearby.includes(key)
+                    ? "border-admin-accent bg-admin-accent-soft text-admin-accent"
+                    : "border-admin-border text-admin-text-muted hover:border-admin-text-muted"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </Section>
       )}
 
