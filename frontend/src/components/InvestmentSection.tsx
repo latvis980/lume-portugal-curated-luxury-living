@@ -49,13 +49,13 @@ const InvestmentSection = () => {
       </div>
 
       {/* Investment tracks */}
-      <div className="section-padding bg-background">
+      <div className="section-padding bg-[#2a2a2a]">
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="max-w-3xl mx-auto text-center text-sm text-muted-foreground leading-relaxed mb-16"
+          className="max-w-3xl mx-auto text-center text-base text-[#f0ece4] leading-relaxed mb-16"
         >
           Our investment advisory is delivered in partnership with <strong>Mark Properties</strong> — a Portuguese real estate development platform founded by seasoned executives with decades of experience in premium residential development, strategic consulting, and infrastructure finance. Rooted in Lisbon and backed by established relationships with leading Portuguese banks, architects, and construction partners, <strong>Mark Properties</strong> brings institutional rigour to every opportunity.
         </motion.p>
@@ -69,12 +69,12 @@ const InvestmentSection = () => {
               transition={{ duration: 0.6, delay: i * 0.15 }}
               className="text-center"
             >
-              <track.icon className="w-8 h-8 text-primary mx-auto mb-5" strokeWidth={1.2} />
-              <h3 className="font-display text-xl font-light text-foreground mb-4">
+              <track.icon className="w-8 h-8 text-[#FFD700] mx-auto mb-5" strokeWidth={1.2} />
+              <h3 className="font-display text-2xl font-light text-[#f0ece4] mb-4">
                 {track.title}
               </h3>
-              <div className="w-8 h-px bg-primary/40 mx-auto mb-5" />
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <div className="w-8 h-px bg-[#FFD700]/60 mx-auto mb-5" />
+              <p className="text-base text-[#c8c2b8] leading-relaxed">
                 {track.description}
               </p>
             </motion.div>
