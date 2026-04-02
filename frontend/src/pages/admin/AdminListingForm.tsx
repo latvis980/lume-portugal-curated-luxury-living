@@ -53,7 +53,7 @@ function emptyForm() {
     lifestyle_tags: "", key_selling_points: "",
     cover_image: "", gallery: "", video_url: "", virtual_tour_url: "",
     agent_name: "", agent_phone: "", agent_email: "", agent_whatsapp: "",
-    company: "LUME by OneMark", listing_agent: "OneMark",
+    company: "LUME by Mark", listing_agent: "Mark",
     internal_status: "draft", source: "", priority: "medium",
     confidential: false, internal_notes: "",
   };

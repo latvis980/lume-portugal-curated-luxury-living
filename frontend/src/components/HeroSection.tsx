@@ -39,7 +39,7 @@ const HeroSection = () => {
             <span className="sun-dot" />
           </span>
           <span className="font-body text-xs md:text-sm tracking-[0.3em] uppercase text-sand-light/60 mt-2 font-medium">
-            by OneMark
+            by Mark
           </span>
         </motion.h1>
 
