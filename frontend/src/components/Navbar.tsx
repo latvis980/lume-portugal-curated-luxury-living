@@ -4,9 +4,9 @@ import { Menu, X } from "lucide-react";
 
 const navItems = [
   { label: "Browse Homes", href: "/properties" },
-  { label: "Discover Services", href: "#services" },
-  { label: "Collect with LUME", href: "#art-advisory" },
-  { label: "Request Private Access", href: "#private-access" },
+  { label: "Discover Services", href: "/#services" },
+  { label: "Collect with LUME", href: "/#art-advisory" },
+  { label: "Request Private Access", href: "/#private-access" },
 ];
 
 const Navbar = () => {
@@ -15,9 +15,9 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-16 md:h-20">
-        <a href="#hero" className="flex flex-col items-start leading-none">
+        <a href="/" className="flex flex-col items-start leading-none">
           <span className="font-display text-2xl md:text-3xl font-light tracking-widest text-foreground">LUME</span>
-          <span className="font-body text-[8px] md:text-[9px] tracking-[0.2em] uppercase text-muted-foreground font-medium">by OneMark</span>
+          <span className="font-body text-[8px] md:text-[9px] tracking-[0.2em] uppercase text-muted-foreground font-medium">by Mark</span>
         </a>
 
         {/* Desktop */}

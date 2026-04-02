@@ -85,9 +85,9 @@ async def llms_txt():
     Helps AI assistants (ChatGPT, Claude, Perplexity) understand
     what this site offers and how to navigate it.
     """
-    content = f"""# LUME by OneMark — Homes, Life in Portugal & Art & Antiques Advisory
+    content = f"""# LUME by Mark — Homes, Life in Portugal & Art & Antiques Advisory
 
-> LUME by OneMark helps discerning individuals find their home, build their
+> LUME by Mark helps discerning individuals find their home, build their
 > life, and collect with meaning in Portugal. Each client is paired with a
 > dedicated Curator who orchestrates every detail.
 

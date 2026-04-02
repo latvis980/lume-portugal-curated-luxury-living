@@ -26,9 +26,9 @@ SITE_URL = os.getenv("SITE_URL", "https://lumebymark.com")
 R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL", "")
 IMAGE_BASE_URL = os.getenv("IMAGE_BASE_URL", R2_PUBLIC_URL)  # fallback to R2
 
-DEFAULT_TITLE = "LUME by OneMark — Homes, Life & Art Advisory in Portugal"
+DEFAULT_TITLE = "LUME by Mark — Homes, Life & Art Advisory in Portugal"
 DEFAULT_DESCRIPTION = (
-    "LUME by OneMark helps you find your home, build your life, "
+    "LUME by Mark helps you find your home, build your life, "
     "and collect with meaning in Portugal."
 )
 DEFAULT_OG_IMAGE = f"{SITE_URL}/og-default.png"
@@ -490,7 +490,7 @@ def _seo_content_home(properties: List[Dict[str, Any]]) -> str:
 
     parts = [
         '<div id="seo-content" style="display:none" aria-hidden="true">',
-        "<h1>LUME by OneMark — Homes, Life & Art Advisory in Portugal</h1>",
+        "<h1>LUME by Mark — Homes, Life & Art Advisory in Portugal</h1>",
         "<p>Your light to living in Portugal. LUME helps you find your home, "
         "build your life, and collect with meaning.</p>",
         '<p><a href="/properties">View all properties</a></p>',
@@ -717,28 +717,28 @@ def _build_home_seo(html: str) -> str:
 # Static page metadata
 _STATIC_META: Dict[str, Tuple[str, str]] = {
     "about": (
-        "About — LUME by OneMark",
-        "Meet LUME by OneMark — homes, lifestyle management, "
+        "About — LUME by Mark",
+        "Meet LUME by Mark — homes, lifestyle management, "
         "and art & antiques advisory in Portugal.",
     ),
     "contact": (
-        "Contact — LUME by OneMark",
-        "Get in touch with LUME by OneMark. Homes, life in Portugal, "
+        "Contact — LUME by Mark",
+        "Get in touch with LUME by Mark. Homes, life in Portugal, "
         "and art & antiques advisory.",
     ),
     "services": (
-        "Services — LUME by OneMark",
+        "Services — LUME by Mark",
         "Lifestyle management, art & antiques advisory, and concierge services. "
-        "LUME by OneMark handles every detail of your life in Portugal.",
+        "LUME by Mark handles every detail of your life in Portugal.",
     ),
     "investment": (
-        "Investment — LUME by OneMark",
+        "Investment — LUME by Mark",
         "Strategic property investment in Portugal. Investment homes, second homes, "
-        "and development opportunities curated by LUME by OneMark.",
+        "and development opportunities curated by LUME by Mark.",
     ),
     "privacy": (
-        "Privacy Policy — LUME by OneMark",
-        "Privacy policy for LUME by OneMark (lumebymark.com).",
+        "Privacy Policy — LUME by Mark",
+        "Privacy policy for LUME by Mark (lumebymark.com).",
     ),
 }
 
