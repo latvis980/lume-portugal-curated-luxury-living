@@ -1,6 +1,10 @@
 import { motion } from "framer-motion";
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  unlocked?: boolean;
+}
+
+const HeroSection = ({ unlocked = false }: HeroSectionProps) => {
   return (
     <section id="hero" className="relative h-screen w-full overflow-hidden">
       {/* Background video */}
@@ -66,7 +70,7 @@ const HeroSection = () => {
           className="mt-12 flex flex-col sm:flex-row gap-4"
         >
           <a
-            href="#questionnaire"
+            href={unlocked ? "#listings" : "#questionnaire"}
             className="px-8 py-3 border border-sand-light/40 text-sand-light text-xs tracking-[0.2em] uppercase hover:bg-sand-light/10 transition-all duration-300"
           >
             Begin Your Journey
