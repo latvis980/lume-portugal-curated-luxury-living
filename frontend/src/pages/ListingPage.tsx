@@ -31,6 +31,16 @@ import {
   Compass,
   Building2,
   Mountain,
+  Plane,
+  Anchor,
+  GraduationCap,
+  Bike,
+  Coffee,
+  Wine,
+  Sparkles,
+  Bus,
+  Hospital,
+  Landmark,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -76,6 +86,56 @@ const VIEW_ICONS: Record<string, typeof Waves> = {
   garden: TreePine,
   marina: Compass,
   panoramic: Eye,
+};
+
+const NEARBY_LABELS: Record<string, string> = {
+  beach: "Beach",
+  airport: "Airport",
+  golf_course: "Golf Course",
+  marina: "Marina",
+  yacht_club: "Yacht Club",
+  tennis_court: "Tennis Court",
+  equestrian: "Equestrian Centre",
+  fine_dining: "Fine Dining",
+  wine_region: "Wine Region",
+  spa_wellness: "Spa & Wellness",
+  international_school: "International School",
+  private_hospital: "Private Hospital",
+  historic_center: "Historic Centre",
+  cultural_district: "Cultural District",
+  river_waterfront: "River / Waterfront",
+  park_nature: "Park & Nature Reserve",
+  surf_spot: "Surf Spot",
+  cycling_paths: "Cycling Paths",
+  peace_quiet: "Peace & Quiet",
+  public_transport: "Public Transport",
+  coworking_space: "Coworking Space",
+  ski_resort: "Ski Resort",
+};
+
+const NEARBY_ICONS: Record<string, typeof MapPin> = {
+  beach: Waves,
+  airport: Plane,
+  golf_course: TreePine,
+  marina: Anchor,
+  yacht_club: Anchor,
+  tennis_court: Compass,
+  equestrian: Mountain,
+  fine_dining: Coffee,
+  wine_region: Wine,
+  spa_wellness: Sparkles,
+  international_school: GraduationCap,
+  private_hospital: Hospital,
+  historic_center: Landmark,
+  cultural_district: Landmark,
+  river_waterfront: Waves,
+  park_nature: TreePine,
+  surf_spot: Waves,
+  cycling_paths: Bike,
+  peace_quiet: Mountain,
+  public_transport: Bus,
+  coworking_space: Building2,
+  ski_resort: Mountain,
 };
 
 // ─── Feature collector ───────────────────────────────────────────────────
@@ -764,6 +824,35 @@ export default function ListingPage() {
                       >
                         <Icon size={16} strokeWidth={1.5} className="text-primary" />
                         <span className="text-sm font-body">{capitalize(view)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.section>
+            )}
+
+            {/* ── Nearby ───────────────────────────────────────────────── */}
+            {listing.nearby.length > 0 && (
+              <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.28 }}
+              >
+                <h2 className="font-display text-2xl font-light text-foreground mb-6">
+                  Close To
+                </h2>
+                <div className="flex flex-wrap gap-3">
+                  {listing.nearby.map((item) => {
+                    const Icon = NEARBY_ICONS[item] || MapPin;
+                    return (
+                      <div
+                        key={item}
+                        className="flex items-center gap-2 px-4 py-2.5 border border-border rounded-sm"
+                      >
+                        <Icon size={16} strokeWidth={1.5} className="text-primary" />
+                        <span className="text-sm font-body">
+                          {NEARBY_LABELS[item] ?? capitalize(item)}
+                        </span>
                       </div>
                     );
                   })}
