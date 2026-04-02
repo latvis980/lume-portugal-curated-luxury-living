@@ -15,15 +15,27 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (!href.startsWith("/#")) return;
-    e.preventDefault();
-    const hash = href.slice(1); // e.g. "#services"
+  const scrollToHash = (hash: string) => {
     if (location.pathname === "/") {
       document.querySelector(hash)?.scrollIntoView({ behavior: "smooth" });
     } else {
-      navigate(href);
+      navigate(`/${hash}`);
     }
+  };
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!href.startsWith("/#")) return;
+    e.preventDefault();
+    scrollToHash(href.slice(1)); // e.g. "#services"
+  };
+
+  const handleMobileNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!href.startsWith("/#")) return;
+    e.preventDefault();
+    const hash = href.slice(1);
+    setOpen(false);
+    // Wait for the menu collapse animation before scrolling
+    setTimeout(() => scrollToHash(hash), 300);
   };
 
   return (
@@ -72,10 +84,7 @@ const Navbar = () => {
                 <a
                   key={item.label}
                   href={item.href}
-                  onClick={(e) => {
-                    handleNavClick(e, item.href);
-                    setOpen(false);
-                  }}
+                  onClick={(e) => handleMobileNavClick(e, item.href)}
                   className="text-xs tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {item.label}
