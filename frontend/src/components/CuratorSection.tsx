@@ -17,7 +17,6 @@ const CuratorSection = () => {
             alt="Your dedicated Residential Curator"
             className="w-full max-w-md mx-auto lg:mx-0 aspect-[3/4] object-cover"
           />
-          <div className="absolute -bottom-4 -right-4 w-32 h-32 border border-primary/20" />
         </motion.div>
 
         <motion.div
