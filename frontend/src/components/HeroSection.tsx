@@ -29,7 +29,7 @@ const HeroSection = ({ unlocked = false }: HeroSectionProps) => {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="text-xs md:text-sm tracking-[0.35em] uppercase text-sand-light/80 mb-6"
         >
-          Homes · Life in Portugal · Art &amp; Antiques
+          Homes · Living · Collecting
         </motion.p>
 
         <motion.h1
