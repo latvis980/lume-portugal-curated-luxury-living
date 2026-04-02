@@ -47,14 +47,14 @@ const Index = () => {
           >
             {/* Pass answers — null for returning visitors means no filter applied */}
             <ListingsSection answers={answers} />
-            <ServicesSection />
             <CuratorSection />
             <ConciergeSection />
-            <InvestmentSection />
           </motion.div>
         )}
       </AnimatePresence>
 
+      <ServicesSection />
+      <InvestmentSection />
       <PrivateAccessSection />
       <Footer />
       <CookieConsent />

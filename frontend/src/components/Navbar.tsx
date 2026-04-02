@@ -3,10 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
 const navItems = [
-  { label: "Lifestyle", href: "#hero" },
-  { label: "Discover", href: "#questionnaire" },
-  { label: "Services", href: "#services" },
-  { label: "Investment", href: "#investment" },
+  { label: "Browse Homes", href: "/properties" },
+  { label: "Discover Services", href: "#services" },
+  { label: "Invest with Mark", href: "#investment" },
   { label: "Private Access", href: "#private-access" },
 ];
 
