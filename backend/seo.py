@@ -1,6 +1,6 @@
 # backend/seo.py
 """
-SEO injection module for LUME by OneMark.
+SEO injection module for LUME by Mark.
 
 Replaces placeholder strings in the HTML template with dynamic meta tags,
 JSON-LD structured data, and hidden content blocks based on the requested URL.
@@ -26,9 +26,9 @@ SITE_URL = os.getenv("SITE_URL", "https://lumebymark.com")
 R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL", "")
 IMAGE_BASE_URL = os.getenv("IMAGE_BASE_URL", R2_PUBLIC_URL)  # fallback to R2
 
-DEFAULT_TITLE = "LUME by OneMark — Luxury Real Estate & Investment in Portugal"
+DEFAULT_TITLE = "LUME by Mark — Luxury Real Estate & Investment in Portugal"
 DEFAULT_DESCRIPTION = (
-    "LUME by OneMark curates luxury real estate, seamless relocation, "
+    "LUME by Mark curates luxury real estate, seamless relocation, "
     "and strategic investment opportunities across Portugal."
 )
 DEFAULT_OG_IMAGE = f"{SITE_URL}/og-default.png"
@@ -293,7 +293,7 @@ def _jsonld_real_estate_listing(prop: Dict[str, Any], url: str) -> str:
     # Publisher
     ld["provider"] = {
         "@type": "RealEstateAgent",
-        "name": "LUME by OneMark",
+        "name": "LUME by Mark",
         "url": SITE_URL,
     }
 
@@ -329,7 +329,7 @@ def _jsonld_organization() -> str:
     ld = {
         "@context": "https://schema.org",
         "@type": "RealEstateAgent",
-        "name": "LUME by OneMark",
+        "name": "LUME by Mark",
         "url": SITE_URL,
         "description": DEFAULT_DESCRIPTION,
         "areaServed": {
@@ -354,7 +354,7 @@ def _jsonld_service(svc: Dict[str, Any], url: str) -> str:
         "url": url,
         "provider": {
             "@type": "RealEstateAgent",
-            "name": "LUME by OneMark",
+            "name": "LUME by Mark",
             "url": SITE_URL,
         },
         "areaServed": {
@@ -444,7 +444,7 @@ def _seo_content_properties_list(properties: List[Dict[str, Any]]) -> str:
 
     parts = [
         '<div id="seo-content" style="display:none" aria-hidden="true">',
-        "<h1>Luxury Properties in Portugal — LUME by OneMark</h1>",
+        "<h1>Luxury Properties in Portugal — LUME by Mark</h1>",
         "<p>Curated selection of luxury real estate across Lisbon, Porto, Algarve, Cascais, and beyond.</p>",
     ]
     for p in properties[:30]:
@@ -490,7 +490,7 @@ def _seo_content_home(properties: List[Dict[str, Any]]) -> str:
 
     parts = [
         '<div id="seo-content" style="display:none" aria-hidden="true">',
-        "<h1>LUME by OneMark — Luxury Real Estate & Investment in Portugal</h1>",
+        "<h1>LUME by Mark — Luxury Real Estate & Investment in Portugal</h1>",
         "<p>Your light to living in Portugal. LUME curates luxury real estate, "
         "seamless relocation, and strategic investment opportunities.</p>",
         '<p><a href="/properties">View all properties</a></p>',
@@ -579,7 +579,7 @@ def _build_property_seo(html: str, params: dict) -> str:
     city = prop.get("city") or ""
     if city:
         title_parts.append(city)
-    title = " · ".join(title_parts) + " — LUME by OneMark"
+    title = " · ".join(title_parts) + " — LUME by Mark"
 
     price = prop.get("price")
     price_text = _format_price(price)
@@ -619,7 +619,7 @@ def _build_properties_seo(html: str) -> str:
     url = f"{SITE_URL}/properties"
     properties = _fetch_properties_list()
 
-    title = "Luxury Properties in Portugal — LUME by OneMark"
+    title = "Luxury Properties in Portugal — LUME by Mark"
     description = (
         "Browse curated luxury real estate across Lisbon, Porto, Cascais, "
         "Algarve, and Portugal's most desirable addresses."
@@ -649,15 +649,15 @@ def _build_location_seo(html: str, params: dict) -> str:
         display_name = slug.replace("-", " ").title()
         return _replace_placeholders(
             html,
-            title=f"Properties in {display_name} — LUME by OneMark",
+            title=f"Properties in {display_name} — LUME by Mark",
             url=url,
         )
 
     name = loc.get("name") or slug.replace("-", " ").title()
-    title = f"Luxury Properties in {name}, Portugal — LUME by OneMark"
+    title = f"Luxury Properties in {name}, Portugal — LUME by Mark"
     description = loc.get("description") or (
         f"Explore curated luxury real estate in {name}, Portugal. "
-        f"Handpicked properties by LUME by OneMark."
+        f"Handpicked properties by LUME by Mark."
     )
     properties = loc.get("properties") or []
 
@@ -683,11 +683,11 @@ def _build_service_seo(html: str, params: dict) -> str:
         display_name = slug.replace("-", " ").title()
         return _replace_placeholders(
             html,
-            title=f"{display_name} — LUME by OneMark",
+            title=f"{display_name} — LUME by Mark",
             url=url,
         )
 
-    title = f"{svc.get('title', '')} — LUME by OneMark"
+    title = f"{svc.get('title', '')} — LUME by Mark"
     description = svc.get("description") or DEFAULT_DESCRIPTION
 
     jsonld = _jsonld_service(svc, url)
@@ -717,28 +717,28 @@ def _build_home_seo(html: str) -> str:
 # Static page metadata
 _STATIC_META: Dict[str, Tuple[str, str]] = {
     "about": (
-        "About — LUME by OneMark",
-        "Meet LUME by OneMark — your dedicated residential curator for luxury real estate, "
+        "About — LUME by Mark",
+        "Meet LUME by Mark — your dedicated residential curator for luxury real estate, "
         "relocation, and investment in Portugal.",
     ),
     "contact": (
-        "Contact — LUME by OneMark",
-        "Get in touch with LUME by OneMark. Request your personal residential curator "
+        "Contact — LUME by Mark",
+        "Get in touch with LUME by Mark. Request your personal residential curator "
         "for luxury property in Portugal.",
     ),
     "services": (
-        "Services — LUME by OneMark",
+        "Services — LUME by Mark",
         "Real estate, relocation, investment, and concierge services. "
-        "LUME by OneMark handles every detail of your move to Portugal.",
+        "LUME by Mark handles every detail of your move to Portugal.",
     ),
     "investment": (
-        "Investment — LUME by OneMark",
+        "Investment — LUME by Mark",
         "Strategic property investment in Portugal. Investment homes, second homes, "
-        "and development opportunities curated by LUME by OneMark.",
+        "and development opportunities curated by LUME by Mark.",
     ),
     "privacy": (
-        "Privacy Policy — LUME by OneMark",
-        "Privacy policy for LUME by OneMark (lumebymark.com).",
+        "Privacy Policy — LUME by Mark",
+        "Privacy policy for LUME by Mark (lumebymark.com).",
     ),
 }
 

@@ -1,6 +1,6 @@
 # backend/main.py
 """
-LUME by OneMark — Website Backend
+LUME by Mark — Website Backend
 
 FastAPI application that:
 1. Serves the React SPA (built by Vite into frontend/dist/)
@@ -53,7 +53,7 @@ from seo import inject_seo
 # =============================================================================
 
 app = FastAPI(
-    title="LUME by OneMark API",
+    title="LUME by Mark API",
     description="Luxury real estate & lifestyle management in Portugal",
     version="1.0.0",
     docs_url="/api/docs" if os.getenv("DEBUG", "").lower() == "true" else None,
@@ -231,7 +231,7 @@ else:
     @app.get("/")
     async def no_frontend():
         return JSONResponse({
-            "message": "LUME by OneMark API is running",
+            "message": "LUME by Mark API is running",
             "api_docs": "/api/docs" if os.getenv("DEBUG") else None,
             "health": "/api/health",
             "note": "Frontend not built. Run 'cd frontend && npm run build' first.",
@@ -247,7 +247,7 @@ def main():
     debug = os.getenv("DEBUG", "").lower() == "true"
 
     print()
-    print("  LUME by OneMark — Backend")
+    print("  LUME by Mark — Backend")
     print("  ========================")
     print(f"  Port: {port}")
     print(f"  Debug: {debug}")

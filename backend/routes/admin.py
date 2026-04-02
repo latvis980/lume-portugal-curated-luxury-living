@@ -1,6 +1,6 @@
 # backend/routes/admin.py
 """
-Admin / CMS routes for LUME by OneMark.
+Admin / CMS routes for LUME by Mark.
 
 All routes are prefixed with /api/admin and require JWT authentication
 (except the login endpoint).
@@ -141,7 +141,7 @@ async def create_listing(body: dict, admin=Depends(require_admin)):
         "views": ["river", "city"],
         "short_description": "Stunning penthouse with panoramic river views.",
         "cover_image": "https://...",
-        "company": "LUME by OneMark",
+        "company": "LUME by Mark",
         "listing_agent": "Mark"
     }
 

@@ -57,7 +57,7 @@ const InvestmentSection = () => {
           transition={{ duration: 0.7 }}
           className="max-w-3xl mx-auto text-center text-sm text-muted-foreground leading-relaxed mb-16"
         >
-          Our investment advisory is delivered in partnership with <strong>OneMark Properties</strong> — a Portuguese real estate development platform founded by seasoned executives with decades of experience in premium residential development, strategic consulting, and infrastructure finance. Rooted in Lisbon and backed by established relationships with leading Portuguese banks, architects, and construction partners, <strong>OneMark Properties</strong> brings institutional rigour to every opportunity.
+          Our investment advisory is delivered in partnership with <strong>Mark Properties</strong> — a Portuguese real estate development platform founded by seasoned executives with decades of experience in premium residential development, strategic consulting, and infrastructure finance. Rooted in Lisbon and backed by established relationships with leading Portuguese banks, architects, and construction partners, <strong>Mark Properties</strong> brings institutional rigour to every opportunity.
         </motion.p>
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
           {tracks.map((track, i) => (

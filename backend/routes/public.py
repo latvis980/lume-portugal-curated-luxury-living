@@ -1,6 +1,6 @@
 # backend/routes/public.py
 """
-Public routes for LUME by OneMark.
+Public routes for LUME by Mark.
 
 Includes:
 - robots.txt (search engine crawl rules)
@@ -84,9 +84,9 @@ async def llms_txt():
     Helps AI assistants (ChatGPT, Claude, Perplexity) understand
     what this site offers and how to navigate it.
     """
-    content = f"""# LUME by OneMark — Luxury Real Estate & Investment in Portugal
+    content = f"""# LUME by Mark — Luxury Real Estate & Investment in Portugal
 
-> LUME by OneMark curates luxury real estate, seamless relocation, and strategic
+> LUME by Mark curates luxury real estate, seamless relocation, and strategic
 > investment opportunities across Portugal. Each client is paired with a
 > dedicated Residential Curator who orchestrates every detail.
 
