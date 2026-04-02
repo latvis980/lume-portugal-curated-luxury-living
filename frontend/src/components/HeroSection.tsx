@@ -25,7 +25,7 @@ const HeroSection = () => {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="text-xs md:text-sm tracking-[0.35em] uppercase text-sand-light/80 mb-6"
         >
-          Real Estate · Relocation · Investment
+          Homes · Life in Portugal · Art &amp; Antiques
         </motion.p>
 
         <motion.h1

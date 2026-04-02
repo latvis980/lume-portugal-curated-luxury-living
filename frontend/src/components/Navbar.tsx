@@ -5,7 +5,7 @@ import { Menu, X } from "lucide-react";
 const navItems = [
   { label: "Browse Homes", href: "/properties" },
   { label: "Discover Services", href: "#services" },
-  { label: "Invest with OneMark", href: "#investment" },
+  { label: "Collect with LUME", href: "#art-advisory" },
   { label: "Private Access", href: "#private-access" },
 ];
 
