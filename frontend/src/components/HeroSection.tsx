@@ -34,13 +34,9 @@ const HeroSection = () => {
           transition={{ duration: 1, delay: 0.5 }}
           className="flex flex-col items-center"
         >
-          <span className="logo-shimmer font-display text-5xl md:text-7xl lg:text-8xl font-light tracking-wider inline-flex items-baseline">
-            LU
-            <span className="relative inline-block">
-              M
-              <span className="sun-dot" />
-            </span>
-            E
+          <span className="logo-shimmer font-display text-5xl md:text-7xl lg:text-8xl font-light tracking-wider inline-flex items-baseline relative">
+            LUME
+            <span className="sun-dot" />
           </span>
           <span className="font-body text-xs md:text-sm tracking-[0.3em] uppercase text-sand-light/60 mt-2 font-medium">
             by Mark

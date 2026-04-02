@@ -173,7 +173,7 @@
 .sun-dot {
   position: absolute;
   top: 0.18em;
-  right: -0.05em;
+  left: calc(75% - 0.05em);
   width: 0.09em;
   height: 0.09em;
   border-radius: 50%;
@@ -196,9 +196,8 @@
   background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
-  animation: shimmer-text 9s ease-in-out 6s infinite;
+  -webkit-text-fill-color: transparent;
+  color: hsl(38 33% 95%);
+  animation: shimmer-text 9s ease-in-out infinite;
   animation-delay: 2s;
-  animation-iteration-count: infinite;
-  animation-fill-mode: backwards;
 }
