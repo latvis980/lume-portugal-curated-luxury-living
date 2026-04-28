@@ -11,11 +11,11 @@ import { useUnsavedChanges } from "./UnsavedChangesContext";
 
 // ─── Locale config ────────────────────────────────────────────────────────────
 
-type I18nLocale = "en" | "pt_br" | "ru" | "es";
+type I18nLocale = "en" | "pt_pt" | "ru" | "es";
 
 const LOCALE_TABS: { code: I18nLocale; short: string; name: string }[] = [
   { code: "en",    short: "EN", name: "English" },
-  { code: "pt_br", short: "PT", name: "Português (BR)" },
+  { code: "pt_pt", short: "PT", name: "Portuguese" },
   { code: "ru",    short: "RU", name: "Русский" },
   { code: "es",    short: "ES", name: "Español" },
 ];
@@ -63,10 +63,10 @@ function emptyForm() {
   return {
     reference: "", title: "",
     // i18n JSONB columns — populated from DB on edit, saved back on update
-    title_i18n:             { pt_br: "", ru: "", es: "" } as Record<string, string>,
-    short_description_i18n: { pt_br: "", ru: "", es: "" } as Record<string, string>,
-    full_description_i18n:  { pt_br: "", ru: "", es: "" } as Record<string, string>,
-    ai_summary_i18n:        { pt_br: "", ru: "", es: "" } as Record<string, string>,
+    title_i18n:             { pt_pt: "", ru: "", es: "" } as Record<string, string>,
+    short_description_i18n: { pt_pt: "", ru: "", es: "" } as Record<string, string>,
+    full_description_i18n:  { pt_pt: "", ru: "", es: "" } as Record<string, string>,
+    ai_summary_i18n:        { pt_pt: "", ru: "", es: "" } as Record<string, string>,
     // ─────────────────────────────────────────────────────────────────────
     property_type: "apartment", listing_type: "sale", status: "draft",
     price: "", currency: "EUR", featured: false,

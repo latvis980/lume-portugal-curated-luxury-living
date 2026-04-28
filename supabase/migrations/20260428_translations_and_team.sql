@@ -5,14 +5,14 @@
 -- ("about", "title"), ("nav", "browse_homes"), ("about.founder.1", "bio").
 -- Each row stores the source text per supported locale.
 --
--- Supported locales: en, pt_br, ru, es.
+-- Supported locales: en, pt_pt, ru, es.
 
 create table if not exists public.translations (
     id uuid primary key default gen_random_uuid(),
     namespace text not null,
     key text not null,
     en text,
-    pt_br text,
+    pt_pt text,
     ru text,
     es text,
     created_at timestamptz not null default now(),

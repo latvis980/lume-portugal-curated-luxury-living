@@ -16,11 +16,11 @@ import {
 
 // ─── Locale config ────────────────────────────────────────────────────────────
 
-type I18nLocale = "en" | "pt_br" | "ru" | "es";
+type I18nLocale = "en" | "pt_pt" | "ru" | "es";
 
 const LOCALE_TABS: { code: I18nLocale; short: string; name: string }[] = [
   { code: "en",    short: "EN", name: "English" },
-  { code: "pt_br", short: "PT", name: "Português (BR)" },
+  { code: "pt_pt", short: "PT", name: "Portuguese" },
   { code: "ru",    short: "RU", name: "Русский" },
   { code: "es",    short: "ES", name: "Español" },
 ];
@@ -42,9 +42,9 @@ const CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
 
 // ─── Form state ───────────────────────────────────────────────────────────────
 
-type I18nValues = { pt_br?: string; ru?: string; es?: string };
+type I18nValues = { pt_pt?: string; ru?: string; es?: string };
 
-const EMPTY_I18N: I18nValues = { pt_br: "", ru: "", es: "" };
+const EMPTY_I18N: I18nValues = { pt_pt: "", ru: "", es: "" };
 
 const EMPTY_FORM = {
   title:            "",
@@ -237,7 +237,7 @@ export default function AdminServices() {
                           </span>
                           {/* Show translation coverage indicator */}
                           <span className="flex gap-0.5" title="Translation coverage">
-                            {(["pt_br","ru","es"] as const).map(loc => (
+                            {(["pt_pt","ru","es"] as const).map(loc => (
                               <span
                                 key={loc}
                                 className={`inline-block h-1.5 w-1.5 rounded-full ${

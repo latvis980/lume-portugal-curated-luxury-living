@@ -175,7 +175,7 @@ export async function deleteContact(id: string) {
 // ─── Services ───────────────────────────────────────────────────────────────
 
 export type I18nValues = {
-  pt_br?: string;
+  pt_pt?: string;
   ru?: string;
   es?: string;
 };
@@ -272,15 +272,15 @@ export async function translateServiceField(
 
 // ─── Translations (static site copy) ────────────────────────────────────────
 
-export type Locale = "en" | "pt_br" | "ru" | "es";
-export const TRANSLATION_LOCALES: Locale[] = ["en", "pt_br", "ru", "es"];
+export type Locale = "en" | "pt_pt" | "ru" | "es";
+export const TRANSLATION_LOCALES: Locale[] = ["en", "pt_pt", "ru", "es"];
 
 export interface Translation {
   id: string;
   namespace: string;
   key: string;
   en: string | null;
-  pt_br: string | null;
+  pt_pt: string | null;
   ru: string | null;
   es: string | null;
   created_at: string;
@@ -304,7 +304,7 @@ export async function upsertTranslation(data: {
   namespace: string;
   key: string;
   en?: string | null;
-  pt_br?: string | null;
+  pt_pt?: string | null;
   ru?: string | null;
   es?: string | null;
 }): Promise<Translation> {

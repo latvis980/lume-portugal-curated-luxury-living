@@ -1,7 +1,7 @@
 // frontend/src/lib/i18n.tsx
 //
 // Lightweight i18n: one fetch of /api/translations at boot, all strings live
-// in a (namespace, key) -> { en, pt_br, ru, es } map.  Components call
+// in a (namespace, key) -> { en, pt_pt, ru, es } map.  Components call
 // `t("about", "title")` and get back the active locale's value (with English
 // as fallback so the UI never shows raw keys while translations are pending).
 
@@ -16,19 +16,19 @@ import {
 } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-export const LOCALES = ["en", "pt_br", "ru", "es"] as const;
+export const LOCALES = ["en", "pt_pt", "ru", "es"] as const;
 export type Locale = (typeof LOCALES)[number];
 
 export const LOCALE_LABELS: Record<Locale, string> = {
   en: "English",
-  pt_br: "Português (BR)",
+  pt_pt: "Portuguese",
   ru: "Русский",
   es: "Español",
 };
 
 export const LOCALE_SHORT: Record<Locale, string> = {
   en: "EN",
-  pt_br: "PT",
+  pt_pt: "PT",
   ru: "RU",
   es: "ES",
 };
@@ -39,7 +39,7 @@ interface TranslationRow {
   namespace: string;
   key: string;
   en?: string | null;
-  pt_br?: string | null;
+  pt_pt?: string | null;
   ru?: string | null;
   es?: string | null;
 }
@@ -58,7 +58,7 @@ function detectInitialLocale(): Locale {
   const stored = window.localStorage.getItem(STORAGE_KEY) as Locale | null;
   if (stored && LOCALES.includes(stored)) return stored;
   const nav = window.navigator.language?.toLowerCase() ?? "";
-  if (nav.startsWith("pt")) return "pt_br";
+  if (nav.startsWith("pt")) return "pt_pt";
   if (nav.startsWith("ru")) return "ru";
   if (nav.startsWith("es")) return "es";
   return "en";
@@ -82,13 +82,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     setLocaleState(l);
     if (typeof window !== "undefined") {
       window.localStorage.setItem(STORAGE_KEY, l);
-      document.documentElement.lang = l === "pt_br" ? "pt-BR" : l;
+      document.documentElement.lang = l === "pt_pt" ? "pt-PT" : l;
     }
   }, []);
 
   useEffect(() => {
     if (typeof document !== "undefined") {
-      document.documentElement.lang = locale === "pt_br" ? "pt-BR" : locale;
+      document.documentElement.lang = locale === "pt_pt" ? "pt-PT" : locale;
     }
   }, [locale]);
 

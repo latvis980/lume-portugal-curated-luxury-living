@@ -55,15 +55,15 @@ _DEEPL_SOURCE = {
     "en":    "EN",
     "es":    "ES",
     "ru":    "RU",
-    "pt_br": "PT",
+    "pt_pt": "PT",
 }
 _DEEPL_TARGET = {
     "en":    "EN-US",
     "es":    "ES",
     "ru":    "RU",
-    "pt_br": "PT-BR",
+    "pt_pt": "PT-PT",
 }
-_LOCALES = ("en", "pt_br", "ru", "es")
+_LOCALES = ("en", "pt_pt", "ru", "es")
 
 # Fields that can be auto-translated on each table
 _LISTING_TRANSLATABLE = ("title", "short_description", "full_description", "ai_summary")
@@ -134,7 +134,7 @@ class TranslationIn(BaseModel):
     namespace: str
     key: str
     en: Optional[str] = None
-    pt_br: Optional[str] = None
+    pt_pt: Optional[str] = None
     ru: Optional[str] = None
     es: Optional[str] = None
 
@@ -191,7 +191,7 @@ async def admin_translations_delete(
 # ─── DeepL fan-out for static translations table ─────────────────────────────
 
 class TranslateRequest(BaseModel):
-    source: Optional[str] = None  # "en" | "pt_br" | "ru" | "es"; auto-detect if None
+    source: Optional[str] = None  # "en" | "pt_pt" | "ru" | "es"; auto-detect if None
     overwrite: bool = False        # if False, only fill empty locales
 
 
@@ -307,9 +307,9 @@ async def translate_listing_field(
 
     - English text lives in the base column (e.g. listing.title).
     - Other locales are stored in listing.title_i18n as
-      {"pt_br": "...", "ru": "...", "es": "..."}.
+      {"pt_pt": "...", "ru": "...", "es": "..."}.
     - If source_locale is "en", reads from the base column.
-    - If source_locale is "ru"/"es"/"pt_br", reads from the _i18n column.
+    - If source_locale is "ru"/"es"/"pt_pt", reads from the _i18n column.
     - After translation, writes results back to the appropriate column.
     - Returns the full updated listing row.
     """
