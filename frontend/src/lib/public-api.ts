@@ -4,7 +4,7 @@
  * Fetches data from /api/properties, /api/locations, etc.
  *
  * Phase 4 — locale-awareness:
- * All content fetches now accept a `locale` param (e.g. "ru", "pt_br").
+ * All content fetches now accept a `locale` param (e.g. "ru", "pt_pt").
  * The backend merges translations server-side, so the response shapes
  * are unchanged — title is always a string, never a JSONB object.
  */
@@ -146,7 +146,7 @@ export async function fetchListingBySlug(
 
 export interface ListingsQuery {
   // ── Locale (Phase 4) ──────────────────────────────────────────────────────
-  locale?: string;          // "en" | "pt_br" | "ru" | "es"
+  locale?: string;          // "en" | "pt_pt" | "ru" | "es"
 
   // ── Location cascade ───────────────────────────────────────────────────────
   region?: string;

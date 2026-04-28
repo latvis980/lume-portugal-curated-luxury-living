@@ -9,7 +9,7 @@ Includes:
 - Public API endpoints for listings and services
 
 Phase 4 — locale-awareness:
-  All content endpoints now accept an optional ?locale=ru|es|pt_br|en
+  All content endpoints now accept an optional ?locale=ru|es|pt_pt|en
   parameter. The backend merges the appropriate _i18n translation into
   the base fields before returning, so the response shape is unchanged.
 """
@@ -220,7 +220,7 @@ async def get_property_facets():
 @router.get("/properties")
 async def list_properties(
     # ── Locale (Phase 4) ────────────────────────────────────────────────────
-    locale:          Optional[str]   = Query(None, description="en | pt_br | ru | es"),
+    locale:          Optional[str]   = Query(None, description="en | pt_pt | ru | es"),
 
     # ── Location cascade ─────────────────────────────────────────────────────
     region:          Optional[str]   = Query(None),
@@ -304,7 +304,7 @@ async def list_properties(
 @router.get("/properties/{slug}")
 async def get_property(
     slug: str,
-    locale: Optional[str] = Query(None, description="en | pt_br | ru | es"),
+    locale: Optional[str] = Query(None, description="en | pt_pt | ru | es"),
 ):
     """
     Fetch a single available listing by its URL slug.
@@ -326,7 +326,7 @@ async def get_property(
 
 @router.get("/services")
 async def list_services_public(
-    locale: Optional[str] = Query(None, description="en | pt_br | ru | es"),
+    locale: Optional[str] = Query(None, description="en | pt_pt | ru | es"),
 ):
     """
     List all active services, grouped by category.

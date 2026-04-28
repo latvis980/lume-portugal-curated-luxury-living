@@ -129,9 +129,11 @@ _I18N_SERVICE_FIELDS = ("title", "subtitle", "description")
 
 _LOCALE_NORM = {
     "en":    "en",
-    "pt":    "pt_br",
-    "pt-br": "pt_br",
-    "pt_br": "pt_br",
+    "pt":    "pt_pt",
+    "pt-pt": "pt_pt",
+    "pt_pt": "pt_pt",
+    "pt-br": "pt_pt",
+    "pt_br": "pt_pt",
     "ru":    "ru",
     "es":    "es",
 }
@@ -940,7 +942,7 @@ def admin_get_stats() -> Dict[str, Any]:
 # Translations (multi-language CMS strings)
 # ---------------------------------------------------------------------------
 
-SUPPORTED_LOCALES = ("en", "pt_br", "ru", "es")
+SUPPORTED_LOCALES = ("en", "pt_pt", "ru", "es")
 
 
 def public_list_translations(namespace: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -948,7 +950,7 @@ def public_list_translations(namespace: Optional[str] = None) -> List[Dict[str, 
     try:
         client = _get_client()
         q = client.table("translations").select(
-            "namespace, key, en, pt_br, ru, es"
+            "namespace, key, en, pt_pt, ru, es"
         )
         if namespace:
             q = q.eq("namespace", namespace)
@@ -1001,7 +1003,7 @@ def admin_upsert_translation(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     try:
         client = _get_admin_client()
         payload = {k: v for k, v in data.items() if k in (
-            "namespace", "key", "en", "pt_br", "ru", "es"
+            "namespace", "key", "en", "pt_pt", "ru", "es"
         )}
         if not payload.get("namespace") or not payload.get("key"):
             raise ValueError("namespace and key are required")
@@ -1022,7 +1024,7 @@ def admin_update_translation(
     try:
         client = _get_admin_client()
         payload = {k: v for k, v in data.items() if k in (
-            "namespace", "key", "en", "pt_br", "ru", "es"
+            "namespace", "key", "en", "pt_pt", "ru", "es"
         )}
         result = (
             client.table("translations")
