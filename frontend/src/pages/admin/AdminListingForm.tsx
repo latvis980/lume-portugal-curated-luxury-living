@@ -1,5 +1,5 @@
 // frontend/src/pages/admin/AdminListingForm.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -7,6 +7,7 @@ import {
   type ListingTranslatableField,
 } from "@/lib/admin-api";
 import { getToken } from "@/lib/admin-api";
+import { useUnsavedChanges } from "./UnsavedChangesContext";
 
 // ─── Locale config ────────────────────────────────────────────────────────────
 
@@ -103,6 +104,9 @@ export default function AdminListingForm() {
   const [form, setForm] = useState(emptyForm());
   const [error, setError] = useState("");
   const [activeSection, setActiveSection] = useState("basics");
+  const [formDirty, setFormDirty] = useState(false);
+
+  const { setDirty, registerSaveHandler, unregisterSaveHandler } = useUnsavedChanges();
 
   // ── Fetch existing listing (edit mode) ────────────────────────────────────
   const { data: existing } = useQuery({
@@ -143,10 +147,14 @@ export default function AdminListingForm() {
         (f as any)[key] = val; // handles _i18n JSONB objects directly
     });
     setForm(f);
+    setFormDirty(false); // reset — this was a DB load, not a user edit
   }, [existing]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
-  const set = (k: string, v: any) => setForm((prev) => ({ ...prev, [k]: v }));
+  const set = (k: string, v: any) => {
+    setForm((prev) => ({ ...prev, [k]: v }));
+    setFormDirty(true);
+  };
   const toggleView = (v: string) =>
     set("views", form.views.includes(v) ? form.views.filter((x) => x !== v) : [...form.views, v]);
   const toggleNearby = (v: string) =>
@@ -156,19 +164,8 @@ export default function AdminListingForm() {
   const needsFloor = NEEDS_FLOOR.includes(form.property_type);
   const needsPlot  = NEEDS_PLOT.includes(form.property_type);
 
-  // ── Save ──────────────────────────────────────────────────────────────────
-  const saveMutation = useMutation({
-    mutationFn: (payload: Record<string, unknown>) =>
-      isEdit ? updateListing(id!, payload) : createListing(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-listings"] });
-      navigate("/admin/listings");
-    },
-    onError: (err: Error) => setError(err.message),
-  });
-
-  const handleSave = () => {
-    setError("");
+  // ── Build payload (extracted so it can be called from modal save handler) ──
+  const buildPayload = useCallback((): Record<string, unknown> => {
     const payload: Record<string, unknown> = {};
 
     // Strings
@@ -221,8 +218,44 @@ export default function AdminListingForm() {
       ? form.gallery.split(",").map((s: string) => s.trim()).filter(Boolean)
       : [];
 
-    saveMutation.mutate(payload);
+    return payload;
+  }, [form]);
+
+  // ── Save mutation ─────────────────────────────────────────────────────────
+  // onSuccess does NOT navigate — callers handle navigation explicitly so we
+  // can reuse mutateAsync from the modal without double-navigating.
+  const saveMutation = useMutation({
+    mutationFn: (payload: Record<string, unknown>) =>
+      isEdit ? updateListing(id!, payload) : createListing(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-listings"] });
+      setFormDirty(false);
+    },
+    onError: (err: Error) => setError(err.message),
+  });
+
+  // Save button handler — saves then navigates to listings
+  const handleSave = () => {
+    setError("");
+    saveMutation.mutate(buildPayload(), {
+      onSuccess: () => navigate("/admin/listings"),
+    });
   };
+
+  // ── Register dirty state + save handler with global context ───────────────
+  useEffect(() => {
+    setDirty("listing-form", formDirty);
+  }, [formDirty]); // eslint-disable-line
+
+  useEffect(() => {
+    // Modal's "Save & Leave" calls this — saves without navigating (modal does blocker.proceed)
+    registerSaveHandler("listing-form", async () => {
+      await saveMutation.mutateAsync(buildPayload());
+    });
+    return () => unregisterSaveHandler("listing-form");
+  }, [buildPayload]); // eslint-disable-line
+
+
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (

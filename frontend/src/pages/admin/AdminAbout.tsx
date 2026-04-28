@@ -22,6 +22,7 @@ import {
   type Locale,
   type TeamMember,
 } from "@/lib/admin-api";
+import { useUnsavedChanges } from "./UnsavedChangesContext";
 
 // ─── Locale config ────────────────────────────────────────────────────────────
 
@@ -180,7 +181,7 @@ export default function AdminAbout() {
             ↺ Translate
           </span>{" "}
           on any field to auto-fill the other languages via DeepL.
-          Changes are saved automatically when you leave a field.
+          The Save button activates when you make changes to a field.
         </p>
       </div>
 
@@ -205,19 +206,25 @@ export default function AdminAbout() {
         <div className="py-20 text-center text-sm text-admin-text-muted">Loading…</div>
       ) : (
         <>
-          {/* ── Content fields for current section ── */}
-          <div className="space-y-6">
-            {currentSection.fields.map((field) => (
-              <TranslationField
-                key={field.key}
-                label={field.label}
-                hint={field.hint}
-                row={aboutMap[field.key]}
-                rows={field.rows}
-                onSaved={invalidateAll}
-              />
-            ))}
-          </div>
+          {/* ── Content fields — all sections always mounted, inactive ones hidden ── */}
+          {/* Keeping them mounted preserves dirty state when switching tabs.          */}
+          {SECTIONS.map((section) => (
+            <div
+              key={section.id}
+              className={activeSection === section.id ? "space-y-6" : "hidden"}
+            >
+              {section.fields.map((field) => (
+                <TranslationField
+                  key={field.key}
+                  label={field.label}
+                  hint={field.hint}
+                  row={aboutMap[field.key]}
+                  rows={field.rows}
+                  onSaved={invalidateAll}
+                />
+              ))}
+            </div>
+          ))}
 
           {/* ── Team members (only shown in "team" section) ── */}
           {activeSection === "team" && (
@@ -289,7 +296,9 @@ export default function AdminAbout() {
 }
 
 // ─── TranslationField ─────────────────────────────────────────────────────────
-// Reusable locale-tab field with auto-save on blur and DeepL translate button.
+// Locale-tab field with explicit Save button (always visible, muted when clean)
+// and DeepL translate button. Registers dirty state + save handler with the
+// global UnsavedChangesContext so AdminLayout can intercept navigation.
 
 interface TranslationFieldProps {
   label: string;
@@ -307,14 +316,20 @@ function TranslationField({ label, hint, row, rows, onSaved }: TranslationFieldP
   const [savedFlash, setSavedFlash] = useState(false);
   const [error, setError] = useState("");
 
+  const { setDirty, registerSaveHandler, unregisterSaveHandler } = useUnsavedChanges();
+
+  // Unique key for this field in the context (row.id once loaded, else label)
+  const contextKey = row?.id ?? `pending:${label}`;
+
   // Sync localValue when row or locale changes
   const storedValue = row?.[locale] ?? "";
   useEffect(() => { setLocalValue(storedValue); }, [storedValue, locale]);
 
   const isDirty = localValue !== storedValue;
 
-  const handleBlur = async () => {
-    if (!row || !isDirty) return;
+  // ── Save handler ──────────────────────────────────────────────────────────
+  const handleSave = async () => {
+    if (!row) return;
     setSaving(true);
     setError("");
     try {
@@ -322,20 +337,42 @@ function TranslationField({ label, hint, row, rows, onSaved }: TranslationFieldP
       onSaved();
       setSavedFlash(true);
       setTimeout(() => setSavedFlash(false), 1500);
+      setDirty(contextKey, false);
     } catch (e: any) {
       setError(e.message || "Save failed");
+      throw e; // re-throw so saveAll() in context can catch
     } finally {
       setSaving(false);
     }
   };
 
+  // ── Register / unregister with global context ─────────────────────────────
+  // Re-register whenever localValue or locale changes so the handler always
+  // captures the latest unsaved text.
+  useEffect(() => {
+    if (!row) return;
+    registerSaveHandler(contextKey, handleSave);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextKey, localValue, locale, row?.id]);
+
+  useEffect(() => {
+    if (!row) return;
+    setDirty(contextKey, isDirty);
+  }, [contextKey, isDirty, row?.id]); // eslint-disable-line
+
+  // Cleanup on unmount — unregister handler but PRESERVE dirty state in context
+  // so switching sections doesn't lose the "you have unsaved changes" flag.
+  useEffect(() => {
+    return () => { if (row) unregisterSaveHandler(row.id); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [row?.id]);
+
+  // ── Translate ─────────────────────────────────────────────────────────────
   const handleTranslate = async () => {
     if (!row) return;
-    // If dirty, save first so DeepL uses the latest text
     if (isDirty) {
-      try {
-        await updateTranslation(row.id, { [locale]: localValue });
-      } catch { /* ignore — translate will still work with stored value */ }
+      try { await updateTranslation(row.id, { [locale]: localValue }); }
+      catch { /* ignore */ }
     }
     setTranslating(true);
     setError("");
@@ -344,6 +381,7 @@ function TranslationField({ label, hint, row, rows, onSaved }: TranslationFieldP
       onSaved();
       setSavedFlash(true);
       setTimeout(() => setSavedFlash(false), 1500);
+      setDirty(contextKey, false);
     } catch (e: any) {
       setError(e.message || "Translation failed");
     } finally {
@@ -356,7 +394,7 @@ function TranslationField({ label, hint, row, rows, onSaved }: TranslationFieldP
 
   return (
     <div>
-      {/* Header: label + locale tabs + status + translate */}
+      {/* Header: label + locale tabs + status + buttons */}
       <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2 min-h-[24px]">
         <div>
           <label className="text-xs font-medium text-admin-text-secondary">{label}</label>
@@ -386,14 +424,25 @@ function TranslationField({ label, hint, row, rows, onSaved }: TranslationFieldP
             </button>
           ))}
 
-          {/* Status */}
+          {/* Status flash */}
           <span className="ml-1 min-w-[44px] text-[10px] text-admin-text-muted text-right">
-            {translating ? "Translating…"
-              : saving ? "Saving…"
-              : savedFlash ? "✓ Saved"
-              : isDirty ? "Unsaved"
-              : ""}
+            {translating ? "Translating…" : saving ? "Saving…" : savedFlash ? "✓ Saved" : ""}
           </span>
+
+          {/* Save button — always visible; muted/disabled when nothing to save */}
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving || !row || !isDirty}
+            title={isDirty ? "Save this field" : "No unsaved changes"}
+            className={`ml-1 rounded border px-2 py-0.5 text-[11px] font-medium transition ${
+              isDirty
+                ? "border-admin-btn bg-admin-btn text-white hover:bg-admin-btn-hover"
+                : "border-admin-border bg-transparent text-admin-text-muted opacity-50 cursor-default"
+            }`}
+          >
+            {saving ? "Saving…" : "Save"}
+          </button>
 
           {/* Translate button */}
           <button
@@ -413,11 +462,10 @@ function TranslationField({ label, hint, row, rows, onSaved }: TranslationFieldP
         </div>
       </div>
 
-      {/* Textarea */}
+      {/* Textarea — accent border when dirty */}
       <textarea
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
-        onBlur={handleBlur}
         rows={rows}
         placeholder={
           !row
@@ -427,7 +475,9 @@ function TranslationField({ label, hint, row, rows, onSaved }: TranslationFieldP
               : "English text…"
         }
         disabled={!row}
-        className="w-full resize-y rounded-md border border-admin-border bg-admin-surface px-3 py-2 text-sm text-admin-text placeholder-admin-text-muted outline-none transition focus:border-admin-text-muted disabled:opacity-50"
+        className={`w-full resize-y rounded-md border px-3 py-2 text-sm text-admin-text placeholder-admin-text-muted outline-none transition focus:border-admin-text-muted disabled:opacity-50 bg-admin-surface ${
+          isDirty ? "border-admin-accent/60" : "border-admin-border"
+        }`}
       />
 
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
