@@ -75,19 +75,19 @@ const AboutPage = () => {
       </section>
 
       {/* ── Intro ────────────────────────────────────────────────────────── */}
-      <section className="section-padding bg-background">
+      <section className="px-6 md:px-10 lg:px-16 py-14 md:py-20 bg-background">
         <div className="max-w-3xl mx-auto">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="font-display text-xl md:text-2xl font-light text-foreground italic leading-relaxed"
+            className="font-display text-2xl md:text-3xl font-light text-foreground italic leading-relaxed"
           >
             {t("about", "tagline")}
           </motion.p>
 
-          <div className="mt-10 space-y-5 text-base text-muted-foreground leading-relaxed">
+          <div className="mt-8 space-y-5 text-lg text-muted-foreground leading-relaxed">
             <p>{t("about", "intro_p1")}</p>
             <p>{t("about", "intro_p2")}</p>
             <p>{t("about", "intro_p3")}</p>
@@ -96,42 +96,42 @@ const AboutPage = () => {
       </section>
 
       {/* ── What we do ───────────────────────────────────────────────────── */}
-      <section className="section-padding bg-card">
+      <section className="px-6 md:px-10 lg:px-16 py-14 md:py-20 bg-card">
         <div className="max-w-3xl mx-auto">
-          <h2 className="font-display text-3xl md:text-4xl font-light text-foreground mb-4">
+          <h2 className="font-display text-4xl md:text-5xl font-light text-foreground mb-4">
             {t("about", "what_we_do_title", "What we do")}
           </h2>
-          <div className="w-12 h-px bg-primary mb-8" />
+          <div className="w-12 h-px bg-primary mb-6" />
 
-          <p className="text-base text-foreground mb-6">
+          <p className="text-lg text-foreground mb-5">
             {t("about", "what_we_do_lead", "LUME connects three layers:")}
           </p>
 
-          <ul className="space-y-4 mb-8">
+          <ul className="space-y-4 mb-6">
             {["homes", "living", "collecting"].map((k) => (
               <li
                 key={k}
-                className="pl-5 border-l border-primary/40 text-base text-muted-foreground leading-relaxed"
+                className="pl-5 border-l border-primary/40 text-lg text-muted-foreground leading-relaxed"
               >
                 {t("about", `what_we_do_${k}`)}
               </li>
             ))}
           </ul>
 
-          <p className="text-base text-muted-foreground italic">
+          <p className="text-lg text-muted-foreground italic">
             {t("about", "what_we_do_outro")}
           </p>
         </div>
       </section>
 
       {/* ── How we work ──────────────────────────────────────────────────── */}
-      <section className="section-padding bg-background">
+      <section className="px-6 md:px-10 lg:px-16 py-14 md:py-20 bg-background">
         <div className="max-w-3xl mx-auto">
-          <h2 className="font-display text-3xl md:text-4xl font-light text-foreground mb-4">
+          <h2 className="font-display text-4xl md:text-5xl font-light text-foreground mb-4">
             {t("about", "how_we_work_title", "How we work")}
           </h2>
-          <div className="w-12 h-px bg-primary mb-8" />
-          <div className="space-y-5 text-base text-muted-foreground leading-relaxed">
+          <div className="w-12 h-px bg-primary mb-6" />
+          <div className="space-y-5 text-lg text-muted-foreground leading-relaxed">
             <p>{t("about", "how_we_work_p1")}</p>
             <p>{t("about", "how_we_work_p2")}</p>
             <p>{t("about", "how_we_work_p3")}</p>
@@ -140,13 +140,13 @@ const AboutPage = () => {
       </section>
 
       {/* ── Why LUME ─────────────────────────────────────────────────────── */}
-      <section className="section-padding bg-card">
+      <section className="px-6 md:px-10 lg:px-16 py-14 md:py-20 bg-card">
         <div className="max-w-3xl mx-auto">
-          <h2 className="font-display text-3xl md:text-4xl font-light text-foreground mb-4">
+          <h2 className="font-display text-4xl md:text-5xl font-light text-foreground mb-4">
             {t("about", "why_lume_title", "Why LUME")}
           </h2>
-          <div className="w-12 h-px bg-primary mb-8" />
-          <div className="space-y-5 text-base text-muted-foreground leading-relaxed">
+          <div className="w-12 h-px bg-primary mb-6" />
+          <div className="space-y-5 text-lg text-muted-foreground leading-relaxed">
             <p>{t("about", "why_lume_p1")}</p>
             <p>{t("about", "why_lume_p2")}</p>
           </div>
@@ -154,29 +154,29 @@ const AboutPage = () => {
       </section>
 
       {/* ── Our goal ─────────────────────────────────────────────────────── */}
-      <section className="section-padding bg-background">
+      <section className="px-6 md:px-10 lg:px-16 py-14 md:py-20 bg-background">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-light text-foreground mb-4">
+          <h2 className="font-display text-4xl md:text-5xl font-light text-foreground mb-4">
             {t("about", "goal_title", "Our goal")}
           </h2>
-          <div className="w-12 h-px bg-primary mb-8 mx-auto" />
-          <p className="font-display text-xl md:text-2xl font-light text-foreground italic leading-relaxed mb-4">
+          <div className="w-12 h-px bg-primary mb-6 mx-auto" />
+          <p className="font-display text-2xl md:text-3xl font-light text-foreground italic leading-relaxed mb-4">
             {t("about", "goal_p1")}
           </p>
-          <p className="text-base text-muted-foreground">
+          <p className="text-lg text-muted-foreground">
             {t("about", "goal_p2")}
           </p>
         </div>
       </section>
 
       {/* ── Team ─────────────────────────────────────────────────────────── */}
-      <section className="section-padding bg-card">
+      <section className="px-6 md:px-10 lg:px-16 py-14 md:py-20 bg-card">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">
               {t("about", "team_eyebrow", "Founders & Curators")}
             </p>
-            <h2 className="font-display text-3xl md:text-5xl font-light text-foreground">
+            <h2 className="font-display text-4xl md:text-5xl font-light text-foreground">
               {t("about", "team_title", "The people behind LUME")}
             </h2>
           </div>
@@ -236,7 +236,7 @@ function FounderCard({ member, index }: { member: TeamMember; index: number }) {
         </p>
       )}
       {bio && (
-        <p className="text-xs text-muted-foreground leading-relaxed">
+        <p className="text-sm text-muted-foreground leading-relaxed">
           {bio}
         </p>
       )}
