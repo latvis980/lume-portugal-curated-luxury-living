@@ -160,7 +160,7 @@ def _merge_locale(row: Dict[str, Any], locale: str, i18n_fields: tuple) -> Dict[
     return merged
 
 
-def get_property_by_slug(slug: str) -> Optional[Dict[str, Any]]:
+def get_property_by_slug(slug: str, locale: str = "en") -> Optional[Dict[str, Any]]:
     """Fetch a single available listing by its URL slug."""
     try:
         client = _get_client()
@@ -172,13 +172,14 @@ def get_property_by_slug(slug: str) -> Optional[Dict[str, Any]]:
             .limit(1)
             .execute()
         )
-        return result.data[0] if result.data else None
+        row = result.data[0] if result.data else None
+        return _merge_locale(row, locale, _I18N_LISTING_FIELDS) if row else None
     except Exception as e:
         print(f"[DB] Error fetching listing {slug}: {e}")
         return None
 
 
-def get_featured_properties(limit: int = 30) -> List[Dict[str, Any]]:
+def get_featured_properties(limit: int = 30, locale: str = "en") -> List[Dict[str, Any]]:
     """Fetch featured/available listings for the listings page and SEO."""
     try:
         client = _get_client()
@@ -191,7 +192,8 @@ def get_featured_properties(limit: int = 30) -> List[Dict[str, Any]]:
             .limit(limit)
             .execute()
         )
-        return result.data or []
+        rows = result.data or []
+        return [_merge_locale(r, locale, _I18N_LISTING_FIELDS) for r in rows]
     except Exception as e:
         print(f"[DB] Error fetching featured listings: {e}")
         return []
@@ -214,6 +216,7 @@ def get_all_property_slugs() -> List[Dict[str, Any]]:
 
 
 def query_properties(
+    locale: str = "en",
     region: Optional[str] = None,
     city: Optional[str] = None,
     area: Optional[str] = None,
@@ -326,7 +329,11 @@ def query_properties(
             data_q = data_q.order("featured", desc=True).order("published_at", desc=True)
 
         result = data_q.range(offset, offset + limit - 1).execute()
-        return {"items": result.data or [], "total": total}
+        rows = result.data or []
+        return {
+            "items": [_merge_locale(r, locale, _I18N_LISTING_FIELDS) for r in rows],
+            "total": total,
+        }
 
     except Exception as e:
         print(f"[DB] Error querying listings: {e}")
@@ -532,8 +539,8 @@ def get_service_by_slug(slug: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def get_all_services() -> List[Dict[str, Any]]:
-    """Fetch all active services."""
+def get_all_services(locale: str = "en") -> List[Dict[str, Any]]:
+    """Fetch all active services, merged for the given locale."""
     try:
         client = _get_client()
         result = (
@@ -544,7 +551,8 @@ def get_all_services() -> List[Dict[str, Any]]:
             .order("sort_order")
             .execute()
         )
-        return result.data or []
+        rows = result.data or []
+        return [_merge_locale(r, locale, _I18N_SERVICE_FIELDS) for r in rows]
     except Exception as e:
         print(f"[DB] Error fetching services: {e}")
         return []

@@ -2,12 +2,17 @@
 /**
  * Public API client for the LUME frontend.
  * Fetches data from /api/properties, /api/locations, etc.
+ *
+ * Phase 4 — locale-awareness:
+ * All content fetches now accept a `locale` param (e.g. "ru", "pt_br").
+ * The backend merges translations server-side, so the response shapes
+ * are unchanged — title is always a string, never a JSONB object.
  */
 
 export interface Listing {
   id: string;
   reference: string;
-  title: string;
+  title: string;          // already merged to the requested locale by the backend
   slug: string;
 
   // Classification
@@ -94,7 +99,7 @@ export interface Listing {
   concierge?: boolean | null;
   furnished?: boolean | null;
 
-  // Content
+  // Content (already locale-merged by backend)
   lifestyle_tags: string[];
   short_description: string;
   full_description?: string | null;
@@ -121,8 +126,16 @@ export interface Listing {
   updated_at: string;
 }
 
-export async function fetchListingBySlug(slug: string): Promise<Listing | null> {
-  const res = await fetch(`/api/properties/${encodeURIComponent(slug)}`);
+/**
+ * Fetch a single listing by slug.
+ * Pass the current locale so the backend returns translated content.
+ */
+export async function fetchListingBySlug(
+  slug: string,
+  locale = "en",
+): Promise<Listing | null> {
+  const params = locale && locale !== "en" ? `?locale=${locale}` : "";
+  const res = await fetch(`/api/properties/${encodeURIComponent(slug)}${params}`);
   if (!res.ok) return null;
   const data = await res.json();
   if (data.error) return null;
@@ -132,31 +145,40 @@ export async function fetchListingBySlug(slug: string): Promise<Listing | null> 
 // ─── Listings query (Properties page) ────────────────────────────────────────
 
 export interface ListingsQuery {
-  // Location cascade
+  // ── Locale (Phase 4) ──────────────────────────────────────────────────────
+  locale?: string;          // "en" | "pt_br" | "ru" | "es"
+
+  // ── Location cascade ───────────────────────────────────────────────────────
   region?: string;
   city?: string;
   area?: string;
   lifestyle?: string;
-  // Classification
-  type?: string;           // property_type
-  listing_type?: string;   // sale | rent
-  // Price
+
+  // ── Classification ─────────────────────────────────────────────────────────
+  type?: string;            // property_type
+  listing_type?: string;    // sale | rent
+
+  // ── Price ──────────────────────────────────────────────────────────────────
   min_price?: number;
   max_price?: number;
-  // Rooms
+
+  // ── Rooms ──────────────────────────────────────────────────────────────────
   min_bedrooms?: number;
   max_bedrooms?: number;
   min_bathrooms?: number;
   max_bathrooms?: number;
-  // Area m²
+
+  // ── Area m² ────────────────────────────────────────────────────────────────
   min_area?: number;
   max_area?: number;
-  // Extras
+
+  // ── Extras ─────────────────────────────────────────────────────────────────
   condition?: string;
-  views?: string[];         // comma-joined before sending
-  features?: string[];      // comma-joined before sending
+  views?: string[];
+  features?: string[];
   featured_only?: boolean;
-  // Sort & page
+
+  // ── Sort & page ────────────────────────────────────────────────────────────
   sort_by?: "featured" | "newest" | "price_asc" | "price_desc";
   limit?: number;
   offset?: number;
@@ -169,14 +191,24 @@ export interface ListingsResponse {
   offset: number;
 }
 
-export async function fetchListings(params: ListingsQuery = {}): Promise<ListingsResponse> {
+/**
+ * Fetch listings with full filter support.
+ * Pass locale in params so the backend returns translated content.
+ */
+export async function fetchListings(
+  params: ListingsQuery = {},
+): Promise<ListingsResponse> {
   const q = new URLSearchParams();
-  if (params.region)        q.set("region",         params.region);
-  if (params.city)          q.set("city",            params.city);
-  if (params.area)          q.set("area",            params.area);
-  if (params.lifestyle)     q.set("lifestyle",        params.lifestyle); 
-  if (params.type)          q.set("type",            params.type);
-  if (params.listing_type)  q.set("listing_type",    params.listing_type);
+
+  // Locale — skip if "en" (backend defaults to English)
+  if (params.locale && params.locale !== "en") q.set("locale", params.locale);
+
+  if (params.region)       q.set("region",        params.region);
+  if (params.city)         q.set("city",           params.city);
+  if (params.area)         q.set("area",           params.area);
+  if (params.lifestyle)    q.set("lifestyle",       params.lifestyle);
+  if (params.type)         q.set("type",           params.type);
+  if (params.listing_type) q.set("listing_type",   params.listing_type);
   if (params.min_price  != null) q.set("min_price",  String(params.min_price));
   if (params.max_price  != null) q.set("max_price",  String(params.max_price));
   if (params.min_bedrooms  != null) q.set("min_bedrooms",  String(params.min_bedrooms));
@@ -185,11 +217,11 @@ export async function fetchListings(params: ListingsQuery = {}): Promise<Listing
   if (params.max_bathrooms != null) q.set("max_bathrooms", String(params.max_bathrooms));
   if (params.min_area != null) q.set("min_area", String(params.min_area));
   if (params.max_area != null) q.set("max_area", String(params.max_area));
-  if (params.condition)     q.set("condition",       params.condition);
-  if (params.views?.length) q.set("views",           params.views.join(","));
-  if (params.features?.length) q.set("features",     params.features.join(","));
-  if (params.featured_only) q.set("featured_only",   "true");
-  if (params.sort_by)       q.set("sort_by",         params.sort_by);
+  if (params.condition)    q.set("condition",      params.condition);
+  if (params.views?.length)    q.set("views",    params.views.join(","));
+  if (params.features?.length) q.set("features", params.features.join(","));
+  if (params.featured_only)    q.set("featured_only", "true");
+  if (params.sort_by)      q.set("sort_by",        params.sort_by);
   if (params.limit  != null) q.set("limit",  String(params.limit));
   if (params.offset != null) q.set("offset", String(params.offset));
 
@@ -199,14 +231,39 @@ export async function fetchListings(params: ListingsQuery = {}): Promise<Listing
   return res.json();
 }
 
+// ─── Public services ──────────────────────────────────────────────────────────
+
+export interface PublicService {
+  id: string;
+  title: string;    // locale-merged by backend
+  subtitle?: string | null;
+  description?: string | null;
+  category: string;
+  icon?: string | null;
+  sort_order: number;
+  is_active: boolean;
+}
+
+/**
+ * Fetch active services.
+ * Pass locale so the backend returns translated titles and descriptions.
+ */
+export async function fetchPublicServices(locale = "en"): Promise<PublicService[]> {
+  const params = locale && locale !== "en" ? `?locale=${locale}` : "";
+  const res = await fetch(`/api/services${params}`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data?.services ?? [];
+}
+
 // ─── Facets — populate filter dropdowns + slider bounds ──────────────────────
 
 export interface PropertyFacets {
   regions: string[];
-  all_cities: string[];                         
+  all_cities: string[];
   cities_by_region: Record<string, string[]>;
   areas_by_city: Record<string, string[]>;
-  areas_by_region: Record<string, string[]>;   
+  areas_by_region: Record<string, string[]>;
   property_types: string[];
   listing_types: string[];
   price_range: { min: number; max: number };
@@ -222,7 +279,6 @@ export async function fetchPropertyFacets(): Promise<PropertyFacets | null> {
     const res = await fetch("/api/properties/facets");
     if (!res.ok) return null;
     const data = await res.json();
-    // If backend returned an error body, treat as null
     if (data?.error || !data?.cities_by_region) return null;
     return data as PropertyFacets;
   } catch {

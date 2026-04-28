@@ -6,7 +6,12 @@ Includes:
 - robots.txt (search engine crawl rules)
 - llms.txt (LLM discovery — helps ChatGPT/Claude understand the site)
 - sitemap.xml (dynamic sitemap from Supabase data)
-- Public API endpoints for listings
+- Public API endpoints for listings and services
+
+Phase 4 — locale-awareness:
+  All content endpoints now accept an optional ?locale=ru|es|pt_br|en
+  parameter. The backend merges the appropriate _i18n translation into
+  the base fields before returning, so the response shape is unchanged.
 """
 
 import os
@@ -44,11 +49,6 @@ def generate_slug(text: str) -> str:
 
 @router.get("/robots.txt", response_class=PlainTextResponse)
 async def robots():
-    """
-    Search engine crawl rules.
-    
-    Allows all crawlers, points to sitemap, blocks admin pages.
-    """
     content = f"""User-agent: *
 Allow: /
 Disallow: /admin
@@ -72,19 +72,12 @@ Allow: /
     return PlainTextResponse(content=content, media_type="text/plain")
 
 
-
 # ---------------------------------------------------------------------------
 # llms.txt — LLM-readable site description
 # ---------------------------------------------------------------------------
 
 @router.get("/llms.txt", response_class=PlainTextResponse)
 async def llms_txt():
-    """
-    LLM discovery file.
-
-    Helps AI assistants (ChatGPT, Claude, Perplexity) understand
-    what this site offers and how to navigate it.
-    """
     content = f"""# LUME by Mark — Homes, Life in Portugal & Art & Antiques Advisory
 
 > LUME by Mark helps discerning individuals find their home, build their
@@ -138,23 +131,15 @@ async def llms_txt():
 
 @router.get("/sitemap.xml")
 async def sitemap():
-    """
-    Dynamic XML sitemap generated from Supabase data.
-    
-    Includes all property listings, location pages, service pages,
-    and static pages with appropriate priority levels.
-    """
     today = date.today().isoformat()
-
     urls = []
 
-    # Static pages
     static_pages = [
-        ("/", "1.0", "daily"),
+        ("/",           "1.0", "daily"),
         ("/properties", "0.9", "daily"),
-        ("/services", "0.7", "weekly"),
-        ("/about", "0.5", "monthly"),
-        ("/contact", "0.5", "monthly"),
+        ("/services",   "0.7", "weekly"),
+        ("/about",      "0.5", "monthly"),
+        ("/contact",    "0.5", "monthly"),
         ("/investment", "0.7", "weekly"),
     ]
     for path, priority, freq in static_pages:
@@ -168,7 +153,6 @@ async def sitemap():
             f"</url>"
         )
 
-    # Dynamic property pages from database
     try:
         from database import get_all_property_slugs
         slugs = get_all_property_slugs() or []
@@ -190,7 +174,6 @@ async def sitemap():
     except Exception as e:
         print(f"[Sitemap] Error fetching property slugs: {e}")
 
-    # Dynamic location pages
     try:
         from database import get_all_location_slugs
         loc_slugs = get_all_location_slugs() or []
@@ -213,7 +196,6 @@ async def sitemap():
         + "\n".join(urls)
         + "\n</urlset>"
     )
-
     return Response(content=xml, media_type="application/xml")
 
 
@@ -225,8 +207,8 @@ async def sitemap():
 async def get_property_facets():
     """
     Return all distinct filter values present in live listings.
-    Used to populate cascading dropdowns and slider bounds on the
-    Properties page. Cached by the client — call once on page load.
+    Used to populate cascading dropdowns and slider bounds.
+    Facets are locale-independent (they're filter values, not display text).
     """
     try:
         from database import get_property_facets
@@ -237,37 +219,48 @@ async def get_property_facets():
 
 @router.get("/properties")
 async def list_properties(
-    # Location cascade
+    # ── Locale (Phase 4) ────────────────────────────────────────────────────
+    locale:          Optional[str]   = Query(None, description="en | pt_br | ru | es"),
+
+    # ── Location cascade ─────────────────────────────────────────────────────
     region:          Optional[str]   = Query(None),
     city:            Optional[str]   = Query(None),
     area:            Optional[str]   = Query(None),
-    lifestyle:       Optional[str]   = Query(None, description="ocean | city | countryside | wine_region"),  # ← here
+    lifestyle:       Optional[str]   = Query(None, description="ocean | city | countryside | wine_region"),
 
-    # Property classification
+    # ── Property classification ───────────────────────────────────────────────
     type:            Optional[str]   = Query(None, description="property_type enum"),
     listing_type:    Optional[str]   = Query(None, description="sale | rent"),
-    # Price range
+
+    # ── Price range ───────────────────────────────────────────────────────────
     min_price:       Optional[float] = Query(None),
     max_price:       Optional[float] = Query(None),
-    # Rooms
+
+    # ── Rooms ─────────────────────────────────────────────────────────────────
     min_bedrooms:    Optional[int]   = Query(None),
     max_bedrooms:    Optional[int]   = Query(None),
     min_bathrooms:   Optional[int]   = Query(None),
     max_bathrooms:   Optional[int]   = Query(None),
-    # Area (m²)
+
+    # ── Area (m²) ─────────────────────────────────────────────────────────────
     min_area:        Optional[float] = Query(None),
     max_area:        Optional[float] = Query(None),
-    # Condition & features
+
+    # ── Condition & features ──────────────────────────────────────────────────
     condition:       Optional[str]   = Query(None),
     views:           Optional[str]   = Query(None, description="Comma-separated view types"),
     features:        Optional[str]   = Query(None, description="Comma-separated boolean feature columns"),
     featured_only:   bool            = Query(False),
-    # Sorting & pagination
+
+    # ── Sorting & pagination ──────────────────────────────────────────────────
     sort_by:         str             = Query("featured", description="featured | newest | price_asc | price_desc"),
     limit:           int             = Query(24, ge=1, le=100),
     offset:          int             = Query(0, ge=0),
 ):
-    """List properties with full filter support."""
+    """
+    List properties with full filter support.
+    Pass ?locale=ru to receive translated titles and descriptions.
+    """
     try:
         from database import query_properties
 
@@ -275,6 +268,7 @@ async def list_properties(
         features_list = [f.strip() for f in features.split(",") if f.strip()] if features else None
 
         result = query_properties(
+            locale=locale or "en",
             region=region,
             city=city,
             area=area,
@@ -306,31 +300,44 @@ async def list_properties(
     except Exception as e:
         return {"properties": [], "total": 0, "error": str(e)}
 
+
 @router.get("/properties/{slug}")
-async def get_property(slug: str):
-    """Fetch a single available listing by its URL slug."""
+async def get_property(
+    slug: str,
+    locale: Optional[str] = Query(None, description="en | pt_br | ru | es"),
+):
+    """
+    Fetch a single available listing by its URL slug.
+    Pass ?locale=ru to receive translated title and descriptions.
+    """
     try:
         from database import get_property_by_slug
-        listing = get_property_by_slug(slug)
+        listing = get_property_by_slug(slug, locale=locale or "en")
         if not listing:
             from fastapi import HTTPException
             raise HTTPException(status_code=404, detail="Property not found")
         return listing
     except Exception as e:
         from fastapi import HTTPException
-        # Re-raise HTTP exceptions (like our 404) as-is
         if hasattr(e, "status_code"):
             raise
         return {"error": str(e)}
 
+
 @router.get("/services")
-async def list_services_public():
-    """List all active services, grouped by category."""
+async def list_services_public(
+    locale: Optional[str] = Query(None, description="en | pt_br | ru | es"),
+):
+    """
+    List all active services, grouped by category.
+    Pass ?locale=ru to receive translated service titles and descriptions.
+    """
     try:
         from database import get_all_services
-        return {"services": get_all_services()}
+        return {"services": get_all_services(locale=locale or "en")}
     except Exception as e:
         return {"services": [], "error": str(e)}
+
 
 @router.get("/locations")
 async def list_locations():

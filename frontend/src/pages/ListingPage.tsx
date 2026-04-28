@@ -45,6 +45,7 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { fetchListingBySlug, type Listing } from "@/lib/public-api";
+import { useI18n } from "@/lib/i18n";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────
 
@@ -486,6 +487,7 @@ function EnquirySidebar({ listing }: { listing: Listing }) {
 
 export default function ListingPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { locale } = useI18n();
   const navigate = useNavigate();
   const [galleryOpen, setGalleryOpen] = useState<number | null>(null);
 
@@ -494,9 +496,8 @@ export default function ListingPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["listing", slug],
-    queryFn: () => fetchListingBySlug(slug!),
-    enabled: !!slug,
+    queryKey: ["listing", slug, locale],   // ← locale added to key
+    queryFn: () => fetchListingBySlug(slug!, locale),  // ← pass locale
   });
 
   // Scroll to top on mount

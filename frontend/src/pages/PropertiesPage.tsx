@@ -13,6 +13,7 @@ import {
   fetchListings, fetchPropertyFacets,
   type ListingsQuery, type PropertyFacets, type Listing,
 } from "@/lib/public-api";
+import { useI18n } from "@/lib/i18n";
 
 const PAGE_SIZE = 24;
 
@@ -244,6 +245,7 @@ function FilterChips({ filters, onRemove }: {
 
 export default function PropertiesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { locale } = useI18n();
   const [filters, setFilters] = useState<Filters>(() => searchParamsToFilters(searchParams));
   const [draftFilters, setDraftFilters] = useState<Filters>(filters);
   const [page, setPage] = useState(0);
@@ -267,8 +269,8 @@ export default function PropertiesPage() {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["listings", filters, page],
-    queryFn: () => fetchListings(filtersToQuery(filters, page * PAGE_SIZE)),
+    queryKey: ["listings", filters, page, locale],
+    queryFn: () => fetchListings({ ...filtersToQuery(filters, page * PAGE_SIZE), locale }),
     placeholderData: keepPreviousData,
   });
 

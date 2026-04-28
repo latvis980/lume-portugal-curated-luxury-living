@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchListings, type Listing } from "@/lib/public-api";
 import { answersToQuery, type QuestionnaireAnswers } from "@/lib/questionnaire-filter";
+import { useI18n } from "@/lib/i18n";
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -75,11 +76,12 @@ interface ListingsSectionProps {
 const ListingsSection = ({ answers }: ListingsSectionProps) => {
   // Build the query from answers. If answers is null/undefined, use defaults.
   const queryParams = answers ? answersToQuery(answers) : { limit: 6 };
+  const { locale } = useI18n();  // ← add this
 
   // TanStack query — re-fetches automatically when answers change
   const { data, isLoading } = useQuery({
-    queryKey: ["public-listings", queryParams],
-    queryFn: () => fetchListings(queryParams),
+    queryKey: ["public-listings", queryParams, locale],
+    queryFn: () => fetchListings({ ...queryParams, locale }),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 

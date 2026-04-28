@@ -5,6 +5,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Scale, Heart, Home, TrendingUp, LucideIcon } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
+import { fetchPublicServices } from "@/lib/public-api";
 
 const CATEGORY_META: Record<
   string,
@@ -16,28 +18,16 @@ const CATEGORY_META: Record<
   investment_advisory: { label: "Investment Advisory",  icon: TrendingUp,  order: 3 },
 };
 
-interface Service {
-  id: string;
-  title: string;
-  category: string;
-  sort_order: number;
-  is_active: boolean;
-}
-
-async function fetchPublicServices(): Promise<{ services: Service[] }> {
-  const res = await fetch("/api/services");
-  if (!res.ok) throw new Error("Failed to load services");
-  return res.json();
-}
-
 const ServicesSection = () => {
-  const { data } = useQuery({
-    queryKey: ["public-services"],
-    queryFn: fetchPublicServices,
+  const { locale } = useI18n();
+
+  const { data: services = [] } = useQuery({
+    // Include locale in the query key so the query re-runs when locale changes
+    queryKey: ["public-services", locale],
+    queryFn:  () => fetchPublicServices(locale),
+    staleTime: 1000 * 60 * 5,
     retry: 1,
   });
-
-  const services = data?.services ?? [];
 
   const categories = Object.entries(CATEGORY_META)
     .sort(([, a], [, b]) => a.order - b.order)
@@ -47,7 +37,7 @@ const ServicesSection = () => {
       items: services
         .filter((s) => s.category === key)
         .sort((a, b) => a.sort_order - b.sort_order)
-        .map((s) => s.title),
+        .map((s) => s.title),  // title is already locale-merged by the backend
     }));
 
   return (
