@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { to: "/admin/listings",     label: "Listings",     icon: "⌂" },
   { to: "/admin/contacts",     label: "Contacts",     icon: "✉" },
   { to: "/admin/services",     label: "Services",     icon: "✦" },
-  { to: "/admin/translations", label: "Translations", icon: "✎" },
+  { to: "/admin/about", label: "About", icon: "✎" },
 ];
 
 export default function AdminLayout() {
