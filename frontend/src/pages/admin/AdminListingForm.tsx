@@ -104,6 +104,8 @@ export default function AdminListingForm() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [form, setForm] = useState(emptyForm());
+  const formRef = useRef(form);
+  formRef.current = form;  // updates every render — never stale
   const [error, setError] = useState("");
   const [activeSection, setActiveSection] = useState("basics");
   const [formDirty, setFormDirty] = useState(false);
@@ -190,6 +192,7 @@ export default function AdminListingForm() {
 
   // ── Build payload (extracted so it can be called from modal save handler) ──
   const buildPayload = useCallback((): Record<string, unknown> => {
+    const form = formRef.current;          // ← always the latest state
     const payload: Record<string, unknown> = {};
 
     // Strings
@@ -201,7 +204,7 @@ export default function AdminListingForm() {
       "company","listing_agent","internal_status","source","priority","internal_notes",
     ].forEach((k) => {
       const v = (form as any)[k];
-      if (v !== "" && v !== undefined) payload[k] = v;
+      if (v !== "" && v !== undefined && v !== null) payload[k] = v;
     });
 
     // i18n JSONB fields — always include so translations are never lost
@@ -243,7 +246,7 @@ export default function AdminListingForm() {
       : [];
 
     return payload;
-  }, [form]);
+  }, []); // ref handles freshness — no dep needed
 
   // ── Save mutation ─────────────────────────────────────────────────────────
   // onSuccess does NOT navigate — callers handle navigation explicitly so we
