@@ -49,7 +49,7 @@ const ConciergeSection = () => {
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
           >
-            <p className="text-sm text-muted-foreground leading-relaxed mb-8">
+            <p className="text-base text-muted-foreground leading-relaxed mb-8">
               The LUME Club Card grants you access to our full concierge network — 
               a curated collection of Portugal's finest experiences, reserved exclusively for our members.
             </p>
@@ -64,7 +64,7 @@ const ConciergeSection = () => {
                   className="flex items-center gap-3"
                 >
                   <div className="w-1.5 h-1.5 bg-primary/60 rounded-full shrink-0" />
-                  <span className="text-sm text-foreground">{service}</span>
+                  <span className="text-base text-foreground">{service}</span>
                 </motion.div>
               ))}
             </div>

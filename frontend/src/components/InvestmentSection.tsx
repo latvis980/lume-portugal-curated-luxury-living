@@ -38,7 +38,7 @@ const InvestmentSection = () => {
             viewport={{ once: true }}
             className="text-center"
           >
-            <p className="text-xs tracking-[0.3em] uppercase text-sun-light/80 mb-4">Investment</p>
+            <p className="text-sm tracking-[0.3em] uppercase text-sun-light mb-4">Investment</p>
             <h2 className="font-display text-3xl md:text-5xl lg:text-6xl font-light text-warm-white">
               Property as a Long-Term
               <br />
@@ -55,7 +55,7 @@ const InvestmentSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="max-w-3xl mx-auto text-center text-base text-[#f0ece4] leading-relaxed mb-16"
+          className="max-w-3xl mx-auto text-center text-lg text-[#f0ece4] leading-relaxed mb-16"
         >
           Our investment advisory is delivered in partnership with <strong>Mark Properties</strong> — a Portuguese real estate development platform founded by seasoned executives with decades of experience in premium residential development, strategic consulting, and infrastructure finance. Rooted in Lisbon and backed by established relationships with leading Portuguese banks, architects, and construction partners, <strong>Mark Properties</strong> brings institutional rigour to every opportunity.
         </motion.p>
@@ -74,7 +74,7 @@ const InvestmentSection = () => {
                 {track.title}
               </h3>
               <div className="w-8 h-px bg-[#FFD700]/60 mx-auto mb-5" />
-              <p className="text-base text-[#c8c2b8] leading-relaxed">
+              <p className="text-lg text-[#dcd6cb] leading-relaxed">
                 {track.description}
               </p>
             </motion.div>

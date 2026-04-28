@@ -48,12 +48,12 @@ const PrivateAccessSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <p className="text-xs tracking-[0.3em] uppercase text-sun-light/70 mb-4">Private Access</p>
+          <p className="text-sm tracking-[0.3em] uppercase text-sun-light/90 mb-4">Private Access</p>
           <h2 className="font-display text-3xl md:text-5xl font-light text-warm-white mb-4">
             Begin the Conversation
           </h2>
           <div className="w-16 h-px bg-primary mx-auto mb-8" />
-          <p className="text-sm text-ocean-light/70 leading-relaxed max-w-md mx-auto mb-12">
+          <p className="text-base text-ocean-light/90 leading-relaxed max-w-md mx-auto mb-12">
             Request a private consultation with our team. Share your vision and
             we'll curate a bespoke plan for your life in Portugal.
           </p>
@@ -75,7 +75,7 @@ const PrivateAccessSection = () => {
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
               disabled={isSubmitting}
-              className="w-full px-4 py-3 bg-transparent border border-warm-white/15 text-warm-white text-sm tracking-wider placeholder:text-warm-white/30 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
+              className="w-full px-4 py-3 bg-transparent border border-warm-white/25 text-warm-white text-base tracking-wider placeholder:text-warm-white/50 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <input
@@ -85,7 +85,7 @@ const PrivateAccessSection = () => {
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 required
                 disabled={isSubmitting}
-                className="w-full px-4 py-3 bg-transparent border border-warm-white/15 text-warm-white text-sm tracking-wider placeholder:text-warm-white/30 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
+                className="w-full px-4 py-3 bg-transparent border border-warm-white/25 text-warm-white text-base tracking-wider placeholder:text-warm-white/50 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
               />
               <input
                 type="tel"
@@ -93,7 +93,7 @@ const PrivateAccessSection = () => {
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 disabled={isSubmitting}
-                className="w-full px-4 py-3 bg-transparent border border-warm-white/15 text-warm-white text-sm tracking-wider placeholder:text-warm-white/30 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
+                className="w-full px-4 py-3 bg-transparent border border-warm-white/25 text-warm-white text-base tracking-wider placeholder:text-warm-white/50 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
               />
             </div>
             <textarea
@@ -112,7 +112,7 @@ const PrivateAccessSection = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-4 bg-primary text-primary-foreground text-xs tracking-[0.25em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-4 bg-primary text-primary-foreground text-sm tracking-[0.25em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Sending..." : "Request Private Access"}
             </button>
@@ -126,7 +126,7 @@ const PrivateAccessSection = () => {
             <p className="font-display text-2xl font-light text-warm-white italic mb-3">
               Thank you
             </p>
-            <p className="text-sm text-ocean-light/60">
+            <p className="text-base text-ocean-light/85">
               A member of our team will be in touch within 24 hours.
             </p>
           </motion.div>

@@ -105,7 +105,7 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
           <h2 className="font-display text-3xl md:text-5xl font-light text-foreground mb-4">
             Tell Us What You Seek
           </h2>
-          <p className="text-sm text-muted-foreground/70 font-light max-w-md mx-auto">
+          <p className="text-base text-muted-foreground/90 font-light max-w-md mx-auto">
             Answer a few quick questions to unlock exclusive listings and services tailored to you.
           </p>
         </motion.div>
@@ -129,7 +129,7 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
               transition={{ duration: 0.4 }}
               className="text-center"
             >
-              <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
+              <p className="text-sm tracking-[0.2em] uppercase text-muted-foreground mb-3">
                 Question {currentQuestion + 1} of {questions.length}
               </p>
               <h3 className="font-display text-2xl md:text-3xl font-light text-foreground mb-12">
@@ -140,7 +140,7 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
                   <button
                     key={option}
                     onClick={() => handleAnswer(option)}
-                    className={`px-6 py-4 border text-sm tracking-wider transition-all duration-300 ${
+                    className={`px-6 py-4 border text-base tracking-wider transition-all duration-300 ${
                       answers[currentQuestion] === option
                         ? "border-primary bg-primary/10 text-foreground"
                         : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
@@ -164,7 +164,7 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
               <h3 className="font-display text-2xl md:text-3xl font-light text-foreground mb-4">
                 Unlock Your Curated Selection
               </h3>
-              <p className="text-sm text-muted-foreground mb-8">
+              <p className="text-base text-muted-foreground mb-8">
                 Enter your email to reveal properties and services matched to your preferences.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
@@ -175,12 +175,12 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
                   placeholder="your@email.com"
                   required
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-3 bg-background border border-border text-foreground text-sm tracking-wider placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-3 bg-background border border-border text-foreground text-base tracking-wider placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
                 />
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-8 py-3 bg-primary text-primary-foreground text-xs tracking-[0.2em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  className="px-8 py-3 bg-primary text-primary-foreground text-sm tracking-[0.2em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
                   {isSubmitting ? "Sending…" : "Reveal"}
                 </button>

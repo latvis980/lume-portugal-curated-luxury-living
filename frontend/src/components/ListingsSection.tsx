@@ -105,7 +105,7 @@ const ListingsSection = ({ answers }: ListingsSectionProps) => {
             Your Curated Selection
           </h2>
           {/* Dynamic filter subtitle */}
-          <p className="max-w-2xl mx-auto text-sm font-light text-muted-foreground/70">
+          <p className="max-w-2xl mx-auto text-base font-light text-muted-foreground/90">
             This selection reflects the preferences you shared with us. Browse our full portfolio or reach out for a personally tailored presentation.
           </p>
         </motion.div>
@@ -127,12 +127,12 @@ const ListingsSection = ({ answers }: ListingsSectionProps) => {
             <p className="font-display mb-3 text-xl font-light text-foreground">
               We're curating your perfect match
             </p>
-            <p className="mb-8 text-sm text-muted-foreground">
+            <p className="mb-8 text-base text-muted-foreground">
               New properties matching your preferences are added regularly.
             </p>
             <Link
               to="/properties"
-              className="inline-block border border-border px-8 py-3 text-xs uppercase tracking-[0.2em] text-foreground transition-colors duration-300 font-body hover:bg-muted"
+              className="inline-block border border-border px-8 py-3 text-sm uppercase tracking-[0.2em] text-foreground transition-colors duration-300 font-body hover:bg-muted"
             >
               Browse All Properties
             </Link>
@@ -157,13 +157,13 @@ const ListingsSection = ({ answers }: ListingsSectionProps) => {
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute left-4 top-4">
-                      <span className="bg-background/90 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-foreground">
+                      <span className="bg-background/90 px-3 py-1 text-xs uppercase tracking-[0.2em] text-foreground">
                         {getTag(listing)}
                       </span>
                     </div>
                     {listing.listing_type === "rent" && (
                       <div className="absolute right-4 top-4">
-                        <span className="bg-secondary/90 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-secondary-foreground">
+                        <span className="bg-secondary/90 px-3 py-1 text-xs uppercase tracking-[0.2em] text-secondary-foreground">
                           Rent
                         </span>
                       </div>
@@ -175,14 +175,14 @@ const ListingsSection = ({ answers }: ListingsSectionProps) => {
                     <h3 className="font-display mb-1 text-xl font-light text-foreground transition-colors duration-300 group-hover:text-primary">
                       {listing.title}
                     </h3>
-                    <p className="mb-3 text-xs tracking-wider text-muted-foreground">
+                    <p className="mb-3 text-sm tracking-wider text-muted-foreground">
                       {locationString(listing)}
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="font-display text-lg text-primary">
                         {formatPrice(listing.price, listing.currency, listing.listing_type)}
                       </span>
-                      <span className="text-[11px] tracking-wider text-muted-foreground">
+                      <span className="text-[13px] tracking-wider text-muted-foreground">
                         {formatSpecs(listing)}
                       </span>
                     </div>
@@ -203,7 +203,7 @@ const ListingsSection = ({ answers }: ListingsSectionProps) => {
           >
             <Link
               to="/properties"
-              className="inline-block border border-border px-10 py-3.5 text-xs uppercase tracking-[0.2em] text-foreground transition-colors duration-300 font-body hover:bg-muted"
+              className="inline-block border border-border px-10 py-3.5 text-sm uppercase tracking-[0.2em] text-foreground transition-colors duration-300 font-body hover:bg-muted"
             >
               View All Properties
             </Link>
