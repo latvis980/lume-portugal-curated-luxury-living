@@ -1,15 +1,21 @@
 // frontend/src/pages/admin/AdminLayout.tsx
+//
+// useBlocker (React Router) only works with createBrowserRouter (data router).
+// This project uses <BrowserRouter>, so we instead:
+//   1. Intercept sidebar NavLink / Sign Out clicks manually
+//   2. Add window.beforeunload for browser refresh / tab close
+
 import { useEffect, useState } from "react";
-import { Outlet, NavLink, useNavigate, useBlocker } from "react-router-dom";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { isAuthenticated, clearToken, verifyAuth } from "@/lib/admin-api";
 import { UnsavedChangesProvider, useUnsavedChanges } from "./UnsavedChangesContext";
 
 const NAV_ITEMS = [
-  { to: "/admin",              label: "Dashboard",    icon: "◻" },
-  { to: "/admin/listings",     label: "Listings",     icon: "⌂" },
-  { to: "/admin/contacts",     label: "Contacts",     icon: "✉" },
-  { to: "/admin/services",     label: "Services",     icon: "✦" },
-  { to: "/admin/about", label: "About", icon: "✎" },
+  { to: "/admin",          label: "Dashboard", icon: "◻" },
+  { to: "/admin/listings", label: "Listings",  icon: "⌂" },
+  { to: "/admin/contacts", label: "Contacts",  icon: "✉" },
+  { to: "/admin/services", label: "Services",  icon: "✦" },
+  { to: "/admin/about",    label: "About",     icon: "✎" },
 ];
 
 export default function AdminLayout() {
@@ -33,27 +39,62 @@ export default function AdminLayout() {
 
   return (
     <UnsavedChangesProvider>
-      <AdminLayoutInner navigate={navigate} />
+      <AdminLayoutInner />
     </UnsavedChangesProvider>
   );
 }
 
-// ─── Inner layout (needs access to UnsavedChangesProvider above it) ───────────
-
-function AdminLayoutInner({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
+function AdminLayoutInner() {
+  const navigate = useNavigate();
   const { hasDirty, saveAll, discardAll } = useUnsavedChanges();
+  const [pendingTo, setPendingTo] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
 
-  // Block navigation when there are unsaved changes
-  const blocker = useBlocker(hasDirty);
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!hasDirty) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasDirty]);
+
+  const handleNavClick =
+    (to: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (!hasDirty) return;
+      e.preventDefault();
+      setPendingTo(to);
+    };
+
+  const handleSignOut = () => {
+    if (hasDirty) {
+      setPendingTo("__signout__");
+    } else {
+      clearToken();
+      navigate("/admin/login");
+    }
+  };
+
+  const doNavigate = (to: string) => {
+    setPendingTo(null);
+    setSaveError("");
+    if (to === "__signout__") {
+      clearToken();
+      navigate("/admin/login");
+    } else {
+      navigate(to);
+    }
+  };
 
   const handleSaveAndLeave = async () => {
+    if (!pendingTo) return;
     setSaving(true);
     setSaveError("");
     try {
       await saveAll();
-      blocker.proceed?.();
+      doNavigate(pendingTo);
     } catch (e: any) {
       setSaveError(e?.message || "Save failed. Please try again.");
     } finally {
@@ -62,17 +103,18 @@ function AdminLayoutInner({ navigate }: { navigate: ReturnType<typeof useNavigat
   };
 
   const handleDiscard = () => {
+    if (!pendingTo) return;
     discardAll();
-    blocker.proceed?.();
+    doNavigate(pendingTo);
   };
 
   const handleKeepEditing = () => {
-    blocker.reset?.();
+    setPendingTo(null);
+    setSaveError("");
   };
 
   return (
     <div className="flex min-h-screen bg-admin-bg text-admin-text">
-      {/* Sidebar */}
       <aside className="fixed left-0 top-0 z-30 flex h-screen w-56 flex-col border-r border-admin-border bg-admin-surface">
         <div className="flex h-14 items-center px-5 border-b border-admin-border">
           <span className="text-sm font-light tracking-[0.2em] text-admin-text">LUME</span>
@@ -85,6 +127,7 @@ function AdminLayoutInner({ navigate }: { navigate: ReturnType<typeof useNavigat
               key={item.to}
               to={item.to}
               end={item.to === "/admin"}
+              onClick={handleNavClick(item.to)}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-md px-3 py-2 text-sm transition ${
                   isActive
@@ -103,12 +146,13 @@ function AdminLayoutInner({ navigate }: { navigate: ReturnType<typeof useNavigat
           <a
             href="/"
             target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-admin-text-muted transition hover:bg-admin-surface-hover hover:text-admin-text-secondary"
           >
             <span className="text-base">↗</span>View Site
           </a>
           <button
-            onClick={() => { clearToken(); navigate("/admin/login"); }}
+            onClick={handleSignOut}
             className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-admin-text-muted transition hover:bg-admin-surface-hover hover:text-red-500"
           >
             <span className="text-base">⏻</span>Sign Out
@@ -120,13 +164,11 @@ function AdminLayoutInner({ navigate }: { navigate: ReturnType<typeof useNavigat
         <Outlet />
       </main>
 
-      {/* ── Unsaved changes modal ── */}
-      {blocker.state === "blocked" && (
+      {pendingTo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-xl border border-admin-border bg-admin-surface shadow-2xl p-6">
-            {/* Icon + title */}
             <div className="mb-4 flex items-start gap-3">
-              <span className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 text-sm">
+              <span className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 text-base">
                 ⚠
               </span>
               <div>
@@ -145,7 +187,6 @@ function AdminLayoutInner({ navigate }: { navigate: ReturnType<typeof useNavigat
               </p>
             )}
 
-            {/* Actions — stacked so labels are never cramped */}
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleSaveAndLeave}
