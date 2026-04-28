@@ -14,6 +14,7 @@ import {
   useContext,
   useRef,
   useState,
+  type ReactNode,
 } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -50,7 +51,7 @@ export function useUnsavedChanges() {
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
-export function UnsavedChangesProvider({ children }: { children: React.ReactNode }) {
+export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   // Set of keys that are currently dirty
   const [dirtyKeys, setDirtyKeys] = useState<Set<string>>(new Set());
 
