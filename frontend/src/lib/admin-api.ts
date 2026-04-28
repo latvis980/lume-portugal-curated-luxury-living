@@ -354,3 +354,58 @@ export async function translateRow(
   }
   return res.json();
 }
+
+// ─── Team members ─────────────────────────────────────────────────────────────
+// Paste this block at the END of admin-api.ts
+
+export interface TeamMember {
+  id: string;
+  slug: string;
+  name: string;
+  role: string | null;
+  image_url: string | null;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getTeamMembers(): Promise<{ team: TeamMember[] }> {
+  const res = await adminFetch("/team");
+  if (!res.ok) throw new Error("Failed to fetch team members");
+  return res.json();
+}
+
+export async function createTeamMember(
+  data: Omit<Partial<TeamMember>, "id" | "slug" | "created_at" | "updated_at">,
+): Promise<TeamMember> {
+  const res = await adminFetch("/team", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Failed to create team member");
+  }
+  return res.json();
+}
+
+export async function updateTeamMember(
+  id: string,
+  data: Partial<TeamMember>,
+): Promise<TeamMember> {
+  const res = await adminFetch(`/team/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Failed to update team member");
+  }
+  return res.json();
+}
+
+export async function deleteTeamMember(id: string): Promise<void> {
+  const res = await adminFetch(`/team/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to delete team member");
+}

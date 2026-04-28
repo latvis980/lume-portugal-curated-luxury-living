@@ -11,7 +11,6 @@ import ListingPage from "./pages/ListingPage.tsx";
 import PropertiesPage from "./pages/PropertiesPage.tsx";
 import AboutPage from "./pages/AboutPage.tsx";
 
-
 // Admin pages
 import AdminLogin from "./pages/admin/AdminLogin.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
@@ -20,8 +19,7 @@ import AdminListings from "./pages/admin/AdminListings.tsx";
 import AdminListingForm from "./pages/admin/AdminListingForm.tsx";
 import AdminContacts from "./pages/admin/AdminContacts.tsx";
 import AdminServices from "./pages/admin/AdminServices.tsx";
-import AdminTranslations from "./pages/admin/AdminTranslations.tsx";
-
+import AdminAbout from "./pages/admin/AdminAbout.tsx";
 
 const queryClient = new QueryClient();
 
@@ -48,7 +46,7 @@ const App = () => (
               <Route path="listings/:id" element={<AdminListingForm />} />
               <Route path="contacts" element={<AdminContacts />} />
               <Route path="services" element={<AdminServices />} />
-              <Route path="translations" element={<AdminTranslations />} />
+              <Route path="about" element={<AdminAbout />} />
             </Route>
 
             {/* Catch-all */}
