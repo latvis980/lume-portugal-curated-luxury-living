@@ -875,3 +875,187 @@ def admin_get_stats() -> Dict[str, Any]:
     except Exception as e:
         print(f"[DB] Error fetching stats: {e}")
         return {"total_listings": 0, "available_listings": 0, "total_contacts": 0}
+
+
+# ---------------------------------------------------------------------------
+# Translations (multi-language CMS strings)
+# ---------------------------------------------------------------------------
+
+SUPPORTED_LOCALES = ("en", "pt_br", "ru", "es")
+
+
+def public_list_translations(namespace: Optional[str] = None) -> List[Dict[str, Any]]:
+    """All translations the public site needs (read with publishable key)."""
+    try:
+        client = _get_client()
+        q = client.table("translations").select(
+            "namespace, key, en, pt_br, ru, es"
+        )
+        if namespace:
+            q = q.eq("namespace", namespace)
+        result = q.execute()
+        return result.data or []
+    except Exception as e:
+        print(f"[DB] Error fetching translations: {e}")
+        return []
+
+
+def admin_list_translations(
+    namespace: Optional[str] = None,
+    search: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    """List translations for the CMS — same shape, includes ids and timestamps."""
+    try:
+        client = _get_admin_client()
+        q = client.table("translations").select("*")
+        if namespace:
+            q = q.eq("namespace", namespace)
+        if search:
+            q = q.or_(
+                f"key.ilike.%{search}%,en.ilike.%{search}%,namespace.ilike.%{search}%"
+            )
+        result = q.order("namespace").order("key").execute()
+        return result.data or []
+    except Exception as e:
+        print(f"[DB] Error listing translations: {e}")
+        return []
+
+
+def admin_get_translation(translation_id: str) -> Optional[Dict[str, Any]]:
+    try:
+        client = _get_admin_client()
+        result = (
+            client.table("translations")
+            .select("*")
+            .eq("id", translation_id)
+            .limit(1)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"[DB] Error fetching translation {translation_id}: {e}")
+        return None
+
+
+def admin_upsert_translation(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Insert or update a translation row, keyed on (namespace, key)."""
+    try:
+        client = _get_admin_client()
+        payload = {k: v for k, v in data.items() if k in (
+            "namespace", "key", "en", "pt_br", "ru", "es"
+        )}
+        if not payload.get("namespace") or not payload.get("key"):
+            raise ValueError("namespace and key are required")
+        result = (
+            client.table("translations")
+            .upsert(payload, on_conflict="namespace,key")
+            .execute()
+        )
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"[DB] Error upserting translation: {e}")
+        raise
+
+
+def admin_update_translation(
+    translation_id: str, data: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    try:
+        client = _get_admin_client()
+        payload = {k: v for k, v in data.items() if k in (
+            "namespace", "key", "en", "pt_br", "ru", "es"
+        )}
+        result = (
+            client.table("translations")
+            .update(payload)
+            .eq("id", translation_id)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"[DB] Error updating translation {translation_id}: {e}")
+        raise
+
+
+def admin_delete_translation(translation_id: str) -> bool:
+    try:
+        client = _get_admin_client()
+        client.table("translations").delete().eq("id", translation_id).execute()
+        return True
+    except Exception as e:
+        print(f"[DB] Error deleting translation {translation_id}: {e}")
+        return False
+
+
+# ---------------------------------------------------------------------------
+# Team members (About page)
+# ---------------------------------------------------------------------------
+
+def public_list_team() -> List[Dict[str, Any]]:
+    try:
+        client = _get_client()
+        result = (
+            client.table("team_members")
+            .select("id, slug, name, role, image_url, sort_order")
+            .eq("is_active", True)
+            .order("sort_order")
+            .execute()
+        )
+        return result.data or []
+    except Exception as e:
+        print(f"[DB] Error fetching team members: {e}")
+        return []
+
+
+def admin_list_team() -> List[Dict[str, Any]]:
+    try:
+        client = _get_admin_client()
+        result = (
+            client.table("team_members")
+            .select("*")
+            .order("sort_order")
+            .execute()
+        )
+        return result.data or []
+    except Exception as e:
+        print(f"[DB] Error listing team members: {e}")
+        return []
+
+
+def admin_create_team_member(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    try:
+        client = _get_admin_client()
+        if not data.get("slug") and data.get("name"):
+            data["slug"] = generate_slug(data["name"])
+        result = client.table("team_members").insert(data).execute()
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"[DB] Error creating team member: {e}")
+        raise
+
+
+def admin_update_team_member(
+    member_id: str, data: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    try:
+        client = _get_admin_client()
+        result = (
+            client.table("team_members")
+            .update(data)
+            .eq("id", member_id)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"[DB] Error updating team member {member_id}: {e}")
+        raise
+
+
+def admin_delete_team_member(member_id: str) -> bool:
+    try:
+        client = _get_admin_client()
+        client.table("team_members").delete().eq("id", member_id).execute()
+        return True
+    except Exception as e:
+        print(f"[DB] Error deleting team member {member_id}: {e}")
+        return False

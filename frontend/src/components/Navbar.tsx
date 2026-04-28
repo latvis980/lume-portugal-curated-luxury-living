@@ -2,18 +2,22 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-
-const navItems = [
-  { label: "Browse Homes", href: "/properties" },
-  { label: "Discover Services", href: "/#services" },
-  { label: "Collect with LUME", href: "/#art-advisory" },
-  { label: "Request Private Access", href: "/#private-access" },
-];
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useT } from "@/lib/i18n";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const t = useT();
+
+  const navItems = [
+    { label: t("nav", "browse_homes",           "Browse Homes"),           href: "/properties" },
+    { label: t("nav", "discover_services",      "Discover Services"),      href: "/#services" },
+    { label: t("nav", "collect_with_lume",      "Collect with LUME"),      href: "/#art-advisory" },
+    { label: t("nav", "about",                  "About"),                  href: "/about" },
+    { label: t("nav", "request_private_access", "Request Private Access"), href: "/#private-access" },
+  ];
 
   const scrollToHash = (hash: string) => {
     if (location.pathname === "/") {
@@ -47,10 +51,10 @@ const Navbar = () => {
         </a>
 
         {/* Desktop */}
-        <div className="hidden md:flex items-center gap-10">
+        <div className="hidden md:flex items-center gap-8">
           {navItems.map((item) => (
             <a
-              key={item.label}
+              key={item.href}
               href={item.href}
               onClick={(e) => handleNavClick(e, item.href)}
               className="text-xs tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground transition-colors duration-300"
@@ -58,6 +62,7 @@ const Navbar = () => {
               {item.label}
             </a>
           ))}
+          <LanguageSwitcher />
         </div>
 
         {/* Mobile toggle */}
@@ -82,7 +87,7 @@ const Navbar = () => {
             <div className="px-6 py-6 flex flex-col gap-4">
               {navItems.map((item) => (
                 <a
-                  key={item.label}
+                  key={item.href}
                   href={item.href}
                   onClick={(e) => handleMobileNavClick(e, item.href)}
                   className="text-xs tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground transition-colors"
@@ -90,6 +95,9 @@ const Navbar = () => {
                   {item.label}
                 </a>
               ))}
+              <div className="pt-4 border-t border-border/50">
+                <LanguageSwitcher variant="mobile" />
+              </div>
             </div>
           </motion.div>
         )}

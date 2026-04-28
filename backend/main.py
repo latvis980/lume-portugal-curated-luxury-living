@@ -43,6 +43,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from routes.public import router as public_router
 from routes.admin import router as admin_router
 from routes.public_forms import router as forms_router
+from routes.translations import router as translations_router
 
 from routes.public import robots, llms_txt, sitemap
 from seo import inject_seo
@@ -102,6 +103,7 @@ app.add_middleware(
 app.include_router(public_router)
 app.include_router(admin_router)
 app.include_router(forms_router)
+app.include_router(translations_router)
 # TODO: Add these as you build them:
 # app.include_router(webhook_router) # Supabase webhook handlers
 

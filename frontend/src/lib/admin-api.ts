@@ -188,3 +188,88 @@ export async function deleteService(id: string) {
   if (!res.ok) throw new Error("Failed to delete service");
   return res.json();
 }
+
+// ─── Translations ──────────────────────────────────────────────────────────
+
+export type Locale = "en" | "pt_br" | "ru" | "es";
+export const TRANSLATION_LOCALES: Locale[] = ["en", "pt_br", "ru", "es"];
+
+export interface Translation {
+  id: string;
+  namespace: string;
+  key: string;
+  en: string | null;
+  pt_br: string | null;
+  ru: string | null;
+  es: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getTranslations(params: {
+  namespace?: string;
+  search?: string;
+} = {}): Promise<{ translations: Translation[] }> {
+  const q = new URLSearchParams();
+  if (params.namespace) q.set("namespace", params.namespace);
+  if (params.search) q.set("search", params.search);
+  const qs = q.toString();
+  const res = await adminFetch(`/translations${qs ? `?${qs}` : ""}`);
+  if (!res.ok) throw new Error("Failed to fetch translations");
+  return res.json();
+}
+
+export async function upsertTranslation(data: {
+  namespace: string;
+  key: string;
+  en?: string | null;
+  pt_br?: string | null;
+  ru?: string | null;
+  es?: string | null;
+}): Promise<Translation> {
+  const res = await adminFetch("/translations", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Failed to save translation");
+  }
+  return res.json();
+}
+
+export async function updateTranslation(
+  id: string,
+  data: Partial<Translation>,
+): Promise<Translation> {
+  const res = await adminFetch(`/translations/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Failed to update translation");
+  }
+  return res.json();
+}
+
+export async function deleteTranslation(id: string) {
+  const res = await adminFetch(`/translations/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to delete translation");
+  return res.json();
+}
+
+export async function translateRow(
+  id: string,
+  options: { source?: Locale; overwrite?: boolean } = {},
+): Promise<Translation> {
+  const res = await adminFetch(`/translations/${id}/translate`, {
+    method: "POST",
+    body: JSON.stringify(options),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Translate failed");
+  }
+  return res.json();
+}

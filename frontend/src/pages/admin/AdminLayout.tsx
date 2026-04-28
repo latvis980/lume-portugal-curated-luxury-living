@@ -4,10 +4,11 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { isAuthenticated, clearToken, verifyAuth } from "@/lib/admin-api";
 
 const NAV_ITEMS = [
-  { to: "/admin",          label: "Dashboard", icon: "◻" },
-  { to: "/admin/listings", label: "Listings",  icon: "⌂" },
-  { to: "/admin/contacts", label: "Contacts",  icon: "✉" },
-  { to: "/admin/services", label: "Services",  icon: "✦" },
+  { to: "/admin",              label: "Dashboard",    icon: "◻" },
+  { to: "/admin/listings",     label: "Listings",     icon: "⌂" },
+  { to: "/admin/contacts",     label: "Contacts",     icon: "✉" },
+  { to: "/admin/services",     label: "Services",     icon: "✦" },
+  { to: "/admin/translations", label: "Translations", icon: "✎" },
 ];
 
 export default function AdminLayout() {
