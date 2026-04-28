@@ -8,6 +8,7 @@ import {
 } from "@/lib/admin-api";
 import { getToken } from "@/lib/admin-api";
 import { useUnsavedChanges } from "./UnsavedChangesContext";
+import AdminListingAIImport from "./AdminListingAIImport";
 
 // ─── Locale config ────────────────────────────────────────────────────────────
 
@@ -47,6 +48,7 @@ const NEEDS_FLOOR = ["apartment", "penthouse"];
 const NEEDS_PLOT  = ["villa", "estate", "farmhouse", "quinta", "land"];
 
 const SECTIONS = [
+  { id: "ai_import", label: "✦ AI Import" }, 
   { id: "basics",   label: "Basics" },
   { id: "location", label: "Location" },
   { id: "specs",    label: "Specs" },

@@ -48,6 +48,7 @@ from routes.translations import router as translations_router
 from routes.public import robots, llms_txt, sitemap
 from seo import inject_seo
 
+from routes.ai_listing import router as ai_listing_router
 
 # =============================================================================
 # Application Setup
@@ -104,6 +105,7 @@ app.include_router(public_router)
 app.include_router(admin_router)
 app.include_router(forms_router)
 app.include_router(translations_router)
+app.include_router(ai_listing_router)
 # TODO: Add these as you build them:
 # app.include_router(webhook_router) # Supabase webhook handlers
 
