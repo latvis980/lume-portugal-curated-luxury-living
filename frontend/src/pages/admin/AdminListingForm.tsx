@@ -154,9 +154,31 @@ export default function AdminListingForm() {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const set = (k: string, v: any) => {
-    setForm((prev) => ({ ...prev, [k]: v }));
-    setFormDirty(true);
+  setForm((prev) => ({ ...prev, [k]: v }));
+  setFormDirty(true);
   };
+
+  const fillFromAI = (data: Record<string, unknown>) => {
+    const empty = emptyForm() as Record<string, unknown>;
+    setForm((prev) => {
+      const next = { ...prev };
+      Object.keys(empty).forEach((key) => {
+        const val = data[key];
+        if (val === null || val === undefined) return;
+        if (["lifestyle_tags", "key_selling_points", "gallery"].includes(key) && Array.isArray(val)) {
+          (next as any)[key] = (val as string[]).join(", ");
+        } else if (key === "views" || key === "nearby") {
+          (next as any)[key] = Array.isArray(val) ? val : [];
+        } else {
+          (next as any)[key] = val;
+        }
+      });
+      return next;
+    });
+    setFormDirty(true);
+    setActiveSection("basics");
+  };
+  
   const toggleView = (v: string) =>
     set("views", form.views.includes(v) ? form.views.filter((x) => x !== v) : [...form.views, v]);
   const toggleNearby = (v: string) =>
@@ -298,7 +320,7 @@ export default function AdminListingForm() {
 
       {/* Section tabs */}
       <div className="mb-6 flex gap-1 overflow-x-auto border-b border-admin-border pb-px">
-        {SECTIONS.map((s) => (
+        {SECTIONS.filter(s => !isEdit || s.id !== "ai_import").map((s) => (
           <button
             key={s.id}
             onClick={() => setActiveSection(s.id)}
@@ -313,6 +335,11 @@ export default function AdminListingForm() {
         ))}
       </div>
 
+      {/* ═══ AI IMPORT ═══ */}
+      {activeSection === "ai_import" && !isEdit && (
+        <AdminListingAIImport onFill={fillFromAI} />
+      )}
+      
       {/* ═══ BASICS ═══ */}
       {activeSection === "basics" && (
         <Section>
