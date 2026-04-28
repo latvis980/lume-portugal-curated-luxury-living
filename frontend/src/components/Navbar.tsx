@@ -45,9 +45,12 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-16 md:h-20">
-        <a href="/" className="flex flex-col items-start leading-none">
-          <span className="font-display text-2xl md:text-3xl font-light tracking-widest text-foreground">LUME</span>
-          <span className="font-body text-[8px] md:text-[9px] tracking-[0.2em] uppercase text-muted-foreground font-medium">by Mark</span>
+        <a href="/" className="flex items-center leading-none">
+          <img
+            src="/logo.png"
+            alt="LUME by Mark"
+            className="h-8 md:h-10 w-auto"
+          />
         </a>
 
         {/* Desktop */}
