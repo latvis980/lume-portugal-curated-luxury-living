@@ -114,15 +114,50 @@ def generate_slug(text: str) -> str:
 
 # Select fields for list/card views (avoid pulling the whole row)
 _LISTING_CARD_FIELDS = (
-    "id, slug, title, reference, "
-    "city, region, area, country, "
-    "price, currency, listing_type, property_type, "
-    "bedrooms, bathrooms, interior_living_area, plot_size, "
-    "views, featured, "
-    "cover_image, short_description, ai_summary, "
-    "lifestyle_tags, "
-    "published_at, created_at, updated_at"
-)
+       "id, slug, title, title_i18n, reference, "
+       "city, region, area, country, "
+       "price, currency, listing_type, property_type, "
+       "bedrooms, bathrooms, interior_living_area, plot_size, "
+       "views, featured, "
+       "cover_image, short_description, short_description_i18n, ai_summary, ai_summary_i18n, "
+       "lifestyle_tags, "
+       "published_at, created_at, updated_at"
+   )
+
+_I18N_LISTING_FIELDS = ("title", "short_description", "full_description", "ai_summary")
+_I18N_SERVICE_FIELDS = ("title", "subtitle", "description")
+
+_LOCALE_NORM = {
+    "en":    "en",
+    "pt":    "pt_br",
+    "pt-br": "pt_br",
+    "pt_br": "pt_br",
+    "ru":    "ru",
+    "es":    "es",
+}
+
+
+def _merge_locale(row: Dict[str, Any], locale: str, i18n_fields: tuple) -> Dict[str, Any]:
+    """
+    For each field in i18n_fields, check if row[f"{field}_i18n"][locale]
+    is non-empty. If so, replace row[field] with that translation.
+    Falls back to English (the base column) if translation is missing.
+
+    Returns a new dict (does not mutate the original row).
+    """
+    if not row:
+        return row
+    loc = _LOCALE_NORM.get((locale or "en").lower(), "en")
+    if loc == "en":
+        return row  # English is already the base column — nothing to do
+
+    merged = dict(row)
+    for field in i18n_fields:
+        i18n = merged.get(f"{field}_i18n") or {}
+        translated = (i18n.get(loc) or "").strip()
+        if translated:
+            merged[field] = translated
+    return merged
 
 
 def get_property_by_slug(slug: str) -> Optional[Dict[str, Any]]:
@@ -807,6 +842,22 @@ def admin_list_services() -> List[Dict[str, Any]]:
     except Exception as e:
         print(f"[DB] Error listing services: {e}")
         return []
+
+def admin_get_service(service_id: str) -> Optional[Dict[str, Any]]:
+    """Fetch a single service by ID (admin — any status)."""
+    try:
+        client = _get_admin_client()
+        result = (
+            client.table("services")
+            .select("*")
+            .eq("id", service_id)
+            .limit(1)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"[DB] Error fetching service {service_id}: {e}")
+        return None
 
 
 def admin_create_service(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:

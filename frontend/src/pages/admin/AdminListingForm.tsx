@@ -2,10 +2,25 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getListing, createListing, updateListing } from "@/lib/admin-api";
-import { getToken } from "@/lib/admin-api"; 
+import {
+  getListing, createListing, updateListing, translateListingField,
+  type ListingTranslatableField,
+} from "@/lib/admin-api";
+import { getToken } from "@/lib/admin-api";
 
-// Enum options (must match Supabase enums)
+// ─── Locale config ────────────────────────────────────────────────────────────
+
+type I18nLocale = "en" | "pt_br" | "ru" | "es";
+
+const LOCALE_TABS: { code: I18nLocale; short: string; name: string }[] = [
+  { code: "en",    short: "EN", name: "English" },
+  { code: "pt_br", short: "PT", name: "Português (BR)" },
+  { code: "ru",    short: "RU", name: "Русский" },
+  { code: "es",    short: "ES", name: "Español" },
+];
+
+// ─── Enum options (must match Supabase enums) ─────────────────────────────────
+
 const PROPERTY_TYPES = ["apartment","penthouse","villa","townhouse","estate","farmhouse","quinta","land","new_development_unit"];
 const LISTING_TYPES  = ["sale", "rent", "seasonal_rent"];
 const STATUS_OPTIONS = ["draft", "available", "reserved", "sold", "rented", "off_market"];
@@ -41,9 +56,17 @@ const SECTIONS = [
   { id: "internal", label: "Internal" },
 ];
 
+// ─── Empty form including i18n JSONB fields ───────────────────────────────────
+
 function emptyForm() {
   return {
     reference: "", title: "",
+    // i18n JSONB columns — populated from DB on edit, saved back on update
+    title_i18n:             { pt_br: "", ru: "", es: "" } as Record<string, string>,
+    short_description_i18n: { pt_br: "", ru: "", es: "" } as Record<string, string>,
+    full_description_i18n:  { pt_br: "", ru: "", es: "" } as Record<string, string>,
+    ai_summary_i18n:        { pt_br: "", ru: "", es: "" } as Record<string, string>,
+    // ─────────────────────────────────────────────────────────────────────
     property_type: "apartment", listing_type: "sale", status: "draft",
     price: "", currency: "EUR", featured: false,
     country: "Portugal", region: "", city: "", area: "", development_name: "",
@@ -81,19 +104,19 @@ export default function AdminListingForm() {
   const [error, setError] = useState("");
   const [activeSection, setActiveSection] = useState("basics");
 
-  // ── Fetch existing listing (edit mode) ──────────────────────────────────
+  // ── Fetch existing listing (edit mode) ────────────────────────────────────
   const { data: existing } = useQuery({
     queryKey: ["admin-listing", id],
     queryFn: () => getListing(id!),
     enabled: isEdit,
   });
 
-  // ── Fetch regions from Supabase for the dropdown ─────────────────────────
+  // ── Fetch regions from Supabase for the dropdown ──────────────────────────
   const { data: regionsData } = useQuery({
     queryKey: ["admin-regions"],
     queryFn: async () => {
       const res = await fetch("/api/admin/regions", {
-        headers: { Authorization: `Bearer ${getToken()}` },  // ← was localStorage.getItem("admin_token")
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error("Failed to load regions");
       return res.json();
@@ -101,14 +124,11 @@ export default function AdminListingForm() {
     staleTime: 1000 * 60 * 10,
   });
 
-  // ["", "Lisbon", "Porto", "Algarve", ...]
   const regionOptions = ["", ...(regionsData?.regions?.map((r: any) => r.name) ?? [])];
-
-  // Lifestyle tags for the currently selected region (shown as a hint)
   const selectedRegionTags: string[] =
     regionsData?.regions?.find((r: any) => r.name === form.region)?.lifestyle_tags ?? [];
 
-  // ── Populate form when editing ───────────────────────────────────────────
+  // ── Populate form when editing ────────────────────────────────────────────
   useEffect(() => {
     if (!existing) return;
     const f = emptyForm();
@@ -120,12 +140,12 @@ export default function AdminListingForm() {
       else if (["lifestyle_tags", "key_selling_points", "gallery"].includes(key))
         (f as any)[key] = Array.isArray(val) ? val.join(", ") : val;
       else
-        (f as any)[key] = val;
+        (f as any)[key] = val; // handles _i18n JSONB objects directly
     });
     setForm(f);
   }, [existing]);
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────────────────
   const set = (k: string, v: any) => setForm((prev) => ({ ...prev, [k]: v }));
   const toggleView = (v: string) =>
     set("views", form.views.includes(v) ? form.views.filter((x) => x !== v) : [...form.views, v]);
@@ -136,7 +156,7 @@ export default function AdminListingForm() {
   const needsFloor = NEEDS_FLOOR.includes(form.property_type);
   const needsPlot  = NEEDS_PLOT.includes(form.property_type);
 
-  // ── Save ─────────────────────────────────────────────────────────────────
+  // ── Save ──────────────────────────────────────────────────────────────────
   const saveMutation = useMutation({
     mutationFn: (payload: Record<string, unknown>) =>
       isEdit ? updateListing(id!, payload) : createListing(payload),
@@ -161,6 +181,12 @@ export default function AdminListingForm() {
     ].forEach((k) => {
       const v = (form as any)[k];
       if (v !== "" && v !== undefined) payload[k] = v;
+    });
+
+    // i18n JSONB fields — always include so translations are never lost
+    ["title_i18n", "short_description_i18n", "full_description_i18n", "ai_summary_i18n"].forEach((k) => {
+      const v = (form as any)[k];
+      if (v && typeof v === "object") payload[k] = v;
     });
 
     // Numbers
@@ -198,7 +224,7 @@ export default function AdminListingForm() {
     saveMutation.mutate(payload);
   };
 
-  // ── Render ───────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
 
@@ -259,9 +285,19 @@ export default function AdminListingForm() {
             <Field label="Reference *" width="w-1/3">
               <Input value={form.reference} onChange={v => set("reference", v)} placeholder="LM-001" />
             </Field>
-            <Field label="Title *" width="w-2/3">
-              <Input value={form.title} onChange={v => set("title", v)} placeholder="Riverfront Penthouse with Panoramic Views" />
-            </Field>
+            {/* Title — multilingual */}
+            <div className="w-2/3">
+              <LocalizedField
+                label="Title *"
+                fieldName="title"
+                form={form}
+                set={set}
+                setForm={setForm}
+                listingId={id}
+                required
+                placeholder="Riverfront Penthouse with Panoramic Views"
+              />
+            </div>
           </Row>
           <Row>
             <Field label="Property Type *" width="w-1/3">
@@ -295,17 +331,13 @@ export default function AdminListingForm() {
             <Field label="Country" width="w-1/4">
               <Input value={form.country} onChange={v => set("country", v)} />
             </Field>
-
-            {/* Region — loaded from Supabase regions table */}
             <Field label="Region *" width="w-1/4">
               <Select value={form.region} onChange={v => set("region", v)} options={regionOptions} />
-              {/* Lifestyle tag hint */}
               {selectedRegionTags.length > 0 && (
                 <p className="mt-1 text-xs text-admin-text-muted">
                   Lifestyle: {selectedRegionTags.join(", ")}
                 </p>
               )}
-              {/* Show a plain text input as fallback while regions are loading */}
               {regionOptions.length <= 1 && (
                 <input
                   type="text"
@@ -316,7 +348,6 @@ export default function AdminListingForm() {
                 />
               )}
             </Field>
-
             <Field label="City *" width="w-1/4">
               <Input value={form.city} onChange={v => set("city", v)} placeholder="Lisbon" />
             </Field>
@@ -368,22 +399,19 @@ export default function AdminListingForm() {
                 <Input type="number" value={form.floor_number} onChange={v => set("floor_number", v)} placeholder="6" />
               </Field>
             )}
-            <Field label="Floors" width="w-1/4">
-              <Input type="number" value={form.floors} onChange={v => set("floors", v)} placeholder="2" />
+            <Field label="Total Floors" width="w-1/4">
+              <Input type="number" value={form.floors} onChange={v => set("floors", v)} />
             </Field>
-            <Field label="Suites" width="w-1/4">
-              <Input type="number" value={form.suites} onChange={v => set("suites", v)} />
-            </Field>
-            <Field label="Living Rooms" width="w-1/4">
-              <Input type="number" value={form.living_rooms} onChange={v => set("living_rooms", v)} />
+            <Field label="Gross Built Area (m²)" width="w-1/4">
+              <Input type="number" value={(form as any).gross_built_area ?? ""} onChange={v => set("gross_built_area", v)} />
             </Field>
           </Row>
           <Row>
             <Field label="Build Year" width="w-1/4">
-              <Input type="number" value={form.build_year} onChange={v => set("build_year", v)} placeholder="2022" />
+              <Input type="number" value={form.build_year} onChange={v => set("build_year", v)} placeholder="2018" />
             </Field>
             <Field label="Renovation Year" width="w-1/4">
-              <Input type="number" value={form.renovation_year} onChange={v => set("renovation_year", v)} placeholder="2019" />
+              <Input type="number" value={form.renovation_year} onChange={v => set("renovation_year", v)} />
             </Field>
             <Field label="Condition" width="w-1/4">
               <Select value={form.condition} onChange={v => set("condition", v)} options={["", ...CONDITIONS]} />
@@ -393,8 +421,11 @@ export default function AdminListingForm() {
             </Field>
           </Row>
           <Row>
-            <Field label="Parking Spaces" width="w-1/4">
-              <Input type="number" value={form.parking_spaces} onChange={v => set("parking_spaces", v)} />
+            <Field label="Living Rooms" width="w-1/4">
+              <Input type="number" value={form.living_rooms} onChange={v => set("living_rooms", v)} />
+            </Field>
+            <Field label="Suites" width="w-1/4">
+              <Input type="number" value={form.suites} onChange={v => set("suites", v)} />
             </Field>
             <Field label="Guest WC" width="w-1/4">
               <Input type="number" value={form.guest_wc} onChange={v => set("guest_wc", v)} />
@@ -472,18 +503,51 @@ export default function AdminListingForm() {
         </Section>
       )}
 
-      {/* ═══ CONTENT ═══ */}
+      {/* ═══ CONTENT — multilingual ═══ */}
       {activeSection === "content" && (
         <Section>
-          <Field label="Short Description *">
-            <Textarea value={form.short_description} onChange={v => set("short_description", v)} rows={3} placeholder="1–2 sentences for property cards..." />
-          </Field>
-          <Field label="Full Description">
-            <Textarea value={form.full_description} onChange={v => set("full_description", v)} rows={10} placeholder="Detailed property description..." />
-          </Field>
-          <Field label="AI Summary">
-            <Textarea value={form.ai_summary} onChange={v => set("ai_summary", v)} rows={3} placeholder="Auto-generated summary..." />
-          </Field>
+          <p className="text-xs text-admin-text-muted mb-4">
+            Use the language tabs to enter or review content in each locale.
+            {isEdit
+              ? " Click ↺ Translate on the active tab to fill the other languages via DeepL."
+              : " Save the listing first, then return here to translate."}
+          </p>
+
+          <LocalizedField
+            label="Short Description *"
+            fieldName="short_description"
+            form={form}
+            set={set}
+            setForm={setForm}
+            listingId={id}
+            required
+            rows={3}
+            placeholder="1–2 sentences for property cards…"
+          />
+
+          <LocalizedField
+            label="Full Description"
+            fieldName="full_description"
+            form={form}
+            set={set}
+            setForm={setForm}
+            listingId={id}
+            rows={10}
+            placeholder="Detailed property description…"
+          />
+
+          <LocalizedField
+            label="AI Summary"
+            fieldName="ai_summary"
+            form={form}
+            set={set}
+            setForm={setForm}
+            listingId={id}
+            rows={3}
+            placeholder="Auto-generated summary…"
+          />
+
+          {/* These two are not translatable (structured data / EN-only) */}
           <Field label="Key Selling Points (comma-separated)">
             <Textarea value={form.key_selling_points} onChange={v => set("key_selling_points", v)} rows={2} placeholder="Panoramic views, Private terrace, Gaggenau kitchen" />
           </Field>
@@ -530,19 +594,19 @@ export default function AdminListingForm() {
             </Field>
           </Row>
           <Row>
-            <Field label="Agent Display Name" width="w-1/2">
-              <Input value={form.agent_name} onChange={v => set("agent_name", v)} placeholder="Mark Silva" />
+            <Field label="Agent Name" width="w-1/2">
+              <Input value={form.agent_name} onChange={v => set("agent_name", v)} />
             </Field>
-            <Field label="Agent Phone" width="w-1/2">
-              <Input value={form.agent_phone} onChange={v => set("agent_phone", v)} placeholder="+351 9xx xxx xxx" />
+            <Field label="Agent Email" width="w-1/2">
+              <Input value={form.agent_email} onChange={v => set("agent_email", v)} />
             </Field>
           </Row>
           <Row>
-            <Field label="Agent Email" width="w-1/2">
-              <Input value={form.agent_email} onChange={v => set("agent_email", v)} placeholder="mark@lumemark.com" />
+            <Field label="Agent Phone" width="w-1/2">
+              <Input value={form.agent_phone} onChange={v => set("agent_phone", v)} />
             </Field>
             <Field label="Agent WhatsApp" width="w-1/2">
-              <Input value={form.agent_whatsapp} onChange={v => set("agent_whatsapp", v)} placeholder="+351 9xx xxx xxx" />
+              <Input value={form.agent_whatsapp} onChange={v => set("agent_whatsapp", v)} />
             </Field>
           </Row>
         </Section>
@@ -559,17 +623,21 @@ export default function AdminListingForm() {
               <Select value={form.priority} onChange={v => set("priority", v)} options={PRIORITIES} />
             </Field>
             <Field label="Source" width="w-1/3">
-              <Input value={form.source} onChange={v => set("source", v)} placeholder="manual, import, partner" />
+              <Input value={form.source} onChange={v => set("source", v)} placeholder="Partner referral, Owner, etc." />
             </Field>
           </Row>
-          <Checkbox label="Confidential (hide from certain views)" checked={form.confidential} onChange={v => set("confidential", v)} />
+          <Row>
+            <Field label="" width="w-full">
+              <Checkbox label="Confidential listing" checked={form.confidential} onChange={v => set("confidential", v)} />
+            </Field>
+          </Row>
           <Field label="Internal Notes">
-            <Textarea value={form.internal_notes} onChange={v => set("internal_notes", v)} rows={4} placeholder="Admin-only notes..." />
+            <Textarea value={form.internal_notes} onChange={v => set("internal_notes", v)} rows={4} placeholder="Internal notes, not visible on the site…" />
           </Field>
         </Section>
       )}
 
-      {/* Bottom save */}
+      {/* Bottom save bar */}
       <div className="mt-8 flex justify-end gap-3 border-t border-admin-border pt-6">
         <button
           onClick={() => navigate("/admin/listings")}
@@ -590,7 +658,167 @@ export default function AdminListingForm() {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Reusable form primitives
+   LocalizedField — language-tab input with DeepL translate button
+───────────────────────────────────────────────────────────────────────── */
+
+interface LocalizedFieldProps {
+  label: string;
+  fieldName: string;
+  form: Record<string, any>;
+  set: (k: string, v: any) => void;
+  setForm: React.Dispatch<React.SetStateAction<any>>;
+  listingId?: string;     // undefined → new listing (translate disabled)
+  rows?: number;          // provided → textarea; omitted → text input
+  placeholder?: string;
+  required?: boolean;
+  width?: string;
+}
+
+function LocalizedField({
+  label, fieldName, form, set, setForm, listingId, rows, placeholder, required, width,
+}: LocalizedFieldProps) {
+  const [locale, setLocale] = useState<I18nLocale>("en");
+  const [translating, setTranslating] = useState(false);
+  const [translateError, setTranslateError] = useState("");
+
+  const i18nKey = `${fieldName}_i18n`;
+
+  const value =
+    locale === "en"
+      ? String(form[fieldName] ?? "")
+      : String((form[i18nKey] as Record<string, string> | undefined)?.[locale] ?? "");
+
+  const hasContent = (loc: I18nLocale) => {
+    if (loc === "en") return Boolean(String(form[fieldName] ?? "").trim());
+    return Boolean(
+      String((form[i18nKey] as Record<string, string> | undefined)?.[loc] ?? "").trim()
+    );
+  };
+
+  const onChange = (v: string) => {
+    if (locale === "en") {
+      set(fieldName, v);
+    } else {
+      set(i18nKey, { ...(form[i18nKey] as Record<string, string> || {}), [locale]: v });
+    }
+  };
+
+  const handleTranslate = async () => {
+    if (!listingId) return;
+    setTranslating(true);
+    setTranslateError("");
+    try {
+      const updated = await translateListingField(listingId, {
+        field: fieldName as ListingTranslatableField,
+        source_locale: locale,
+        overwrite: false,
+      });
+      // Patch only the affected fields in form state
+      setForm((prev: any) => ({
+        ...prev,
+        [fieldName]: (updated as any)[fieldName] ?? prev[fieldName],
+        [i18nKey]:   (updated as any)[i18nKey]   ?? prev[i18nKey],
+      }));
+    } catch (e: any) {
+      setTranslateError(e.message || "Translation failed");
+    } finally {
+      setTranslating(false);
+    }
+  };
+
+  const canTranslate = Boolean(listingId) && value.trim().length > 0;
+
+  return (
+    <div className={`mb-4 ${width ?? "w-full"}`}>
+      {/* Header row: label left, tabs + translate button right */}
+      <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2 min-h-[24px]">
+        <label className="text-xs text-admin-text-muted">
+          {label}
+          {required && <span className="ml-0.5 text-red-400">*</span>}
+        </label>
+
+        <div className="flex items-center gap-1">
+          {LOCALE_TABS.map(({ code, short, name }) => (
+            <button
+              key={code}
+              type="button"
+              title={name}
+              onClick={() => setLocale(code)}
+              className={`flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium transition ${
+                locale === code
+                  ? "bg-admin-accent text-white"
+                  : "text-admin-text-muted hover:text-admin-text"
+              }`}
+            >
+              <span
+                className={`inline-block h-1.5 w-1.5 rounded-full ${
+                  hasContent(code) ? "bg-green-400" : "bg-admin-border"
+                }`}
+              />
+              {short}
+            </button>
+          ))}
+
+          {listingId ? (
+            <button
+              type="button"
+              onClick={handleTranslate}
+              disabled={!canTranslate || translating}
+              title={
+                canTranslate
+                  ? `Translate from ${LOCALE_TABS.find(t => t.code === locale)?.name} to all other languages via DeepL`
+                  : "Enter text in this locale first"
+              }
+              className="ml-1.5 rounded border border-admin-accent/50 px-2 py-0.5 text-[11px] text-admin-accent transition hover:bg-admin-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {translating ? "Translating…" : "↺ Translate"}
+            </button>
+          ) : (
+            locale !== "en" && (
+              <span className="ml-1.5 text-[10px] italic text-admin-text-muted">
+                save first to translate
+              </span>
+            )
+          )}
+        </div>
+      </div>
+
+      {/* Text input or textarea depending on rows prop */}
+      {rows ? (
+        <textarea
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          rows={rows}
+          placeholder={
+            locale !== "en" && placeholder
+              ? `${placeholder} (${LOCALE_TABS.find(t => t.code === locale)?.name})`
+              : placeholder
+          }
+          className="w-full resize-y rounded-md border border-admin-border bg-admin-surface px-3 py-2 text-sm text-admin-text placeholder-admin-text-muted outline-none transition focus:border-admin-text-muted"
+        />
+      ) : (
+        <input
+          type="text"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={
+            locale !== "en" && placeholder
+              ? `${placeholder} (${LOCALE_TABS.find(t => t.code === locale)?.name})`
+              : placeholder
+          }
+          className="w-full rounded-md border border-admin-border bg-admin-surface px-3 py-2 text-sm text-admin-text placeholder-admin-text-muted outline-none transition focus:border-admin-text-muted"
+        />
+      )}
+
+      {translateError && (
+        <p className="mt-1 text-xs text-red-500">{translateError}</p>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Reusable form primitives (unchanged)
 ───────────────────────────────────────────────────────────────────────── */
 
 function Section({ children }: { children: React.ReactNode }) {

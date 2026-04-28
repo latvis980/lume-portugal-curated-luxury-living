@@ -110,6 +110,43 @@ export async function deleteListing(id: string) {
   return res.json();
 }
 
+// ─── Listing field translation (DeepL) ──────────────────────────────────────
+
+export type ListingTranslatableField =
+  | "title"
+  | "short_description"
+  | "full_description"
+  | "ai_summary";
+
+export interface FieldTranslateOptions {
+  field: ListingTranslatableField | ServiceTranslatableField;
+  source_locale?: Locale; // default: "en"
+  overwrite?: boolean;    // default: false
+}
+
+/**
+ * Translate a single field of a listing to all other locales via DeepL.
+ * Returns the full updated listing row (with refreshed _i18n columns).
+ */
+export async function translateListingField(
+  listingId: string,
+  options: { field: ListingTranslatableField; source_locale?: Locale; overwrite?: boolean },
+): Promise<Record<string, unknown>> {
+  const res = await adminFetch(`/listings/${listingId}/translate`, {
+    method: "POST",
+    body: JSON.stringify({
+      field: options.field,
+      source_locale: options.source_locale ?? "en",
+      overwrite: options.overwrite ?? false,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Translation failed");
+  }
+  return res.json();
+}
+
 export interface ContactsQuery {
   source?: string;
   search?: string;
@@ -137,11 +174,23 @@ export async function deleteContact(id: string) {
 
 // ─── Services ───────────────────────────────────────────────────────────────
 
+export type I18nValues = {
+  pt_br?: string;
+  ru?: string;
+  es?: string;
+};
+
 export interface Service {
   id: string;
   title: string;
+  title_i18n: I18nValues;
+  subtitle: string | null;
+  subtitle_i18n: I18nValues;
+  description: string | null;
+  description_i18n: I18nValues;
   slug: string;
   category: string;
+  icon: string | null;
   sort_order: number;
   is_active: boolean;
   created_at: string;
@@ -156,6 +205,11 @@ export async function getServices(): Promise<{ services: Service[] }> {
 
 export async function createService(data: {
   title: string;
+  title_i18n?: I18nValues;
+  subtitle?: string;
+  subtitle_i18n?: I18nValues;
+  description?: string;
+  description_i18n?: I18nValues;
   category: string;
   sort_order?: number;
   is_active?: boolean;
@@ -189,7 +243,34 @@ export async function deleteService(id: string) {
   return res.json();
 }
 
-// ─── Translations ──────────────────────────────────────────────────────────
+// ─── Service field translation (DeepL) ──────────────────────────────────────
+
+export type ServiceTranslatableField = "title" | "subtitle" | "description";
+
+/**
+ * Translate a single field of a service to all other locales via DeepL.
+ * Returns the full updated service row.
+ */
+export async function translateServiceField(
+  serviceId: string,
+  options: { field: ServiceTranslatableField; source_locale?: Locale; overwrite?: boolean },
+): Promise<Service> {
+  const res = await adminFetch(`/services/${serviceId}/translate`, {
+    method: "POST",
+    body: JSON.stringify({
+      field: options.field,
+      source_locale: options.source_locale ?? "en",
+      overwrite: options.overwrite ?? false,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Translation failed");
+  }
+  return res.json();
+}
+
+// ─── Translations (static site copy) ────────────────────────────────────────
 
 export type Locale = "en" | "pt_br" | "ru" | "es";
 export const TRANSLATION_LOCALES: Locale[] = ["en", "pt_br", "ru", "es"];

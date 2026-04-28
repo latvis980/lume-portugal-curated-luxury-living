@@ -24,6 +24,16 @@ Admin (require_admin):
     POST   /api/admin/team
     PUT    /api/admin/team/:id
     DELETE /api/admin/team/:id
+
+    POST   /api/admin/listings/:id/translate
+                                          Translate a single field of a listing
+                                          (title, short_description, etc.)
+                                          to all other locales via DeepL.
+                                          Writes results into <field>_i18n JSONB.
+
+    POST   /api/admin/services/:id/translate
+                                          Same for services (title, subtitle,
+                                          description).
 """
 
 from __future__ import annotations
@@ -41,8 +51,6 @@ from auth import require_admin
 router = APIRouter(tags=["translations"])
 
 # --- Locale → DeepL language code -------------------------------------------
-# DeepL accepts BCP-47-style codes; for source it expects the bare language
-# (EN, ES, RU, PT) and for target it accepts EN-US, PT-BR, etc.
 _DEEPL_SOURCE = {
     "en":    "EN",
     "es":    "ES",
@@ -56,6 +64,48 @@ _DEEPL_TARGET = {
     "pt_br": "PT-BR",
 }
 _LOCALES = ("en", "pt_br", "ru", "es")
+
+# Fields that can be auto-translated on each table
+_LISTING_TRANSLATABLE = ("title", "short_description", "full_description", "ai_summary")
+_SERVICE_TRANSLATABLE = ("title", "subtitle", "description")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SHARED DEEPL HELPER
+# ═══════════════════════════════════════════════════════════════════════════
+
+def _deepl_translate(text: str, source: str, target: str) -> str:
+    api_key = os.getenv("DEEPL_API_KEY", "").strip()
+    if not api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="DEEPL_API_KEY is not configured on the server.",
+        )
+    base = (
+        "https://api-free.deepl.com/v2/translate"
+        if api_key.endswith(":fx")
+        else "https://api.deepl.com/v2/translate"
+    )
+    try:
+        resp = httpx.post(
+            base,
+            data={
+                "text": text,
+                "source_lang": _DEEPL_SOURCE[source],
+                "target_lang": _DEEPL_TARGET[target],
+                "preserve_formatting": "1",
+            },
+            headers={"Authorization": f"DeepL-Auth-Key {api_key}"},
+            timeout=20.0,
+        )
+        resp.raise_for_status()
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"DeepL request failed: {e}")
+    payload = resp.json()
+    translations = payload.get("translations") or []
+    if not translations:
+        raise HTTPException(status_code=502, detail="DeepL returned no translations")
+    return translations[0].get("text", "")
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -77,7 +127,7 @@ async def list_team_public():
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# ADMIN — translations
+# ADMIN — translations table (static site copy)
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TranslationIn(BaseModel):
@@ -138,47 +188,11 @@ async def admin_translations_delete(
     return {"detail": "Translation deleted"}
 
 
-# ─── DeepL fan-out ──────────────────────────────────────────────────────────
+# ─── DeepL fan-out for static translations table ─────────────────────────────
 
 class TranslateRequest(BaseModel):
     source: Optional[str] = None  # "en" | "pt_br" | "ru" | "es"; auto-detect if None
     overwrite: bool = False        # if False, only fill empty locales
-
-
-def _deepl_translate(text: str, source: str, target: str) -> str:
-    api_key = os.getenv("DEEPL_API_KEY", "").strip()
-    if not api_key:
-        raise HTTPException(
-            status_code=503,
-            detail="DEEPL_API_KEY is not configured on the server.",
-        )
-    # DeepL has both .com (paid) and api-free.deepl.com (free) endpoints.
-    # Free keys end with ":fx".
-    base = (
-        "https://api-free.deepl.com/v2/translate"
-        if api_key.endswith(":fx")
-        else "https://api.deepl.com/v2/translate"
-    )
-    try:
-        resp = httpx.post(
-            base,
-            data={
-                "text": text,
-                "source_lang": _DEEPL_SOURCE[source],
-                "target_lang": _DEEPL_TARGET[target],
-                "preserve_formatting": "1",
-            },
-            headers={"Authorization": f"DeepL-Auth-Key {api_key}"},
-            timeout=20.0,
-        )
-        resp.raise_for_status()
-    except httpx.HTTPError as e:
-        raise HTTPException(status_code=502, detail=f"DeepL request failed: {e}")
-    payload = resp.json()
-    translations = payload.get("translations") or []
-    if not translations:
-        raise HTTPException(status_code=502, detail="DeepL returned no translations")
-    return translations[0].get("text", "")
 
 
 @router.post("/api/admin/translations/{translation_id}/translate")
@@ -199,7 +213,6 @@ async def admin_translate_row(
 
     source = body.source
     if source not in _LOCALES:
-        # Auto-detect: pick the first populated locale, prefer English.
         source = next(
             (loc for loc in ("en", *(l for l in _LOCALES if l != "en"))
              if (row.get(loc) or "").strip()),
@@ -227,7 +240,7 @@ async def admin_translate_row(
         updates[target] = _deepl_translate(src_text, source=source, target=target)
 
     if not updates:
-        return row  # nothing to do
+        return row
 
     updated = admin_update_translation(translation_id, updates)
     return updated or row
@@ -271,3 +284,165 @@ async def admin_team_delete(member_id: str, admin=Depends(require_admin)):
     if not success:
         raise HTTPException(status_code=404, detail="Team member not found")
     return {"detail": "Team member deleted"}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ADMIN — translate listing fields (JSONB _i18n columns)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class FieldTranslateRequest(BaseModel):
+    field: str                    # "title" | "short_description" | "full_description" | "ai_summary"
+    source_locale: str = "en"    # which locale holds the source text
+    overwrite: bool = False       # if False, skip locales that already have text
+
+
+@router.post("/api/admin/listings/{listing_id}/translate")
+async def translate_listing_field(
+    listing_id: str,
+    body: FieldTranslateRequest,
+    admin=Depends(require_admin),
+):
+    """
+    Translate one text field of a listing to all other locales via DeepL.
+
+    - English text lives in the base column (e.g. listing.title).
+    - Other locales are stored in listing.title_i18n as
+      {"pt_br": "...", "ru": "...", "es": "..."}.
+    - If source_locale is "en", reads from the base column.
+    - If source_locale is "ru"/"es"/"pt_br", reads from the _i18n column.
+    - After translation, writes results back to the appropriate column.
+    - Returns the full updated listing row.
+    """
+    from database import admin_get_listing, admin_update_listing
+
+    if body.field not in _LISTING_TRANSLATABLE:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Field '{body.field}' is not translatable. "
+                   f"Choose from: {', '.join(_LISTING_TRANSLATABLE)}",
+        )
+
+    source = body.source_locale
+    if source not in _LOCALES:
+        raise HTTPException(status_code=422, detail=f"Invalid source_locale '{source}'.")
+
+    listing = admin_get_listing(listing_id)
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found")
+
+    # Read source text
+    if source == "en":
+        src_text = (listing.get(body.field) or "").strip()
+    else:
+        i18n = listing.get(f"{body.field}_i18n") or {}
+        src_text = (i18n.get(source) or "").strip()
+
+    if not src_text:
+        raise HTTPException(
+            status_code=422,
+            detail=f"No text found in '{body.field}' for locale '{source}'. "
+                   "Fill it in first, then translate.",
+        )
+
+    # Current i18n state
+    current_i18n = dict(listing.get(f"{body.field}_i18n") or {})
+    db_updates: dict = {}
+
+    for target in _LOCALES:
+        if target == source:
+            continue
+        # Check if already filled
+        if target == "en":
+            existing = (listing.get(body.field) or "").strip()
+        else:
+            existing = (current_i18n.get(target) or "").strip()
+
+        if not body.overwrite and existing:
+            continue  # don't overwrite existing translations
+
+        translated = _deepl_translate(src_text, source=source, target=target)
+
+        if target == "en":
+            db_updates[body.field] = translated
+        else:
+            current_i18n[target] = translated
+
+    # Always persist the i18n dict (even if unchanged, keeps it clean)
+    db_updates[f"{body.field}_i18n"] = current_i18n
+
+    updated = admin_update_listing(listing_id, db_updates)
+    return updated or listing
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ADMIN — translate service fields (JSONB _i18n columns)
+# ═══════════════════════════════════════════════════════════════════════════
+
+@router.post("/api/admin/services/{service_id}/translate")
+async def translate_service_field(
+    service_id: str,
+    body: FieldTranslateRequest,
+    admin=Depends(require_admin),
+):
+    """
+    Translate one text field of a service to all other locales via DeepL.
+
+    Translatable fields: title, subtitle, description.
+    English lives in the base column; other locales in <field>_i18n JSONB.
+    Returns the full updated service row.
+    """
+    from database import admin_get_service, admin_update_service
+
+    if body.field not in _SERVICE_TRANSLATABLE:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Field '{body.field}' is not translatable. "
+                   f"Choose from: {', '.join(_SERVICE_TRANSLATABLE)}",
+        )
+
+    source = body.source_locale
+    if source not in _LOCALES:
+        raise HTTPException(status_code=422, detail=f"Invalid source_locale '{source}'.")
+
+    service = admin_get_service(service_id)
+    if not service:
+        raise HTTPException(status_code=404, detail="Service not found")
+
+    if source == "en":
+        src_text = (service.get(body.field) or "").strip()
+    else:
+        i18n = service.get(f"{body.field}_i18n") or {}
+        src_text = (i18n.get(source) or "").strip()
+
+    if not src_text:
+        raise HTTPException(
+            status_code=422,
+            detail=f"No text found in '{body.field}' for locale '{source}'. "
+                   "Fill it in first, then translate.",
+        )
+
+    current_i18n = dict(service.get(f"{body.field}_i18n") or {})
+    db_updates: dict = {}
+
+    for target in _LOCALES:
+        if target == source:
+            continue
+        if target == "en":
+            existing = (service.get(body.field) or "").strip()
+        else:
+            existing = (current_i18n.get(target) or "").strip()
+
+        if not body.overwrite and existing:
+            continue
+
+        translated = _deepl_translate(src_text, source=source, target=target)
+
+        if target == "en":
+            db_updates[body.field] = translated
+        else:
+            current_i18n[target] = translated
+
+    db_updates[f"{body.field}_i18n"] = current_i18n
+
+    updated = admin_update_service(service_id, db_updates)
+    return updated or service
