@@ -12,11 +12,11 @@ const Navbar = () => {
   const t = useT();
 
   const navItems = [
-    { label: t("nav", "browse_homes",           "Browse Homes"),           href: "/properties" },
-    { label: t("nav", "discover_services",      "Discover Services"),      href: "/#services" },
-    { label: t("nav", "collect_with_lume",      "Collect with LUME"),      href: "/#art-advisory" },
+    { label: t("nav", "browse_homes",           "Homes"),           href: "/properties" },
+    { label: t("nav", "discover_services",      "Services"),      href: "/#services" },
+    { label: t("nav", "collect_with_lume",      "Collect"),      href: "/#art-advisory" },
     { label: t("nav", "about",                  "About"),                  href: "/about" },
-    { label: t("nav", "request_private_access", "Request Private Access"), href: "/#private-access" },
+    { label: t("nav", "request_private_access", "Contact"), href: "/#private-access" },
   ];
 
   const scrollToHash = (hash: string) => {
@@ -44,12 +44,12 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-16 md:h-20">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-16 md:h-28">
         <a href="/" className="flex items-center leading-none">
           <img
             src="/logo.png"
             alt="LUME by Mark"
-            className="h-8 md:h-10 w-auto"
+            className="h-12 md:h-16 w-auto"
           />
         </a>
 
