@@ -27,7 +27,7 @@ const HeroSection = ({ unlocked = false }: HeroSectionProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="text-xs md:text-sm tracking-[0.35em] uppercase text-sand-light/80 mb-6"
+          className="text-sm md:text-base tracking-[0.35em] uppercase text-sand-light mb-6"
         >
           Homes · Living · Collecting
         </motion.p>
@@ -42,7 +42,7 @@ const HeroSection = ({ unlocked = false }: HeroSectionProps) => {
             LUME
             <span className="sun-dot" />
           </span>
-          <span className="font-body text-xs md:text-sm tracking-[0.3em] uppercase text-sand-light/60 mt-2 font-medium">
+          <span className="font-body text-sm md:text-base tracking-[0.3em] uppercase text-sand-light/85 mt-2 font-medium">
             by Mark
           </span>
         </motion.h1>
@@ -71,13 +71,13 @@ const HeroSection = ({ unlocked = false }: HeroSectionProps) => {
         >
           <a
             href={unlocked ? "#listings" : "#questionnaire"}
-            className="px-8 py-3 border border-sand-light/40 text-sand-light text-xs tracking-[0.2em] uppercase hover:bg-sand-light/10 transition-all duration-300"
+            className="px-8 py-3 border border-sand-light/60 text-sand-light text-sm tracking-[0.2em] uppercase hover:bg-sand-light/10 transition-all duration-300"
           >
             Begin Your Journey
           </a>
           <a
             href="#private-access"
-            className="px-8 py-3 bg-primary/90 text-primary-foreground text-xs tracking-[0.2em] uppercase hover:bg-primary transition-all duration-300"
+            className="px-8 py-3 bg-primary/90 text-primary-foreground text-sm tracking-[0.2em] uppercase hover:bg-primary transition-all duration-300"
           >
             Private Access
           </a>
@@ -91,7 +91,7 @@ const HeroSection = ({ unlocked = false }: HeroSectionProps) => {
         transition={{ delay: 2.5 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
       >
-        <span className="text-[10px] tracking-[0.3em] uppercase text-sand-light/50">Scroll</span>
+        <span className="text-xs tracking-[0.3em] uppercase text-sand-light/75">Scroll</span>
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 1.5, repeat: Infinity }}

@@ -74,7 +74,7 @@ const ServicesSection = () => {
               <div className="w-8 h-px bg-primary/40 mb-5 group-hover:w-12 transition-all duration-500" />
               <ul className="space-y-2.5">
                 {cat.items.map((item) => (
-                  <li key={item} className="text-sm text-muted-foreground leading-relaxed">
+                  <li key={item} className="text-base text-muted-foreground leading-relaxed">
                     {item}
                   </li>
                 ))}

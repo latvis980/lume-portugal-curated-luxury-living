@@ -60,7 +60,7 @@ const Navbar = () => {
               key={item.href}
               href={item.href}
               onClick={(e) => handleNavClick(e, item.href)}
-              className="text-xs tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground transition-colors duration-300"
+              className="text-sm tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground transition-colors duration-300"
             >
               {item.label}
             </a>
@@ -93,7 +93,7 @@ const Navbar = () => {
                   key={item.href}
                   href={item.href}
                   onClick={(e) => handleMobileNavClick(e, item.href)}
-                  className="text-xs tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {item.label}
                 </a>

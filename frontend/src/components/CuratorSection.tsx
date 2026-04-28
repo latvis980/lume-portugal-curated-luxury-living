@@ -31,19 +31,19 @@ const CuratorSection = () => {
           </h2>
           <div className="w-16 h-px bg-primary mb-8" />
           <div className="space-y-5">
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-base text-muted-foreground leading-relaxed">
               Beyond real estate and relocation, LUME offers something rare — a dedicated Collection Curator who guides you in building a personal art and antiques collection that reflects your taste, heritage, and the story of your new life in Portugal.
             </p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-base text-muted-foreground leading-relaxed">
               From sourcing contemporary Portuguese artists and antique azulejo panels to navigating international auction houses and private dealers, your Curator handles every detail: authentication, provenance, logistics, installation, and long-term collection management.
             </p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-base text-muted-foreground leading-relaxed">
               This is not a catalogue. It's a deeply personal journey — discovering pieces that transform a house into a home with meaning, and an investment portfolio with soul.
             </p>
           </div>
           <a
             href="#private-access"
-            className="inline-block mt-10 px-8 py-3 border border-foreground/20 text-xs tracking-[0.2em] uppercase text-foreground hover:border-primary hover:text-primary transition-all duration-300"
+            className="inline-block mt-10 px-8 py-3 border border-foreground/30 text-sm tracking-[0.2em] uppercase text-foreground hover:border-primary hover:text-primary transition-all duration-300"
           >
             Request Your Curator
           </a>
