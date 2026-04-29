@@ -41,7 +41,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <HeroSection unlocked={unlocked} />
+      <HeroSection />
 
       <QuestionnaireSection
         onComplete={handleComplete}

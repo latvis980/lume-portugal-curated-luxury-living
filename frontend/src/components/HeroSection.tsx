@@ -1,10 +1,21 @@
 import { motion } from "framer-motion";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useT } from "@/lib/i18n";
 
-interface HeroSectionProps {
-  unlocked?: boolean;
-}
+const HeroSection = () => {
+  const t = useT();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-const HeroSection = ({ unlocked = false }: HeroSectionProps) => {
+  const handleGuideClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (location.pathname === "/") {
+      document.querySelector("#questionnaire")?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate("/#questionnaire");
+    }
+  };
+
   return (
     <section id="hero" className="relative h-screen w-full overflow-hidden">
       {/* Background video */}
@@ -29,7 +40,7 @@ const HeroSection = ({ unlocked = false }: HeroSectionProps) => {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="text-sm md:text-base tracking-[0.35em] uppercase text-sand-light mb-6"
         >
-          Homes · Living · Collecting
+          {t("hero", "eyebrow", "Homes · Living · Collecting")}
         </motion.p>
 
         <motion.h1
@@ -39,11 +50,11 @@ const HeroSection = ({ unlocked = false }: HeroSectionProps) => {
           className="flex flex-col items-center"
         >
           <span className="logo-shimmer font-display text-5xl md:text-7xl lg:text-8xl font-light tracking-wider inline-flex items-baseline relative">
-            LUME
+            {t("hero", "logo", "LUME")}
             <span className="sun-dot" />
           </span>
           <span className="font-body text-sm md:text-base tracking-[0.3em] uppercase text-sand-light/85 mt-2 font-medium">
-            by Mark
+            {t("hero", "logo_subtitle", "by Mark")}
           </span>
         </motion.h1>
 
@@ -60,7 +71,7 @@ const HeroSection = ({ unlocked = false }: HeroSectionProps) => {
           transition={{ duration: 0.8, delay: 1.2 }}
           className="font-display text-xl md:text-2xl font-light text-sand-light/90 italic max-w-xl"
         >
-          Your light to living in Portugal
+          {t("hero", "tagline", "Your light to living in Portugal")}
         </motion.p>
 
         <motion.div
@@ -69,17 +80,18 @@ const HeroSection = ({ unlocked = false }: HeroSectionProps) => {
           transition={{ duration: 0.8, delay: 1.8 }}
           className="mt-12 flex flex-col sm:flex-row gap-4"
         >
-          <a
-            href={unlocked ? "#listings" : "#questionnaire"}
+          <Link
+            to="/properties"
             className="px-8 py-3 border border-sand-light/60 text-sand-light text-sm tracking-[0.2em] uppercase hover:bg-sand-light/10 transition-all duration-300"
           >
-            Begin Your Journey
-          </a>
+            {t("hero", "cta_explore_homes", "Explore Homes")}
+          </Link>
           <a
-            href="#private-access"
+            href="/#questionnaire"
+            onClick={handleGuideClick}
             className="px-8 py-3 bg-primary/90 text-primary-foreground text-sm tracking-[0.2em] uppercase hover:bg-primary transition-all duration-300"
           >
-            Private Access
+            {t("hero", "cta_let_us_guide_you", "Let Us Guide You")}
           </a>
         </motion.div>
       </div>
@@ -91,7 +103,7 @@ const HeroSection = ({ unlocked = false }: HeroSectionProps) => {
         transition={{ delay: 2.5 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
       >
-        <span className="text-xs tracking-[0.3em] uppercase text-sand-light/75">Scroll</span>
+        <span className="text-xs tracking-[0.3em] uppercase text-sand-light/75">{t("hero", "scroll", "Scroll")}</span>
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 1.5, repeat: Infinity }}
