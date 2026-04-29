@@ -1,86 +1,214 @@
 // frontend/src/components/ServicesSection.tsx
-// ⚠️  Category values MUST match the Postgres enum exactly:
-//     administrative | healthcare_family | home | investment_advisory
+//
+// Homepage "A LUME Ecosystem" section.
+// Vertical numbered rail (left) + content panel (right), with a single
+// gold hairline underline that slides between active tab labels using
+// Framer Motion's shared layoutId animation.
+//
+// Categories are sourced from the Postgres `service_category` enum:
+//   settling_in | health | education | lifestyle | environment | leisure | signature
+//
+// On screens narrower than `lg`, the rail collapses into a horizontally
+// scrollable strip above the panel.
 
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
-import { Scale, Heart, Home, TrendingUp, LucideIcon } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
-import { fetchPublicServices } from "@/lib/public-api";
+import { fetchPublicServices, type PublicService } from "@/lib/public-api";
 
-const CATEGORY_META: Record<
-  string,
-  { label: string; icon: LucideIcon; order: number }
-> = {
-  administrative:      { label: "Administrative",       icon: Scale,       order: 0 },
-  healthcare_family:   { label: "Healthcare & Family",  icon: Heart,       order: 1 },
-  home:                { label: "Home",                  icon: Home,        order: 2 },
-  investment_advisory: { label: "Investment Advisory",  icon: TrendingUp,  order: 3 },
-};
+interface CategoryDef {
+  key: string;
+  numeral: string;
+  defaultLabel: string;
+}
+
+const CATEGORIES: readonly CategoryDef[] = [
+  { key: "settling_in",  numeral: "01", defaultLabel: "Settling In"  },
+  { key: "health",       numeral: "02", defaultLabel: "Health"       },
+  { key: "education",    numeral: "03", defaultLabel: "Education"    },
+  { key: "lifestyle",    numeral: "04", defaultLabel: "Lifestyle"    },
+  { key: "environment",  numeral: "05", defaultLabel: "Environment" },
+  { key: "leisure",      numeral: "06", defaultLabel: "Leisure"      },
+  { key: "signature",    numeral: "07", defaultLabel: "Signature"    },
+] as const;
 
 const ServicesSection = () => {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
+  const prefersReduced = useReducedMotion();
+  const [active, setActive] = useState(0);
 
-  const { data: services = [] } = useQuery({
-    // Include locale in the query key so the query re-runs when locale changes
+  const { data: services = [] } = useQuery<PublicService[]>({
     queryKey: ["public-services", locale],
-    queryFn:  () => fetchPublicServices(locale),
+    queryFn: () => fetchPublicServices(locale),
     staleTime: 1000 * 60 * 5,
     retry: 1,
   });
 
-  const categories = Object.entries(CATEGORY_META)
-    .sort(([, a], [, b]) => a.order - b.order)
-    .map(([key, meta]) => ({
-      key,
-      ...meta,
-      items: services
-        .filter((s) => s.category === key)
-        .sort((a, b) => a.sort_order - b.sort_order)
-        .map((s) => s.title),  // title is already locale-merged by the backend
-    }));
+  const tabs = useMemo(
+    () =>
+      CATEGORIES.map((cat) => ({
+        ...cat,
+        label: t("services", `category.${cat.key}`, cat.defaultLabel),
+        items: services
+          .filter((s) => s.category === cat.key)
+          .sort((a, b) => a.sort_order - b.sort_order),
+      })),
+    [services, t]
+  );
+
+  const activeCat = tabs[active];
+  const showLead = activeCat.key === "signature";
+
+  // Easing curve used everywhere in the section for a consistent feel.
+  const ease = [0.22, 0.61, 0.36, 1] as const;
 
   return (
     <section id="services" className="section-padding bg-card">
       <div className="max-w-7xl mx-auto">
+        {/* ─── Header ──────────────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-20"
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.7, ease }}
+          className="text-center mb-16 md:mb-20"
         >
           <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">
-            Exclusive Services
+            {t("services", "eyebrow", "A LUME Ecosystem")}
           </p>
           <h2 className="font-display text-3xl md:text-5xl font-light text-foreground">
-            Everything You Need, Curated
+            {t("services", "heading", "Everything you need, curated")}
           </h2>
+          <div className="w-10 h-px bg-primary mx-auto mt-6" />
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {categories.map((cat, i) => (
-            <motion.div
-              key={cat.key}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="group"
-            >
-              <cat.icon className="w-6 h-6 text-primary mb-5" strokeWidth={1.5} />
-              <h3 className="font-display text-xl font-light text-foreground mb-4">
-                {cat.label}
-              </h3>
-              <div className="w-8 h-px bg-primary/40 mb-5 group-hover:w-12 transition-all duration-500" />
-              <ul className="space-y-2.5">
-                {cat.items.map((item) => (
-                  <li key={item} className="text-base text-muted-foreground leading-relaxed">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
+        {/* ─── Layout: rail + panel ────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-y-10 lg:gap-x-16 items-start">
+          {/* TAB RAIL
+             Desktop: vertical column on the left
+             Mobile:  horizontal scroll-snap strip above the panel */}
+          <nav
+            role="tablist"
+            aria-label={t("services", "heading", "Services")}
+            className="
+              flex lg:flex-col gap-x-7 gap-y-0
+              overflow-x-auto lg:overflow-visible
+              -mx-6 lg:mx-0 px-6 lg:px-0 pb-2 lg:pb-0
+              snap-x snap-mandatory lg:snap-none
+              [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
+            "
+          >
+            {tabs.map((tab, i) => {
+              const isActive = i === active;
+              return (
+                <button
+                  key={tab.key}
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls={`services-panel-${tab.key}`}
+                  onClick={() => setActive(i)}
+                  className="
+                    group flex items-baseline gap-3 lg:gap-4
+                    py-2.5 whitespace-nowrap snap-start
+                    bg-transparent border-0 cursor-pointer
+                    focus:outline-none
+                    focus-visible:outline-none
+                    focus-visible:ring-1 focus-visible:ring-primary/50
+                    focus-visible:ring-offset-4 focus-visible:ring-offset-card
+                    rounded-sm
+                  "
+                >
+                  <span
+                    className="font-display italic text-sm lg:text-[15px] text-primary leading-none"
+                    style={{ minWidth: 18 }}
+                  >
+                    {tab.numeral}
+                  </span>
+                  <span
+                    className={[
+                      "relative text-[11px] tracking-[0.22em] uppercase font-medium",
+                      "transition-colors duration-300 leading-none",
+                      isActive
+                        ? "text-foreground"
+                        : "text-muted-foreground group-hover:text-foreground",
+                    ].join(" ")}
+                  >
+                    {tab.label}
+                    {isActive && (
+                      <motion.span
+                        layoutId="lume-services-tab-underline"
+                        className="absolute left-0 right-0 -bottom-1.5 h-[1.5px] bg-primary"
+                        transition={
+                          prefersReduced
+                            ? { duration: 0 }
+                            : { type: "spring", stiffness: 380, damping: 38 }
+                        }
+                      />
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* PANEL — crossfades on tab switch */}
+          <div className="min-h-[360px] lg:min-h-[420px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeCat.key}
+                id={`services-panel-${activeCat.key}`}
+                role="tabpanel"
+                initial={{ opacity: 0, x: prefersReduced ? 0 : 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: prefersReduced ? 0 : -8 }}
+                transition={{ duration: 0.4, ease }}
+              >
+                {showLead && (
+                  <p className="font-display italic text-lg md:text-xl font-light text-muted-foreground max-w-md mb-10 leading-snug">
+                    <span className="not-italic font-normal text-foreground">
+                      {t(
+                        "services",
+                        "signature.lead.bold",
+                        "Collecting, with LUME."
+                      )}
+                    </span>{" "}
+                    {t(
+                      "services",
+                      "signature.lead.tail",
+                      "Objects that shape space and quietly define how you live."
+                    )}
+                  </p>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-10">
+                  {activeCat.items.map((item, idx) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, x: prefersReduced ? 0 : 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{
+                        duration: 0.45,
+                        delay: prefersReduced ? 0 : idx * 0.045,
+                        ease,
+                      }}
+                      className="group"
+                    >
+                      <h3 className="font-display text-lg md:text-xl font-normal text-foreground mb-2.5">
+                        {item.title}
+                      </h3>
+                      <div className="w-[18px] h-px bg-primary/55 mb-3 transition-[width] duration-500 group-hover:w-9" />
+                      {item.description && (
+                        <p className="text-[13px] md:text-sm leading-relaxed text-muted-foreground font-light">
+                          {item.description}
+                        </p>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </section>
