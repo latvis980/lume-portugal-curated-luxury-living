@@ -221,7 +221,7 @@ function FounderRow({ member, reverse }: { member: TeamMember; reverse: boolean 
       className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10 lg:gap-16 items-start"
     >
       {/* Square photo */}
-      <div className={`md:col-span-5 ${reverse ? "md:order-2" : ""}`}>
+      <div className={`md:col-span-4 ${reverse ? "md:order-2" : ""}`}>
         <div className="aspect-square w-full overflow-hidden bg-muted">
           {member.image_url ? (
             <img
@@ -239,7 +239,7 @@ function FounderRow({ member, reverse }: { member: TeamMember; reverse: boolean 
       </div>
 
       {/* Text */}
-      <div className={`md:col-span-7 ${reverse ? "md:order-1" : ""}`}>
+      <div className={`md:col-span-8 ${reverse ? "md:order-1" : ""}`}>
         <h3 className="font-display text-2xl md:text-3xl lg:text-4xl font-light text-foreground">
           {member.name}
         </h3>
