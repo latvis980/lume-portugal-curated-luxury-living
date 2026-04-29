@@ -28,7 +28,7 @@ import { useUnsavedChanges } from "./UnsavedChangesContext";
 
 const LOCALE_TABS: { code: Locale; short: string; name: string }[] = [
   { code: "en",    short: "EN", name: "English" },
-  { code: "pt_br", short: "PT", name: "Português (BR)" },
+  { code: "pt_pt", short: "PT", name: "Português (PT)" },
   { code: "ru",    short: "RU", name: "Русский" },
   { code: "es",    short: "ES", name: "Español" },
 ];
