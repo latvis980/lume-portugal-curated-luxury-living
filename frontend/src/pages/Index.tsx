@@ -15,7 +15,6 @@ import HeroSection from "@/components/HeroSection";
 import QuestionnaireSection from "@/components/QuestionnaireSection";
 import ListingsSection from "@/components/ListingsSection";
 import ServicesSection from "@/components/ServicesSection";
-import CuratorSection from "@/components/CuratorSection";
 import ConciergeSection from "@/components/ConciergeSection";
 import InvestmentSection from "@/components/InvestmentSection";
 import PrivateAccessSection from "@/components/PrivateAccessSection";
@@ -63,7 +62,6 @@ const Index = () => {
         )}
       </AnimatePresence>
 
-      <CuratorSection />
       <InvestmentSection />
       <PrivateAccessSection />
       <Footer />
