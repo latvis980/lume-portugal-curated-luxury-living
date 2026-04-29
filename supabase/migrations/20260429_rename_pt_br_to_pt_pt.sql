@@ -1,6 +1,6 @@
 -- Rename Brazilian Portuguese (pt_br) to Portugal Portuguese (pt_pt).
 --
--- The translations table has a dedicated pt_br column → rename it.
+-- The translations table has a dedicated pt_br column for Braziilan Portuguese → rename it.
 -- Listings and services store other locales as JSONB under <field>_i18n,
 -- with a "pt_br" key → rename that key to "pt_pt" wherever it exists.
 
