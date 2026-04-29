@@ -43,21 +43,9 @@ type Step =
   | { kind: "email" }
   | { kind: "thanks" };
 
-// ─── Props ────────────────────────────────────────────────────────────────
-
-interface QuestionnaireSectionProps {
-  /** Called once after a successful email submission. Used to unlock the rest of the page. */
-  onComplete: () => void;
-  /**
-   * When true, the section returns null. Comes from session-level React
-   * state in the parent — there's no persisted "already submitted" flag.
-   */
-  isCompleted: boolean;
-}
-
 // ─── Component ────────────────────────────────────────────────────────────
 
-const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionProps) => {
+const QuestionnaireSection = () => {
   const t = useT();
 
   const [step, setStep] = useState<Step>({ kind: "q1" });
@@ -65,9 +53,6 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-
-  // ── Hide the whole section once the parent says we're done ─────────────
-  if (isCompleted) return null;
 
   // ── Derived: which question is on screen, and progress bar % ──────────
   const currentQuestion =
@@ -139,9 +124,6 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
         throw new Error(data.detail || t("questionnaire", "error.generic", "Something went wrong. Please try again."));
       }
 
-      // Unlock the rest of the page (Listings/Services/Concierge),
-      // then move the questionnaire UI to the thank-you screen.
-      onComplete();
       setStep({ kind: "thanks" });
     } catch (err: any) {
       setError(err.message || t("questionnaire", "error.generic", "Something went wrong. Please try again."));
@@ -172,7 +154,7 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
               {t("questionnaire", "intro.title", "Tell us what you seek")}
             </h2>
             <p className="text-sm text-muted-foreground/70 font-light max-w-md mx-auto">
-              {t("questionnaire", "intro.subtitle", "Answer a few quick questions to unlock exclusive listings and services tailored to you.")}
+              {t("questionnaire", "intro.subtitle", "Answer a few quick questions to receive a list of exclusive listings curated for you.")}
             </p>
           </motion.div>
         )}
@@ -241,10 +223,10 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
               className="text-center max-w-md mx-auto"
             >
               <h3 className="font-display text-2xl md:text-3xl font-light text-foreground mb-4">
-                {t("questionnaire", "email.title", "Unlock your curated selection")}
+                {t("questionnaire", "email.title", "Excited to see what Lume has for you?")}
               </h3>
               <p className="text-sm text-muted-foreground mb-8">
-                {t("questionnaire", "email.subtitle", "Enter your email to reveal properties and services matched to your preferences.")}
+                {t("questionnaire", "email.subtitle", "Enter your email to receive our exclusive properties and services list.")}
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
@@ -276,24 +258,47 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
           {step.kind === "thanks" && (
             <motion.div
               key="thanks"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.25, delayChildren: 0.1 } },
+              }}
               className="text-center max-w-xl mx-auto"
             >
-              <h2 className="font-display text-4xl md:text-6xl font-light text-foreground mb-6">
-                {t("questionnaire", "thanks.title", "Thank you")}
-              </h2>
-              <div className="w-12 h-px bg-primary mx-auto mb-8" />
-              <p className="text-base md:text-lg text-muted-foreground font-light leading-relaxed mb-2">
-                {t("questionnaire", "thanks.message", "While we prepare your selection,")}
-              </p>
-              <Link
-                to="/properties"
-                className="inline-block mt-4 px-10 py-3.5 border border-primary text-primary text-xs tracking-[0.25em] uppercase hover:bg-primary hover:text-primary-foreground transition-colors duration-300"
+              <motion.h2
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
+                }}
+                className="font-display text-4xl md:text-6xl font-light text-foreground mb-6"
               >
-                {t("questionnaire", "thanks.cta", "explore our current homes")}
-              </Link>
+                {t("questionnaire", "thanks.title", "Thank you!")}
+              </motion.h2>
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, scaleX: 0 },
+                  visible: { opacity: 1, scaleX: 1, transition: { duration: 0.6 } },
+                }}
+                className="w-12 h-px bg-primary mx-auto mb-8 origin-center"
+              />
+              <motion.p
+                variants={{
+                  hidden: { opacity: 0, y: 12 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
+                }}
+                className="text-base md:text-lg text-muted-foreground font-light leading-relaxed"
+              >
+                {t("questionnaire", "thanks.message", "While we prepare your selection,")}
+                <br />
+                <Link
+                  to="/properties"
+                  className="text-primary underline-offset-4 hover:underline transition-colors"
+                >
+                  {t("questionnaire", "thanks.cta", "explore our current homes")}
+                </Link>
+                .
+              </motion.p>
             </motion.div>
           )}
 
