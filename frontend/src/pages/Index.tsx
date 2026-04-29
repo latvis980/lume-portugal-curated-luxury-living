@@ -1,4 +1,12 @@
 // frontend/src/pages/Index.tsx
+//
+// Landing page composition. The questionnaire is a soft gate: until the
+// visitor submits their email, the Listings/Services/Concierge sections
+// are hidden. Once they submit, those sections animate in. The "unlocked"
+// state lives only in React — there's no cookie, so a fresh page load
+// shows the questionnaire again. This is intentional: returning visitors
+// can do the questionnaire again if they want to.
+
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -7,17 +15,16 @@ import HeroSection from "@/components/HeroSection";
 import QuestionnaireSection from "@/components/QuestionnaireSection";
 import ListingsSection from "@/components/ListingsSection";
 import ServicesSection from "@/components/ServicesSection";
+import CuratorSection from "@/components/CuratorSection";
 import ConciergeSection from "@/components/ConciergeSection";
 import InvestmentSection from "@/components/InvestmentSection";
 import PrivateAccessSection from "@/components/PrivateAccessSection";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
-import { getCookie, EMAIL_SUBMITTED_KEY } from "@/lib/cookies";
-import type { QuestionnaireAnswers } from "@/lib/questionnaire-filter";
 
 const Index = () => {
-  // Has the visitor already submitted their email? (cookie-based)
-  const [unlocked, setUnlocked] = useState(() => !!getCookie(EMAIL_SUBMITTED_KEY));
+  // Session-only: starts false on every fresh load.
+  const [unlocked, setUnlocked] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -28,19 +35,14 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, [location.hash]);
 
-  // Questionnaire answers — used to filter the listings shown below
-  // Null means: returning visitor who skipped the questionnaire (show unfiltered)
-  const [answers, setAnswers] = useState<QuestionnaireAnswers | null>(null);
-
-  const handleComplete = (submittedAnswers: QuestionnaireAnswers) => {
-    setAnswers(submittedAnswers);
+  const handleComplete = () => {
     setUnlocked(true);
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <HeroSection />
+      <HeroSection unlocked={unlocked} />
 
       <QuestionnaireSection
         onComplete={handleComplete}
@@ -54,16 +56,15 @@ const Index = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            {/* Pass answers — null for returning visitors means no filter applied */}
-            <ListingsSection answers={answers} />
+            <ListingsSection />
             <ServicesSection />
             <ConciergeSection />
           </motion.div>
         )}
       </AnimatePresence>
 
+      <CuratorSection />
       <InvestmentSection />
-
       <PrivateAccessSection />
       <Footer />
       <CookieConsent />

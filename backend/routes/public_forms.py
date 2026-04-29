@@ -9,8 +9,8 @@ The Supabase RLS policy allows anon INSERT on the contacts table.
 """
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, EmailStr
-from typing import Optional, Dict, Any
+from pydantic import BaseModel
+from typing import Optional, Dict
 
 router = APIRouter(prefix="/api", tags=["forms"])
 
@@ -20,9 +20,14 @@ router = APIRouter(prefix="/api", tags=["forms"])
 # ---------------------------------------------------------------------------
 
 class QuestionnaireSubmission(BaseModel):
-    """Submitted when user completes the 5-step questionnaire + email."""
+    """Submitted when user completes the branching questionnaire + email."""
     email: str  # using str instead of EmailStr to avoid extra dep
-    answers: Dict[str, str]  # { "1": "Relocation", "2": "Ocean", ... }
+    answers: Dict[str, str]
+    # Top-level branch derived from Q1 ("relocation" | "second_home" |
+    # "investment" | "exploring"). Sent by the frontend so admin can filter
+    # contacts by branch without parsing the JSON blob. Optional for
+    # backwards compatibility with any older clients.
+    branch: Optional[str] = None
 
 
 class PrivateAccessSubmission(BaseModel):
@@ -47,17 +52,31 @@ async def submit_questionnaire(body: QuestionnaireSubmission):
     """
     Save questionnaire answers + email.
 
-    Called when the user completes the "Discover Your Match" flow
-    and enters their email.
+    Called when the user completes the questionnaire and enters their email.
+    Stores the full answers blob plus the derived branch on the contact row.
     """
     from database import create_contact
 
+    # Build the payload — `branch` is folded into the answers blob so it
+    # lives alongside the rest, AND optionally lifted to a top-level column
+    # if you've added one (`questionnaire_branch`). If that column doesn't
+    # exist, Supabase will reject the unknown column; in that case just
+    # remove the `questionnaire_branch` line below.
+    answers_with_branch = dict(body.answers)
+    if body.branch:
+        # Make sure the branch is in the JSON too, so admin viewers see it
+        # without needing the extra column. The frontend already sends
+        # q1_intent in answers, but this is defensive in case that changes.
+        answers_with_branch.setdefault("_branch", body.branch)
+
+    payload = {
+        "email": body.email,
+        "source": "questionnaire",
+        "questionnaire_answers": answers_with_branch,
+    }
+
     try:
-        contact = create_contact({
-            "email": body.email,
-            "source": "questionnaire",
-            "questionnaire_answers": body.answers,
-        })
+        create_contact(payload)
         return {"status": "ok", "message": "Thank you! We'll curate your selection."}
     except Exception as e:
         error_msg = str(e)
@@ -67,7 +86,7 @@ async def submit_questionnaire(body: QuestionnaireSubmission):
                 from database import _get_admin_client
                 client = _get_admin_client()
                 client.table("contacts").update({
-                    "questionnaire_answers": body.answers,
+                    "questionnaire_answers": answers_with_branch,
                     "source": "questionnaire",
                 }).eq("email", body.email).execute()
                 return {"status": "ok", "message": "Preferences updated!"}
@@ -80,14 +99,12 @@ async def submit_questionnaire(body: QuestionnaireSubmission):
 async def submit_private_access(body: PrivateAccessSubmission):
     """
     Save Private Access form submission.
-
-    Called from the "Request Private Access" form at the bottom
-    of the landing page.
+    Called from the "Request Private Access" form at the bottom of the page.
     """
     from database import create_contact
 
     try:
-        contact = create_contact({
+        create_contact({
             "email": body.email,
             "name": body.name,
             "phone": body.phone,
@@ -119,7 +136,7 @@ async def submit_newsletter(body: NewsletterSubmission):
     from database import create_contact
 
     try:
-        contact = create_contact({
+        create_contact({
             "email": body.email,
             "source": "newsletter",
         })

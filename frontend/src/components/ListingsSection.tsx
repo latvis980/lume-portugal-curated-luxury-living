@@ -1,10 +1,12 @@
 // frontend/src/components/ListingsSection.tsx
+//
+// Public listings grid for the landing page. Always shows the latest
+// available listings unfiltered — questionnaire results no longer drive
+// filtering (we follow up by email with a curated selection instead).
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchListings, type Listing } from "@/lib/public-api";
-import { answersToQuery, type QuestionnaireAnswers } from "@/lib/questionnaire-filter";
-import { useI18n } from "@/lib/i18n";
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -60,28 +62,13 @@ function SkeletonCard({ delay }: { delay: number }) {
   );
 }
 
-// ── Props ─────────────────────────────────────────────────────────────────
-
-interface ListingsSectionProps {
-  /**
-   * Questionnaire answers from the current session.
-   * null = returning visitor who skipped the questionnaire — show unfiltered.
-   * {} (empty) = visitor completed questionnaire but skipped all questions somehow.
-   */
-  answers?: QuestionnaireAnswers | null;
-}
-
 // ── Main Component ───────────────────────────────────────────────────────
 
-const ListingsSection = ({ answers }: ListingsSectionProps) => {
-  // Build the query from answers. If answers is null/undefined, use defaults.
-  const queryParams = answers ? answersToQuery(answers) : { limit: 6 };
-  const { locale } = useI18n();  // ← add this
-
-  // TanStack query — re-fetches automatically when answers change
+const ListingsSection = () => {
+  // Always fetch the latest 6 available listings — no questionnaire filtering.
   const { data, isLoading } = useQuery({
-    queryKey: ["public-listings", queryParams, locale],
-    queryFn: () => fetchListings({ ...queryParams, locale }),
+    queryKey: ["public-listings", { limit: 6 }],
+    queryFn: () => fetchListings({ limit: 6 }),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
@@ -102,11 +89,10 @@ const ListingsSection = ({ answers }: ListingsSectionProps) => {
             Selected Properties
           </p>
           <h2 className="font-display mb-3 text-3xl font-light text-foreground md:text-5xl">
-            Your Curated Selection
+            Our Current Homes
           </h2>
-          {/* Dynamic filter subtitle */}
-          <p className="max-w-2xl mx-auto text-base font-light text-muted-foreground/90">
-            This selection reflects the preferences you shared with us. Browse our full portfolio or reach out for a personally tailored presentation.
+          <p className="max-w-2xl mx-auto text-sm font-light text-muted-foreground/70">
+            A snapshot of what's available right now. Browse our full portfolio or reach out for a personally tailored presentation.
           </p>
         </motion.div>
 
@@ -118,71 +104,63 @@ const ListingsSection = ({ answers }: ListingsSectionProps) => {
             ))}
           </div>
         ) : listings.length === 0 ? (
-          // Empty state — no listings match filters yet
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="py-20 text-center"
           >
             <p className="font-display mb-3 text-xl font-light text-foreground">
-              We're curating your perfect match
+              New listings coming soon
             </p>
-            <p className="mb-8 text-base text-muted-foreground">
-              New properties matching your preferences are added regularly.
+            <p className="mb-8 text-sm text-muted-foreground">
+              Reach out for a personally curated selection.
             </p>
-            <Link
-              to="/properties"
-              className="inline-block border border-border px-8 py-3 text-sm uppercase tracking-[0.2em] text-foreground transition-colors duration-300 font-body hover:bg-muted"
-            >
-              Browse All Properties
-            </Link>
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-3">
-            {listings.map((listing, index) => (
+            {listings.map((listing, i) => (
               <motion.div
                 key={listing.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="group"
               >
-                <Link to={`/properties/${listing.slug}`} className="group block">
-                  {/* Image */}
-                  <div className="relative mb-5 aspect-[4/5] overflow-hidden">
+                <Link to={`/properties/${listing.slug}`} className="block">
+                  <div className="relative mb-5 aspect-[4/5] overflow-hidden rounded-sm bg-muted">
                     <img
                       src={listing.cover_image}
                       alt={listing.title}
-                      loading={index < 3 ? "eager" : "lazy"}
+                      loading={i < 3 ? "eager" : "lazy"}
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute left-4 top-4">
-                      <span className="bg-background/90 px-3 py-1 text-xs uppercase tracking-[0.2em] text-foreground">
+                      <span className="bg-background/90 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-foreground">
                         {getTag(listing)}
                       </span>
                     </div>
                     {listing.listing_type === "rent" && (
                       <div className="absolute right-4 top-4">
-                        <span className="bg-secondary/90 px-3 py-1 text-xs uppercase tracking-[0.2em] text-secondary-foreground">
+                        <span className="bg-secondary/90 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-secondary-foreground">
                           Rent
                         </span>
                       </div>
                     )}
                   </div>
 
-                  {/* Details */}
                   <div>
                     <h3 className="font-display mb-1 text-xl font-light text-foreground transition-colors duration-300 group-hover:text-primary">
                       {listing.title}
                     </h3>
-                    <p className="mb-3 text-sm tracking-wider text-muted-foreground">
+                    <p className="mb-3 text-xs tracking-wider text-muted-foreground">
                       {locationString(listing)}
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="font-display text-lg text-primary">
                         {formatPrice(listing.price, listing.currency, listing.listing_type)}
                       </span>
-                      <span className="text-[13px] tracking-wider text-muted-foreground">
+                      <span className="text-[11px] tracking-wider text-muted-foreground">
                         {formatSpecs(listing)}
                       </span>
                     </div>
@@ -203,7 +181,7 @@ const ListingsSection = ({ answers }: ListingsSectionProps) => {
           >
             <Link
               to="/properties"
-              className="inline-block border border-border px-10 py-3.5 text-sm uppercase tracking-[0.2em] text-foreground transition-colors duration-300 font-body hover:bg-muted"
+              className="inline-block border border-border px-10 py-3.5 text-xs uppercase tracking-[0.2em] text-foreground transition-colors duration-300 font-body hover:bg-muted"
             >
               View All Properties
             </Link>
