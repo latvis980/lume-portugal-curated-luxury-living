@@ -171,8 +171,8 @@ const AboutPage = () => {
 
       {/* ── Team ─────────────────────────────────────────────────────────── */}
       <section className="px-6 md:px-10 lg:px-16 py-14 md:py-20 bg-card">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16 md:mb-20">
             <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">
               {t("about", "team_eyebrow", "Founders & Curators")}
             </p>
@@ -181,9 +181,9 @@ const AboutPage = () => {
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-6">
+          <div className="space-y-24 md:space-y-36">
             {team.map((member, i) => (
-              <FounderCard key={member.id} member={member} index={i} />
+              <FounderRow key={member.id} member={member} reverse={i % 2 === 1} />
             ))}
           </div>
         </div>
@@ -194,9 +194,16 @@ const AboutPage = () => {
   );
 };
 
-function FounderCard({ member, index }: { member: TeamMember; index: number }) {
+function FounderRow({ member, reverse }: { member: TeamMember; reverse: boolean }) {
   const t = useT();
   const bio = t(`team.${member.slug}`, "bio");
+
+  // Split bio on blank lines so editors can write paragraphs in a single
+  // text field (one blank line in the admin = new paragraph on the page).
+  const paragraphs = bio
+    ? bio.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+    : [];
+
   const initials = member.name
     .split(/\s+/)
     .map((s) => s[0])
@@ -207,39 +214,49 @@ function FounderCard({ member, index }: { member: TeamMember; index: number }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: index * 0.08 }}
-      className="flex flex-col items-center text-center"
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.7 }}
+      className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10 lg:gap-16 items-start"
     >
-      <div className="relative w-28 h-28 md:w-32 md:h-32 mb-5 overflow-hidden rounded-full bg-muted">
-        {member.image_url ? (
-          <img
-            src={member.image_url}
-            alt={member.name}
-            className="w-full h-full object-cover grayscale"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-sand text-charcoal/60 font-display text-2xl">
-            {initials || "·"}
+      {/* Square photo */}
+      <div className={`md:col-span-5 ${reverse ? "md:order-2" : ""}`}>
+        <div className="aspect-square w-full overflow-hidden bg-muted">
+          {member.image_url ? (
+            <img
+              src={member.image_url}
+              alt={member.name}
+              className="w-full h-full object-cover grayscale"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-sand text-charcoal/60 font-display text-5xl">
+              {initials || "·"}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Text */}
+      <div className={`md:col-span-7 ${reverse ? "md:order-1" : ""}`}>
+        <h3 className="font-display text-2xl md:text-3xl lg:text-4xl font-light text-foreground">
+          {member.name}
+        </h3>
+        {member.role && (
+          <p className="text-[10px] md:text-xs tracking-[0.25em] uppercase text-primary mt-3">
+            {member.role}
+          </p>
+        )}
+        <div className="w-12 h-px bg-primary my-6" />
+        {paragraphs.length > 0 && (
+          <div className="space-y-4 text-base md:text-lg text-muted-foreground leading-relaxed">
+            {paragraphs.map((para, idx) => (
+              <p key={idx}>{para}</p>
+            ))}
           </div>
         )}
       </div>
-      <h3 className="font-display text-lg font-light text-foreground">
-        {member.name}
-      </h3>
-      {member.role && (
-        <p className="text-[10px] tracking-[0.2em] uppercase text-primary mt-1 mb-3">
-          {member.role}
-        </p>
-      )}
-      {bio && (
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          {bio}
-        </p>
-      )}
     </motion.div>
   );
 }

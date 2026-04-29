@@ -28,7 +28,7 @@ import { useUnsavedChanges } from "./UnsavedChangesContext";
 
 const LOCALE_TABS: { code: Locale; short: string; name: string }[] = [
   { code: "en",    short: "EN", name: "English" },
-  { code: "pt_pt", short: "PT", name: "Portuguese" },
+  { code: "pt_br", short: "PT", name: "Português (BR)" },
   { code: "ru",    short: "RU", name: "Русский" },
   { code: "es",    short: "ES", name: "Español" },
 ];
@@ -548,9 +548,9 @@ function TeamMemberRow({ member, bioRow, onEdit, onDelete, onBioSaved }: TeamMem
       {/* Bio — multilingual */}
       <TranslationField
         label="Bio"
-        hint={`Bio for ${member.name} — shown on the About page below their photo`}
+        hint={`Bio for ${member.name}. Press Enter twice to start a new paragraph — blank lines become paragraph breaks on the live page.`}
         row={bioRow}
-        rows={3}
+        rows={10}
         onSaved={onBioSaved}
       />
     </div>
