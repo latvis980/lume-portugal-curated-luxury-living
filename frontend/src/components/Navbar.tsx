@@ -71,15 +71,15 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center h-16 md:h-28 gap-6">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-sand/85 backdrop-blur-md border-b border-border/50">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center h-14 md:h-[5.5rem] gap-6">
 
         {/* Logo */}
         <a href="/" className="flex items-center leading-none flex-shrink-0">
           <img
             src="/logo.png"
             alt="LUME by Mark"
-            className="h-16 md:h-20 w-auto"
+            className="h-12 md:h-16 w-auto"
           />
         </a>
 
