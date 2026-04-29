@@ -15,7 +15,6 @@ import HeroSection from "@/components/HeroSection";
 import QuestionnaireSection from "@/components/QuestionnaireSection";
 import ListingsSection from "@/components/ListingsSection";
 import ServicesSection from "@/components/ServicesSection";
-import ConciergeSection from "@/components/ConciergeSection";
 import InvestmentSection from "@/components/InvestmentSection";
 import PrivateAccessSection from "@/components/PrivateAccessSection";
 import Footer from "@/components/Footer";
@@ -57,7 +56,6 @@ const Index = () => {
           >
             <ListingsSection />
             <ServicesSection />
-            <ConciergeSection />
           </motion.div>
         )}
       </AnimatePresence>

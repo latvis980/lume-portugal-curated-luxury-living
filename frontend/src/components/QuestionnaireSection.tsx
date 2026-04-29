@@ -263,7 +263,7 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
                 >
                   {isSubmitting
                     ? t("questionnaire", "email.button_loading", "Sending…")
-                    : t("questionnaire", "email.button", "Reveal")}
+                    : t("questionnaire", "email.button", "Send")}
                 </button>
               </div>
               {error && (
@@ -286,13 +286,13 @@ const QuestionnaireSection = ({ onComplete, isCompleted }: QuestionnaireSectionP
               </h2>
               <div className="w-12 h-px bg-primary mx-auto mb-8" />
               <p className="text-base md:text-lg text-muted-foreground font-light leading-relaxed mb-2">
-                {t("questionnaire", "thanks.message", "While we prepare your selection, you can")}
+                {t("questionnaire", "thanks.message", "While we prepare your selection,")}
               </p>
               <Link
                 to="/properties"
                 className="inline-block mt-4 px-10 py-3.5 border border-primary text-primary text-xs tracking-[0.25em] uppercase hover:bg-primary hover:text-primary-foreground transition-colors duration-300"
               >
-                {t("questionnaire", "thanks.cta", "explore our current homes")} →
+                {t("questionnaire", "thanks.cta", "explore our current homes")}
               </Link>
             </motion.div>
           )}
