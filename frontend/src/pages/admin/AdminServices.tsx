@@ -1,6 +1,6 @@
 // frontend/src/pages/admin/AdminServices.tsx
 // ⚠️  Category values MUST match the Postgres enum exactly:
-//     administrative | healthcare_family | home | investment_advisory
+//     settling_in | health | education | lifestyle | environment | leisure | signature
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -28,10 +28,13 @@ const LOCALE_TABS: { code: I18nLocale; short: string; name: string }[] = [
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
-  { value: "administrative",      label: "Administrative" },
-  { value: "healthcare_family",   label: "Healthcare & Family" },
-  { value: "home",                label: "Home & Lifestyle" },
-  { value: "investment_advisory", label: "Investment Advisory" },
+  { value: "settling_in",  label: "Settling In"  },
+  { value: "health",       label: "Health"       },
+  { value: "education",    label: "Education"    },
+  { value: "lifestyle",    label: "Lifestyle"    },
+  { value: "environment",  label: "Environment" },
+  { value: "leisure",      label: "Leisure"      },
+  { value: "signature",    label: "Signature"    },
 ] as const;
 
 type CategoryValue = (typeof CATEGORIES)[number]["value"];
@@ -53,7 +56,7 @@ const EMPTY_FORM = {
   subtitle_i18n:    { ...EMPTY_I18N } as I18nValues,
   description:      "",
   description_i18n: { ...EMPTY_I18N } as I18nValues,
-  category:         "administrative" as CategoryValue,
+  category:         "settling_in" as CategoryValue,
   sort_order:       0,
   is_active:        true,
 };
