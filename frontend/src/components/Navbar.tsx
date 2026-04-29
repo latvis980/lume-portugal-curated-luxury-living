@@ -26,7 +26,7 @@ const Navbar = () => {
     {
       label:    t("nav", "collect_with_lume",           "Investment"),
       subtitle: t("nav", "collect_with_lume_sub",       "Thinking beyond the present"),
-      href:     "/#art-advisory",
+      href:     "/#investment",
     },
     {
       label:    t("nav", "about",                       "About us"),
