@@ -67,13 +67,21 @@ const QuestionnaireSection = () => {
   }, [step.kind, isMobile]);
 
   // Lock body scroll while the mobile pop-up is showing so the page can't
-  // shift around behind it.
+  // shift around behind it. Pad the body by the scrollbar width while
+  // locked so the layout doesn't get wider when the scrollbar disappears.
   useEffect(() => {
     if (!mobileThanksOpen) return;
-    const original = document.body.style.overflow;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    const originalOverflow = document.body.style.overflow;
+    const originalPaddingRight = document.body.style.paddingRight;
     document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
     return () => {
-      document.body.style.overflow = original;
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
     };
   }, [mobileThanksOpen]);
 
@@ -367,7 +375,7 @@ const QuestionnaireSection = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
-                className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm md:hidden"
+                className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden p-4 bg-background/80 backdrop-blur-sm md:hidden"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="mobile-thanks-title"
@@ -377,7 +385,7 @@ const QuestionnaireSection = () => {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.96, y: 8 }}
                   transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative mx-4 my-6 w-[calc(100vw-2rem)] max-h-[calc(100vh-3rem)] overflow-y-auto bg-card border border-primary/30 shadow-2xl"
+                  className="relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto overflow-x-hidden bg-card border border-primary/30 shadow-2xl"
                 >
                   {/* Animated close button */}
                   <motion.button
