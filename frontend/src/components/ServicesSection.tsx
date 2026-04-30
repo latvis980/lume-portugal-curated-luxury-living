@@ -30,7 +30,7 @@ const CATEGORIES: readonly CategoryDef[] = [
   { key: "lifestyle",    numeral: "04", defaultLabel: "Lifestyle"    },
   { key: "environment",  numeral: "05", defaultLabel: "Environment" },
   { key: "leisure",      numeral: "06", defaultLabel: "Leisure"      },
-  { key: "signature",    numeral: "07", defaultLabel: "Signature"    },
+  { key: "signature",    numeral: "07", defaultLabel: "Signature services"    },
 ] as const;
 
 const ServicesSection = () => {

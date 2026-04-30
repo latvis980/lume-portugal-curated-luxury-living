@@ -13,7 +13,7 @@ INSERT INTO public.translations (namespace, key, en) VALUES
   ('services', 'category.lifestyle',   'Lifestyle'),
   ('services', 'category.environment', 'Environment'),
   ('services', 'category.leisure',     'Leisure'),
-  ('services', 'category.signature',   'Signature'),
+  ('services', 'category.signature',   'Signature services'),
   ('services', 'signature.lead.bold',  'Collecting, with LUME.'),
   ('services', 'signature.lead.tail',  'Objects that shape space and quietly define how you live.')
 ON CONFLICT (namespace, key) DO UPDATE SET

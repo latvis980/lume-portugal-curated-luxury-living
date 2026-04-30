@@ -34,7 +34,7 @@ const CATEGORIES = [
   { value: "lifestyle",    label: "Lifestyle"    },
   { value: "environment",  label: "Environment" },
   { value: "leisure",      label: "Leisure"      },
-  { value: "signature",    label: "Signature"    },
+  { value: "signature",    label: "Signature services"    },
 ] as const;
 
 type CategoryValue = (typeof CATEGORIES)[number]["value"];
