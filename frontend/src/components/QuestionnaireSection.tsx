@@ -138,37 +138,38 @@ const QuestionnaireSection = () => {
     <section id="questionnaire" className="min-h-screen flex items-center bg-card section-padding">
       <div className="max-w-3xl mx-auto w-full">
 
-        {/* Intro — hidden on the 'thanks' screen so it has full focus */}
-        {step.kind !== "thanks" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">
-              {t("questionnaire", "intro.eyebrow", "Discover your match")}
-            </p>
-            <h2 className="font-display text-3xl md:text-5xl font-light text-foreground mb-4">
-              {t("questionnaire", "intro.title", "Tell us what you seek")}
-            </h2>
-            <p className="text-sm text-muted-foreground/70 font-light max-w-md mx-auto">
-              {t("questionnaire", "intro.subtitle", "Answer a few quick questions to receive a list of exclusive listings curated for you.")}
-            </p>
-          </motion.div>
-        )}
+        {/* Intro — hidden but space-reserved on the 'thanks' screen
+            so the heading below stays in the same vertical position. */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className={`text-center mb-16 ${step.kind === "thanks" ? "invisible" : ""}`}
+          aria-hidden={step.kind === "thanks"}
+        >
+          <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">
+            {t("questionnaire", "intro.eyebrow", "Discover your match")}
+          </p>
+          <h2 className="font-display text-3xl md:text-5xl font-light text-foreground mb-4">
+            {t("questionnaire", "intro.title", "Tell us what you seek")}
+          </h2>
+          <p className="text-sm text-muted-foreground/70 font-light max-w-md mx-auto">
+            {t("questionnaire", "intro.subtitle", "Answer a few quick questions to receive a list of exclusive listings curated for you.")}
+          </p>
+        </motion.div>
 
-        {/* Progress bar — hidden on the thanks screen */}
-        {step.kind !== "thanks" && (
-          <div className="w-full h-px bg-border mb-16 relative">
-            <motion.div
-              className="absolute top-0 left-0 h-full bg-primary"
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-        )}
+        {/* Progress bar — hidden but space-reserved on the thanks screen */}
+        <div
+          className={`w-full h-px bg-border mb-16 relative ${step.kind === "thanks" ? "invisible" : ""}`}
+          aria-hidden={step.kind === "thanks"}
+        >
+          <motion.div
+            className="absolute top-0 left-0 h-full bg-primary"
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.5 }}
+          />
+        </div>
 
         <AnimatePresence mode="wait">
 
@@ -287,7 +288,7 @@ const QuestionnaireSection = () => {
                   hidden: { opacity: 0, y: 12 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
                 }}
-                className="text-base md:text-lg text-muted-foreground font-light leading-relaxed"
+                className="text-base md:text-lg text-muted-foreground font-light leading-relaxed mb-12"
               >
                 {t("questionnaire", "thanks.message", "While we prepare your selection,")}
                 <br />
@@ -299,6 +300,20 @@ const QuestionnaireSection = () => {
                 </Link>
                 .
               </motion.p>
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 1 } },
+                }}
+                className="overflow-hidden"
+              >
+                <img
+                  src="/ocean.jpg"
+                  alt=""
+                  aria-hidden="true"
+                  className="w-full h-48 md:h-64 object-cover"
+                />
+              </motion.div>
             </motion.div>
           )}
 
