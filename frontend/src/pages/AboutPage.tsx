@@ -61,7 +61,7 @@ const AboutPage = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="font-display text-3xl md:text-5xl lg:text-6xl font-light text-sand-light max-w-3xl"
+            className="font-display text-2xl md:text-4xl lg:text-5xl font-light text-sand-light max-w-3xl"
           >
             {t("about", "title", "A calm, precise way to enter life in Portugal")}
           </motion.h1>
@@ -82,12 +82,12 @@ const AboutPage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="font-display text-2xl md:text-3xl font-light text-foreground italic leading-relaxed"
+            className="font-display text-lg md:text-2xl font-light text-foreground italic leading-relaxed"
           >
             {t("about", "tagline")}
           </motion.p>
 
-          <div className="mt-8 space-y-5 text-lg text-muted-foreground leading-relaxed">
+          <div className="mt-8 space-y-5 text-sm text-muted-foreground leading-relaxed">
             <p>{t("about", "intro_p1")}</p>
             <p>{t("about", "intro_p2")}</p>
             <p>{t("about", "intro_p3")}</p>
@@ -98,12 +98,12 @@ const AboutPage = () => {
       {/* ── What we do ───────────────────────────────────────────────────── */}
       <section className="px-6 md:px-10 lg:px-16 py-14 md:py-20 bg-card">
         <div className="max-w-3xl mx-auto">
-          <h2 className="font-display text-4xl md:text-5xl font-light text-foreground mb-4">
+          <h2 className="font-display text-3xl md:text-4xl font-light text-foreground mb-4">
             {t("about", "what_we_do_title", "What we do")}
           </h2>
           <div className="w-12 h-px bg-primary mb-6" />
 
-          <p className="text-lg text-foreground mb-5">
+          <p className="text-sm text-foreground mb-5">
             {t("about", "what_we_do_lead", "LUME connects three layers:")}
           </p>
 
@@ -111,14 +111,14 @@ const AboutPage = () => {
             {["homes", "living", "collecting"].map((k) => (
               <li
                 key={k}
-                className="pl-5 border-l border-primary/40 text-lg text-muted-foreground leading-relaxed"
+                className="pl-5 border-l border-primary/40 text-sm text-muted-foreground leading-relaxed"
               >
                 {t("about", `what_we_do_${k}`)}
               </li>
             ))}
           </ul>
 
-          <p className="text-lg text-muted-foreground italic">
+          <p className="text-sm text-muted-foreground italic">
             {t("about", "what_we_do_outro")}
           </p>
         </div>
@@ -127,11 +127,11 @@ const AboutPage = () => {
       {/* ── How we work ──────────────────────────────────────────────────── */}
       <section className="px-6 md:px-10 lg:px-16 py-14 md:py-20 bg-background">
         <div className="max-w-3xl mx-auto">
-          <h2 className="font-display text-4xl md:text-5xl font-light text-foreground mb-4">
+          <h2 className="font-display text-3xl md:text-4xl font-light text-foreground mb-4">
             {t("about", "how_we_work_title", "How we work")}
           </h2>
           <div className="w-12 h-px bg-primary mb-6" />
-          <div className="space-y-5 text-lg text-muted-foreground leading-relaxed">
+          <div className="space-y-5 text-sm text-muted-foreground leading-relaxed">
             <p>{t("about", "how_we_work_p1")}</p>
             <p>{t("about", "how_we_work_p2")}</p>
             <p>{t("about", "how_we_work_p3")}</p>
@@ -142,11 +142,11 @@ const AboutPage = () => {
       {/* ── Why LUME ─────────────────────────────────────────────────────── */}
       <section className="px-6 md:px-10 lg:px-16 py-14 md:py-20 bg-card">
         <div className="max-w-3xl mx-auto">
-          <h2 className="font-display text-4xl md:text-5xl font-light text-foreground mb-4">
+          <h2 className="font-display text-3xl md:text-4xl font-light text-foreground mb-4">
             {t("about", "why_lume_title", "Why LUME")}
           </h2>
           <div className="w-12 h-px bg-primary mb-6" />
-          <div className="space-y-5 text-lg text-muted-foreground leading-relaxed">
+          <div className="space-y-5 text-sm text-muted-foreground leading-relaxed">
             <p>{t("about", "why_lume_p1")}</p>
             <p>{t("about", "why_lume_p2")}</p>
           </div>
@@ -156,14 +156,14 @@ const AboutPage = () => {
       {/* ── Our goal ─────────────────────────────────────────────────────── */}
       <section className="px-6 md:px-10 lg:px-16 py-14 md:py-20 bg-background">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-display text-4xl md:text-5xl font-light text-foreground mb-4">
+          <h2 className="font-display text-3xl md:text-4xl font-light text-foreground mb-4">
             {t("about", "goal_title", "Our goal")}
           </h2>
           <div className="w-12 h-px bg-primary mb-6 mx-auto" />
-          <p className="font-display text-2xl md:text-3xl font-light text-foreground italic leading-relaxed mb-4">
+          <p className="font-display text-lg md:text-2xl font-light text-foreground italic leading-relaxed mb-4">
             {t("about", "goal_p1")}
           </p>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {t("about", "goal_p2")}
           </p>
         </div>
@@ -176,7 +176,7 @@ const AboutPage = () => {
             <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">
               {t("about", "team_eyebrow", "Founders & Curators")}
             </p>
-            <h2 className="font-display text-4xl md:text-5xl font-light text-foreground">
+            <h2 className="font-display text-3xl md:text-4xl font-light text-foreground">
               {t("about", "team_title", "The people behind LUME")}
             </h2>
           </div>
@@ -240,7 +240,7 @@ function FounderRow({ member, reverse }: { member: TeamMember; reverse: boolean 
 
       {/* Text */}
       <div className={`md:col-span-8 ${reverse ? "md:order-1" : ""}`}>
-        <h3 className="font-display text-2xl md:text-3xl lg:text-4xl font-light text-foreground">
+        <h3 className="font-display text-lg md:text-2xl lg:text-3xl font-light text-foreground">
           {member.name}
         </h3>
         {member.role && (
@@ -250,7 +250,7 @@ function FounderRow({ member, reverse }: { member: TeamMember; reverse: boolean 
         )}
         <div className="w-12 h-px bg-primary my-6" />
         {paragraphs.length > 0 && (
-          <div className="space-y-4 text-base md:text-lg text-muted-foreground leading-relaxed">
+          <div className="space-y-4 text-xs md:text-sm text-muted-foreground leading-relaxed">
             {paragraphs.map((para, idx) => (
               <p key={idx}>{para}</p>
             ))}
