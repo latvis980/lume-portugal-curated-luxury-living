@@ -41,7 +41,7 @@ const PrivateAccessSection = () => {
   };
 
   return (
-    <section id="private-access" className="section-padding bg-[#5398b5]">
+    <section id="private-access" className="section-padding bg-[#4e8ba1]">
       <div className="max-w-3xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
