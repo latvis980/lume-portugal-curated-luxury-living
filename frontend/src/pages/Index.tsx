@@ -12,7 +12,7 @@ import HeroSection from "@/components/HeroSection";
 import QuestionnaireSection from "@/components/QuestionnaireSection";
 import ServicesSection from "@/components/ServicesSection";
 import InvestmentSection from "@/components/InvestmentSection";
-import PrivateAccessSection from "@/components/PrivateAccessSection";
+import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 
@@ -34,7 +34,7 @@ const Index = () => {
       <QuestionnaireSection />
       <ServicesSection />
       <InvestmentSection />
-      <PrivateAccessSection />
+      <ContactSection />
       <Footer />
       <CookieConsent />
     </div>
