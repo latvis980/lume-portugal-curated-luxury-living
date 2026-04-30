@@ -278,7 +278,7 @@ const QuestionnaireSection = () => {
                   placeholder={t("questionnaire", "email.placeholder", "your@email.com")}
                   required
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-3 bg-background border border-border text-foreground text-sm tracking-wider placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-3 bg-background border border-border text-foreground text-base sm:text-sm tracking-wider placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
                 />
                 <button
                   type="submit"
