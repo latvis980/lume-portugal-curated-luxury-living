@@ -19,7 +19,7 @@ const NumberedBlock = ({
       style={{
         color: ACCENT,
         fontWeight: 300,
-        fontSize: "clamp(28px, 4vw, 36px)",
+        fontSize: "clamp(34px, 4.8vw, 43px)",
       }}
     >
       {number}
@@ -36,7 +36,7 @@ const NumberedBlock = ({
       >
         {heading}
       </h3>
-      <div className="font-body" style={{ fontSize: "15px", lineHeight: 1.75, color: "#c8c2b6" }}>
+      <div className="font-body" style={{ fontSize: "18px", lineHeight: 1.75, color: "#c8c2b6" }}>
         {children}
       </div>
     </div>
@@ -144,7 +144,7 @@ const InvestmentSection = () => {
                       flexShrink: 0,
                     }}
                   />
-                  <span style={{ fontSize: "15px", lineHeight: 1.7, color: "#e8e4dc" }}>
+                  <span style={{ fontSize: "18px", lineHeight: 1.7, color: "#e8e4dc" }}>
                     {value}
                   </span>
                 </li>
@@ -168,7 +168,7 @@ const InvestmentSection = () => {
             className="font-display text-center"
             style={{
               fontStyle: "italic",
-              fontSize: "17px",
+              fontSize: "20px",
               color: "#d8d2c4",
               lineHeight: 1.7,
               margin: 0,
@@ -199,7 +199,7 @@ const InvestmentSection = () => {
             style={{
               marginTop: "18px",
               maxWidth: "460px",
-              fontSize: "14px",
+              fontSize: "17px",
               lineHeight: 1.75,
               color: "#a8a29a",
             }}
@@ -220,7 +220,7 @@ const InvestmentSection = () => {
               backgroundColor: ACCENT,
               color: "#0f0f0f",
               padding: "14px 36px",
-              fontSize: "13px",
+              fontSize: "16px",
               fontWeight: 500,
               letterSpacing: "2px",
               textTransform: "uppercase",
