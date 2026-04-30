@@ -79,7 +79,7 @@ const Navbar = () => {
           <img
             src="/logo.png"
             alt="LUME by Mark"
-            className="h-12 md:h-16 w-auto"
+            className="h-[3.6rem] md:h-[4.8rem] w-auto"
           />
         </a>
 
@@ -101,10 +101,10 @@ const Navbar = () => {
                 transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
                 className="flex flex-col"
               >
-                <span className="flex items-center justify-center h-9 text-[11px] tracking-[0.22em] uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-300 whitespace-nowrap">
+                <span className="flex items-center justify-center h-9 text-[12.65px] tracking-[0.22em] uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-300 whitespace-nowrap">
                   {item.label}
                 </span>
-                <span className="flex items-center justify-center h-9 text-[11px] italic font-serif tracking-wide text-foreground whitespace-nowrap">
+                <span className="flex items-center justify-center h-9 text-[12.65px] italic font-serif tracking-wide text-foreground whitespace-nowrap">
                   {item.subtitle}
                 </span>
               </motion.div>
@@ -144,10 +144,10 @@ const Navbar = () => {
                   onClick={(e) => handleMobileNavClick(e, item.href)}
                   className="flex flex-col gap-0.5"
                 >
-                  <span className="text-sm tracking-[0.2em] uppercase text-foreground">
+                  <span className="text-[16.1px] tracking-[0.2em] uppercase text-foreground">
                     {item.label}
                   </span>
-                  <span className="text-xs italic font-serif text-muted-foreground">
+                  <span className="text-[13.8px] italic font-serif text-muted-foreground">
                     {item.subtitle}
                   </span>
                 </a>
