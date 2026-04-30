@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useI18n } from "@/lib/i18n";
 
 const ACCENT = "#fabe1e";
 const QUOTE_RULE = "rgba(250, 190, 30, 0.15)";
@@ -48,6 +49,7 @@ const Paragraph = ({ children }: { children: ReactNode }) => (
 );
 
 const InvestmentSection = () => {
+  const { t } = useI18n();
   return (
     <section
       id="investment"
@@ -76,7 +78,7 @@ const InvestmentSection = () => {
               marginBottom: "16px",
             }}
           >
-            Quiet Opportunities
+            {t("investment", "eyebrow", "Quiet Opportunities")}
           </div>
           <h2
             id="investment-heading"
@@ -88,7 +90,7 @@ const InvestmentSection = () => {
               margin: 0,
             }}
           >
-            Investing in real estate in Portugal
+            {t("investment", "heading", "Investing in real estate in Portugal")}
           </h2>
           <div style={{ width: "40px", height: "1px", backgroundColor: ACCENT, marginTop: "24px" }} />
         </div>
