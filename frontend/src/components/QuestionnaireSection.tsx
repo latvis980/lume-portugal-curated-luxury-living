@@ -23,10 +23,13 @@
 // once they've submitted (otherwise refreshing the page mid-session would be
 // painful).
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Q1,
   BRANCHES,
@@ -47,12 +50,42 @@ type Step =
 
 const QuestionnaireSection = () => {
   const t = useT();
+  const isMobile = useIsMobile();
 
   const [step, setStep] = useState<Step>({ kind: "q1" });
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [mobileThanksOpen, setMobileThanksOpen] = useState(false);
+
+  // Open the mobile thank-you pop-up the moment we land on the thanks step.
+  useEffect(() => {
+    if (step.kind === "thanks" && isMobile) {
+      setMobileThanksOpen(true);
+    }
+  }, [step.kind, isMobile]);
+
+  // Lock body scroll while the mobile pop-up is showing so the page can't
+  // shift around behind it.
+  useEffect(() => {
+    if (!mobileThanksOpen) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [mobileThanksOpen]);
+
+  function closeMobileThanks() {
+    setMobileThanksOpen(false);
+    // Allow body scroll to unlock before scrolling to Services.
+    setTimeout(() => {
+      document
+        .querySelector("#services")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  }
 
   // ── Derived: which question is on screen, and progress bar % ──────────
   const currentQuestion =
@@ -255,7 +288,10 @@ const QuestionnaireSection = () => {
             </motion.form>
           )}
 
-          {/* ─── Thank-you screen ─── */}
+          {/* ─── Thank-you screen ───
+              On mobile we also surface this content as a fixed pop-up
+              modal (see below). The image is suppressed on mobile inline
+              so the section height doesn't jump around behind the modal. */}
           {step.kind === "thanks" && (
             <motion.div
               key="thanks"
@@ -305,7 +341,7 @@ const QuestionnaireSection = () => {
                   hidden: { opacity: 0, y: 20 },
                   visible: { opacity: 1, y: 0, transition: { duration: 1 } },
                 }}
-                className="overflow-hidden"
+                className="overflow-hidden hidden md:block"
               >
                 <img
                   src="/ocean.jpg"
@@ -319,6 +355,97 @@ const QuestionnaireSection = () => {
 
         </AnimatePresence>
       </div>
+
+      {/* ─── Mobile-only pop-up layer ─── */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {mobileThanksOpen && isMobile && (
+              <motion.div
+                key="mobile-thanks-modal"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm md:hidden"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="mobile-thanks-title"
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.94, y: 12 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  className="relative mx-4 my-6 w-[calc(100vw-2rem)] max-h-[calc(100vh-3rem)] overflow-y-auto bg-card border border-primary/30 shadow-2xl"
+                >
+                  {/* Animated close button */}
+                  <motion.button
+                    type="button"
+                    onClick={closeMobileThanks}
+                    aria-label={t("questionnaire", "thanks.close", "Close")}
+                    initial={{ opacity: 0, rotate: -90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    transition={{ delay: 0.4, duration: 0.4 }}
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="absolute top-3 right-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md ring-2 ring-primary/30 ring-offset-2 ring-offset-card hover:bg-primary/90 transition-colors"
+                  >
+                    <X className="h-5 w-5" strokeWidth={2.25} />
+                  </motion.button>
+
+                  <div className="px-6 pt-12 pb-6 text-center">
+                    <motion.h2
+                      id="mobile-thanks-title"
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15, duration: 0.6 }}
+                      className="font-display text-3xl font-light text-foreground mb-4"
+                    >
+                      {t("questionnaire", "thanks.title", "Thank you!")}
+                    </motion.h2>
+                    <motion.div
+                      initial={{ opacity: 0, scaleX: 0 }}
+                      animate={{ opacity: 1, scaleX: 1 }}
+                      transition={{ delay: 0.3, duration: 0.5 }}
+                      className="w-12 h-px bg-primary mx-auto mb-6 origin-center"
+                    />
+                    <motion.p
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4, duration: 0.6 }}
+                      className="text-sm text-muted-foreground font-light leading-relaxed mb-6 px-2"
+                    >
+                      {t("questionnaire", "thanks.message", "While we prepare your selection,")}
+                      <br />
+                      <Link
+                        to="/properties"
+                        className="text-primary underline-offset-4 hover:underline transition-colors"
+                      >
+                        {t("questionnaire", "thanks.cta", "explore our current homes")}
+                      </Link>
+                      .
+                    </motion.p>
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.55, duration: 0.7 }}
+                      className="overflow-hidden"
+                    >
+                      <img
+                        src="/ocean.jpg"
+                        alt=""
+                        aria-hidden="true"
+                        className="w-full h-40 object-cover"
+                      />
+                    </motion.div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body,
+        )}
     </section>
   );
 };
