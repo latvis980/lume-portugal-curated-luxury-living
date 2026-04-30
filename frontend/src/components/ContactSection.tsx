@@ -57,14 +57,14 @@ const ContactSection = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <p className="text-sm tracking-[0.3em] uppercase text-sun-light/90 mb-4">
+          <p className="text-sm tracking-[0.3em] uppercase text-[#b8dce8] mb-4">
             {t("contact", "eyebrow", "Contact")}
           </p>
           <h2 className="font-display text-3xl md:text-5xl font-light text-warm-white mb-4">
             {t("contact", "title", "Get in Touch")}
           </h2>
           <div className="w-16 h-px bg-primary mx-auto mb-8" />
-          <p className="text-base text-ocean-light/90 leading-relaxed max-w-md mx-auto">
+          <p className="text-lg text-white/85 leading-relaxed max-w-md mx-auto">
             {t("contact", "intro", "Reach out to our team. Share your vision and we'll help you find your place in Portugal.")}
           </p>
         </motion.div>
@@ -88,7 +88,7 @@ const ContactSection = () => {
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
                   disabled={isSubmitting}
-                  className="w-full px-4 py-3 bg-transparent border border-warm-white/25 text-warm-white text-base tracking-wider placeholder:text-warm-white/50 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
+                  className="w-full px-4 py-3 bg-transparent border border-warm-white/25 text-warm-white text-lg tracking-wider placeholder:text-warm-white/50 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <input
@@ -98,7 +98,7 @@ const ContactSection = () => {
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     required
                     disabled={isSubmitting}
-                    className="w-full px-4 py-3 bg-transparent border border-warm-white/25 text-warm-white text-base tracking-wider placeholder:text-warm-white/50 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
+                    className="w-full px-4 py-3 bg-transparent border border-warm-white/25 text-warm-white text-lg tracking-wider placeholder:text-warm-white/50 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
                   />
                   <input
                     type="tel"
@@ -106,7 +106,7 @@ const ContactSection = () => {
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     disabled={isSubmitting}
-                    className="w-full px-4 py-3 bg-transparent border border-warm-white/25 text-warm-white text-base tracking-wider placeholder:text-warm-white/50 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
+                    className="w-full px-4 py-3 bg-transparent border border-warm-white/25 text-warm-white text-lg tracking-wider placeholder:text-warm-white/50 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
                   />
                 </div>
                 <textarea
@@ -115,17 +115,17 @@ const ContactSection = () => {
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   rows={4}
                   disabled={isSubmitting}
-                  className="w-full px-4 py-3 bg-transparent border border-warm-white/15 text-warm-white text-sm tracking-wider placeholder:text-warm-white/30 focus:outline-none focus:border-primary/50 transition-colors resize-none disabled:opacity-50"
+                  className="w-full px-4 py-3 bg-transparent border border-warm-white/15 text-warm-white text-base tracking-wider placeholder:text-warm-white/30 focus:outline-none focus:border-primary/50 transition-colors resize-none disabled:opacity-50"
                 />
 
                 {error && (
-                  <p className="text-sm text-red-300 text-center">{error}</p>
+                  <p className="text-base text-red-300 text-center">{error}</p>
                 )}
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 bg-primary text-primary-foreground text-sm tracking-[0.25em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-4 bg-primary text-primary-foreground text-base tracking-[0.25em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting
                     ? t("contact", "submitting", "Sending...")
@@ -141,7 +141,7 @@ const ContactSection = () => {
                 <p className="font-display text-2xl font-light text-warm-white italic mb-3">
                   {t("contact", "thank_you_title", "Thank you")}
                 </p>
-                <p className="text-base text-ocean-light/85">
+                <p className="text-lg text-white/85">
                   {t("contact", "thank_you_body", "A member of our team will be in touch within 24 hours.")}
                 </p>
               </motion.div>
@@ -159,13 +159,13 @@ const ContactSection = () => {
             {/* Phone */}
             {phone && (
               <div>
-                <p className="text-xs tracking-[0.25em] uppercase text-sun-light/70 mb-3">
+                <p className="text-xs tracking-[0.25em] uppercase text-[#b8dce8]/90 mb-3">
                   {t("contact", "phone_label", "Phone")}
                 </p>
                 <div className="flex items-center gap-4">
                   <a
                     href={`tel:${phone}`}
-                    className="font-display text-xl font-light text-warm-white hover:text-sun-light/90 transition-colors"
+                    className="font-display text-xl font-light text-warm-white hover:text-white transition-colors"
                   >
                     {phone}
                   </a>
@@ -196,10 +196,10 @@ const ContactSection = () => {
             {/* Address */}
             {address && (
               <div>
-                <p className="text-xs tracking-[0.25em] uppercase text-sun-light/70 mb-3">
+                <p className="text-xs tracking-[0.25em] uppercase text-[#b8dce8]/90 mb-3">
                   {t("contact", "address_label", "Address")}
                 </p>
-                <p className="text-warm-white/90 leading-relaxed whitespace-pre-line">
+                <p className="text-white/90 text-lg leading-relaxed whitespace-pre-line">
                   {address}
                 </p>
                 {mapsUrl && (
@@ -207,7 +207,7 @@ const ContactSection = () => {
                     href={mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block mt-2 text-sm text-sun-light/70 hover:text-sun-light transition-colors underline underline-offset-2"
+                    className="inline-block mt-2 text-base text-[#b8dce8]/80 hover:text-white transition-colors underline underline-offset-2"
                   >
                     {t("contact", "map_link", "View on map")}
                   </a>
