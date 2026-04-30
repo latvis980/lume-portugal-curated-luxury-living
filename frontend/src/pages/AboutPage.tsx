@@ -61,7 +61,7 @@ const AboutPage = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="font-display text-2xl md:text-4xl lg:text-5xl font-light text-sand-light max-w-3xl"
+            className="font-display text-3xl md:text-5xl lg:text-6xl font-light text-sand-light max-w-3xl"
           >
             {t("about", "title", "A calm, precise way to enter life in Portugal")}
           </motion.h1>
