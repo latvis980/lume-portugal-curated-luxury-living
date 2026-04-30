@@ -11,11 +11,12 @@ import { isAuthenticated, clearToken, verifyAuth } from "@/lib/admin-api";
 import { UnsavedChangesProvider, useUnsavedChanges } from "./UnsavedChangesContext";
 
 const NAV_ITEMS = [
-  { to: "/admin",          label: "Dashboard", icon: "◻" },
-  { to: "/admin/listings", label: "Listings",  icon: "⌂" },
-  { to: "/admin/contacts", label: "Contacts",  icon: "✉" },
-  { to: "/admin/services", label: "Services",  icon: "✦" },
-  { to: "/admin/about",    label: "About",     icon: "✎" },
+  { to: "/admin",                label: "Dashboard",    icon: "◻" },
+  { to: "/admin/listings",       label: "Listings",     icon: "⌂" },
+  { to: "/admin/contacts",       label: "Contacts",     icon: "✉" },
+  { to: "/admin/services",       label: "Services",     icon: "✦" },
+  { to: "/admin/about",          label: "About",        icon: "✎" },
+  { to: "/admin/contact-page",   label: "Contact page", icon: "☎" },
 ];
 
 export default function AdminLayout() {
