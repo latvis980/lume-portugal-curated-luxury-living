@@ -64,7 +64,7 @@ const ServicesSection = () => {
   const ease = [0.22, 0.61, 0.36, 1] as const;
 
   return (
-    <section id="services" className="section-padding bg-card">
+    <section id="services" className="section-padding bg-sand">
       <div className="max-w-7xl mx-auto">
         {/* ─── Header ──────────────────────────────────────── */}
         <motion.div
@@ -74,10 +74,10 @@ const ServicesSection = () => {
           transition={{ duration: 0.7, ease }}
           className="text-center mb-16 md:mb-20"
         >
-          <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">
+          <p className="text-sm tracking-[0.3em] uppercase text-primary mb-4">
             {t("services", "eyebrow", "A LUME Ecosystem")}
           </p>
-          <h2 className="font-display text-3xl md:text-5xl font-light text-foreground">
+          <h2 className="font-display text-[2.15rem] md:text-[3.45rem] font-light text-foreground">
             {t("services", "heading", "Everything you need, curated")}
           </h2>
           <div className="w-10 h-px bg-primary mx-auto mt-6" />
@@ -120,18 +120,18 @@ const ServicesSection = () => {
                   "
                 >
                   <span
-                    className="font-display italic text-sm lg:text-[15px] text-primary leading-none"
+                    className="font-display italic text-base lg:text-[17px] text-primary leading-none"
                     style={{ minWidth: 18 }}
                   >
                     {tab.numeral}
                   </span>
                   <span
                     className={[
-                      "relative text-[11px] tracking-[0.22em] uppercase font-medium",
+                      "relative text-[13px] tracking-[0.22em] uppercase font-medium",
                       "transition-colors duration-300 leading-none",
                       isActive
                         ? "text-foreground"
-                        : "text-muted-foreground group-hover:text-foreground",
+                        : "text-foreground/60 group-hover:text-foreground",
                     ].join(" ")}
                   >
                     {tab.label}
@@ -165,7 +165,7 @@ const ServicesSection = () => {
                 transition={{ duration: 0.4, ease }}
               >
                 {showLead && (
-                  <p className="font-display italic text-lg md:text-xl font-light text-muted-foreground max-w-md mb-10 leading-snug">
+                  <p className="font-display italic text-[1.3rem] md:text-[1.44rem] font-light text-foreground/65 max-w-md mb-10 leading-snug">
                     <span className="not-italic font-normal text-foreground">
                       {t(
                         "services",
@@ -194,12 +194,12 @@ const ServicesSection = () => {
                       }}
                       className="group"
                     >
-                      <h3 className="font-display text-lg md:text-xl font-normal text-foreground mb-2.5">
+                      <h3 className="font-display text-[1.3rem] md:text-[1.44rem] font-normal text-foreground mb-2.5">
                         {item.title}
                       </h3>
                       <div className="w-[18px] h-px bg-primary/55 mb-3 transition-[width] duration-500 group-hover:w-9" />
                       {item.description && (
-                        <p className="text-[13px] md:text-sm leading-relaxed text-muted-foreground font-light">
+                        <p className="text-[15px] md:text-base leading-relaxed text-foreground/65">
                           {item.description}
                         </p>
                       )}
