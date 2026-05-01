@@ -29,11 +29,13 @@ import {
 } from "react";
 
 // ─── Tunable constants ─────────────────────────────────────────────────────
-const OCEAN_COLOR = "#4e8ba1";   // must match PrivateAccessSection's bg
-const WAVE_HEIGHT = 60;          // px — height of the wavy crest area
-const FADE_START = 600;          // px — section.top above this: wave invisible
-const FADE_END   = 80;           // px — section.top below this: wave fully opaque
-const SUBMERGE_AT = 30;          // px — section.top below this: navbar flips, drift freezes
+const OCEAN_COLOR  = "#4e8ba1";  // must match PrivateAccessSection's bg
+const WAVE_HEIGHT  = 60;         // px — height of the wavy crest area
+const SEAM_OVERLAP = 2;          // px — overlap to eliminate sub-pixel gap at boundary
+const FADE_START   = 600;        // px — section.top above this: wave invisible
+const FADE_END     = 80;         // px — section.top below this: wave fully opaque
+                                 //      also where navbar bg begins to fade
+const SUBMERGE_AT  = 0;          // px — section.top ≤ this: text/logo flip, drift freezes
 // ───────────────────────────────────────────────────────────────────────────
 
 interface WaveCtx {
@@ -88,10 +90,9 @@ export const WaveProvider = ({
       const anchorY = Math.max(S, 0);
 
       // Fill covers from viewport-top DOWN to the section's top edge.
-      // This paints the area above the section teal as it rises toward the
-      // navbar — the opposite of the old code, which covered the section's
-      // own content (making the form disappear).
-      const fillHeight = anchorY; // == max(S, 0)
+      // +SEAM_OVERLAP extends it 2px past section.top to prevent the
+      // 1px sub-pixel gap that appears between the fill and section during motion.
+      const fillHeight = anchorY + SEAM_OVERLAP;
 
       // Opacity fades in as the section approaches the navbar.
       const fadeRange = FADE_START - FADE_END;
@@ -100,12 +101,19 @@ export const WaveProvider = ({
         Math.min(1, (FADE_START - Math.max(S, FADE_END)) / fadeRange)
       );
 
+      // Navbar background alpha: goes from 1 (full sand) to 0 (transparent)
+      // as section.top descends from FADE_END to 0. This drives the navbar
+      // bg directly from scroll position so it appears the wave is washing
+      // over it, rather than a timed class-flip.
+      const navBgAlpha = Math.max(0, Math.min(1, S / FADE_END));
+
       // Push values to CSS custom properties on :root, where the
       // overlay reads them. This avoids re-rendering on every scroll frame.
       const root = document.documentElement;
       root.style.setProperty("--lume-wave-anchor", `${anchorY}px`);
       root.style.setProperty("--lume-wave-fill-h", `${fillHeight}px`);
       root.style.setProperty("--lume-wave-opacity", String(opacity));
+      root.style.setProperty("--lume-nav-bg-alpha", String(navBgAlpha));
 
       const isSubmerged = S <= SUBMERGE_AT;
       if (isSubmerged !== lastSubmerged) {
@@ -132,6 +140,7 @@ export const WaveProvider = ({
       root.style.removeProperty("--lume-wave-anchor");
       root.style.removeProperty("--lume-wave-fill-h");
       root.style.removeProperty("--lume-wave-opacity");
+      root.style.removeProperty("--lume-nav-bg-alpha");
       document.body.classList.remove("lume-wave-frozen");
     };
   }, [targetSelector]);
@@ -174,7 +183,7 @@ export const WaveOverlay = () => {
         className="pointer-events-none fixed inset-x-0 top-0"
         style={{
           height: `${WAVE_HEIGHT}px`,
-          transform: `translate3d(0, calc(var(--lume-wave-anchor, 0px) - ${WAVE_HEIGHT}px), 0)`,
+          transform: `translate3d(0, calc(var(--lume-wave-anchor, 0px) - ${WAVE_HEIGHT - SEAM_OVERLAP}px), 0)`,
           opacity: "var(--lume-wave-opacity, 0)",
           zIndex: 31,
           willChange: "transform, opacity",

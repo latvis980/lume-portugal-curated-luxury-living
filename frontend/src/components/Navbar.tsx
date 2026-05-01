@@ -79,16 +79,21 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        submerged
-          ? "bg-transparent border-b border-transparent"
-          : "bg-sand/85 backdrop-blur-md border-b border-border/50"
+      className={`fixed top-0 left-0 right-0 z-50 border-b backdrop-blur-md ${
+        submerged ? "border-transparent" : ""
       }`}
+      style={{
+        // Background and border fade out as the wave rises (driven by scroll
+        // position via --lume-nav-bg-alpha, so it's frame-synced not timed).
+        // Falls back to fully opaque on pages without a WaveProvider.
+        backgroundColor: `hsl(35 30% 88% / calc(0.85 * var(--lume-nav-bg-alpha, 1)))`,
+        borderColor: `hsl(var(--border) / calc(0.5 * var(--lume-nav-bg-alpha, 1)))`,
+      }}
     >
       {/* The descendant-target variant `[&_*]:!text-warm-white` flips every text
           element inside the nav to warm-white when submerged, with a transition. */}
       <div
-        className={`max-w-7xl mx-auto px-6 md:px-12 flex items-center h-14 md:h-[5.5rem] gap-6 transition-colors duration-500 ${
+        className={`max-w-7xl mx-auto px-6 md:px-12 flex items-center h-14 md:h-[5.5rem] gap-6 transition-colors duration-300 ${
           submerged ? "[&_*]:!text-warm-white" : ""
         }`}
       >
