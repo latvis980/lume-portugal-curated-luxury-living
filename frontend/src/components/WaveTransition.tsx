@@ -3,22 +3,25 @@
 // "Ocean wave covers the navbar" effect for the LUME homepage.
 //
 // As the PrivateAccessSection (id="private-access") rises toward the
-// fixed navbar, an ocean-blue wave climbs up and submerges it. The
-// wave keeps drifting horizontally until the navbar is fully covered,
-// at which point the drift freezes.
+// fixed navbar, an ocean-blue wave climbs up and submerges it.
 //
 // Architecture:
 //   <WaveProvider>          ← owns state, listens to scroll
 //     <Navbar />            ← reads useWave() to flip its colors
 //     ...page content...
-//     <PrivateAccessSection /> ← the target (must keep id="private-access")
-//     <WaveOverlay />       ← the visual layer (SVG waves + ocean fill)
+//     <PrivateAccessSection /> ← must contain <WaveCrest /> at its top
+//     <WaveOverlay />       ← fixed fill only (no crests)
 //   </WaveProvider>
 //
-// The overlay sits at z-index 30 (below the navbar's z-50).
-// While the wave is rising and visible, the navbar's sand bg fades out
-// so the wave shows through; once submerged, the navbar text flips to
-// warm-white and the drift animation is paused.
+// The wave CREST SVGs live inside PrivateAccessSection (via <WaveCrest />)
+// so they scroll on the compositor thread alongside the section —
+// eliminating the rAF lag that caused the black gap during fast scrolling.
+//
+// The fill (WaveOverlay) is a fixed element that covers from viewport-top
+// down to the section's top. It uses a large buffer (+160px) so that even
+// when the main thread lags behind the compositor by a frame or two, the
+// fill still reaches the section.  The section's z-[32] stacking context
+// ensures any overshoot is hidden behind its own background.
 
 import {
   createContext,
@@ -29,39 +32,29 @@ import {
 } from "react";
 
 // ─── Tunable constants ─────────────────────────────────────────────────────
-const OCEAN_COLOR  = "#4e8ba1";  // must match PrivateAccessSection's bg
-const WAVE_HEIGHT  = 60;         // px — height of the wavy crest area
-const SEAM_OVERLAP = 2;          // px — overlap to eliminate sub-pixel gap at boundary
-const FADE_START   = 600;        // px — section.top above this: wave invisible
-const FADE_END     = 80;         // px — section.top below this: wave fully opaque
-                                 //      also where navbar bg begins to fade
-const SUBMERGE_AT  = 0;          // px — section.top ≤ this: text/logo flip, drift freezes
+export const OCEAN_COLOR  = "#4e8ba1";  // exported — must match PrivateAccessSection bg
+export const WAVE_HEIGHT  = 60;         // px — height of the wavy crest strip
+export const SEAM_OVERLAP = 2;          // px — crest extends this far into the section
+const FILL_BUFFER  = WAVE_HEIGHT + 100; // px — fill overshoots by this much to bridge lag
+const FADE_START   = 600;              // px — section.top above this: wave invisible
+const FADE_END     = 80;               // px — section.top below this: wave fully opaque
+                                        //      also where navbar bg begins to fade
+const SUBMERGE_AT  = 0;               // px — section.top ≤ this: text/logo flip
 // ───────────────────────────────────────────────────────────────────────────
 
 interface WaveCtx {
-  /** True once the section has fully reached the navbar. */
   submerged: boolean;
 }
 
 const WaveContext = createContext<WaveCtx>({ submerged: false });
 
-/**
- * Hook used by the Navbar (and anything else) to react to the wave state.
- * Returns `{ submerged: false }` when used outside a WaveProvider, so it's
- * safe to call from pages that don't have the wave (e.g. /about, /properties).
- */
 export const useWave = () => useContext(WaveContext);
 
 interface ProviderProps {
   children: ReactNode;
-  /** CSS selector for the section the wave attaches to. */
   targetSelector?: string;
 }
 
-/**
- * Wraps the page. Tracks the position of the target section on every
- * scroll/resize and exposes whether it has "reached" the navbar.
- */
 export const WaveProvider = ({
   children,
   targetSelector = "#private-access",
@@ -76,51 +69,38 @@ export const WaveProvider = ({
       rafId = null;
       const target = document.querySelector(targetSelector) as HTMLElement | null;
       if (!target) {
-        if (lastSubmerged) {
-          lastSubmerged = false;
-          setSubmerged(false);
-        }
+        if (lastSubmerged) { lastSubmerged = false; setSubmerged(false); }
         return;
       }
 
-      const rect = target.getBoundingClientRect();
-      const S = rect.top;                 // distance from top of viewport
-
-      // Wave crest bottom is clamped so it never goes above the viewport top.
+      const S = target.getBoundingClientRect().top;
       const anchorY = Math.max(S, 0);
 
-      // Fill covers from viewport-top DOWN to the section's top edge.
-      // +SEAM_OVERLAP extends it 2px past section.top to prevent the
-      // 1px sub-pixel gap that appears between the fill and section during motion.
-      const fillHeight = anchorY + SEAM_OVERLAP;
+      // Fill height: covers viewport-top down to section-top, plus a generous
+      // buffer so compositor-thread lag never leaves an uncovered gap.
+      // The section's z-[32] stacking context hides any overshoot seamlessly.
+      const fillHeight = anchorY + FILL_BUFFER;
 
-      // Opacity fades in as the section approaches the navbar.
+      // Wave opacity: fades in as section approaches, fully opaque near navbar.
       const fadeRange = FADE_START - FADE_END;
       const opacity = Math.max(
         0,
         Math.min(1, (FADE_START - Math.max(S, FADE_END)) / fadeRange)
       );
 
-      // Navbar background alpha: goes from 1 (full sand) to 0 (transparent)
-      // as section.top descends from FADE_END to 0. This drives the navbar
-      // bg directly from scroll position so it appears the wave is washing
-      // over it, rather than a timed class-flip.
+      // Navbar bg alpha: scroll-synced (1 = full sand, 0 = transparent).
       const navBgAlpha = Math.max(0, Math.min(1, S / FADE_END));
 
-      // Push values to CSS custom properties on :root, where the
-      // overlay reads them. This avoids re-rendering on every scroll frame.
       const root = document.documentElement;
-      root.style.setProperty("--lume-wave-anchor", `${anchorY}px`);
-      root.style.setProperty("--lume-wave-fill-h", `${fillHeight}px`);
-      root.style.setProperty("--lume-wave-opacity", String(opacity));
-      root.style.setProperty("--lume-nav-bg-alpha", String(navBgAlpha));
+      root.style.setProperty("--lume-wave-fill-h",  `${fillHeight}px`);
+      root.style.setProperty("--lume-wave-opacity",  String(opacity));
+      root.style.setProperty("--lume-nav-bg-alpha",  String(navBgAlpha));
 
       const isSubmerged = S <= SUBMERGE_AT;
       if (isSubmerged !== lastSubmerged) {
         lastSubmerged = isSubmerged;
         setSubmerged(isSubmerged);
       }
-      // Body class drives CSS pause of the drift animation.
       document.body.classList.toggle("lume-wave-frozen", isSubmerged);
     };
 
@@ -137,7 +117,6 @@ export const WaveProvider = ({
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", update);
       const root = document.documentElement;
-      root.style.removeProperty("--lume-wave-anchor");
       root.style.removeProperty("--lume-wave-fill-h");
       root.style.removeProperty("--lume-wave-opacity");
       root.style.removeProperty("--lume-nav-bg-alpha");
@@ -153,80 +132,83 @@ export const WaveProvider = ({
 };
 
 /**
- * The visual layer: a fixed-position ocean fill + two horizontally
- * drifting wave SVGs. Drop this anywhere inside <WaveProvider>.
- *
- * z-index = 30, which is ABOVE page content but BELOW the navbar (z-50).
- * The Navbar removes its sand bg while submerged so the wave shows through.
+ * Drop this at the very top of PrivateAccessSection (inside the <section>).
+ * Being part of the section means it scrolls on the compositor thread —
+ * no rAF lag, no black gap during fast scrolling.
  */
-export const WaveOverlay = () => {
-  return (
-    <>
-      {/* Ocean fill — covers from viewport-top DOWN to the section's top edge.
-           No transform: it always anchors to top:0 so it never overlaps the
-           section's own content (form, address, etc.). */}
+export const WaveCrest = () => (
+  <div
+    aria-hidden
+    className="pointer-events-none absolute inset-x-0 overflow-hidden"
+    style={{
+      // Shift up so the crest sits above the section top.
+      // SEAM_OVERLAP lets the teal fill at the SVG bottom overlap the
+      // section by a couple pixels, hiding any sub-pixel seam.
+      top: `${-(WAVE_HEIGHT - SEAM_OVERLAP)}px`,
+      height: `${WAVE_HEIGHT}px`,
+      opacity: "var(--lume-wave-opacity, 0)",
+      // z-1 keeps it inside the section's stacking context (z-[32]),
+      // which already places it above the fill (z-30) in the root context.
+      zIndex: 1,
+    }}
+  >
+    {/* Back layer — slower drift, slightly transparent for depth */}
+    <div className="absolute inset-0 overflow-hidden">
       <div
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 top-0"
-        style={{
-          height: "var(--lume-wave-fill-h, 0px)",
-          opacity: "var(--lume-wave-opacity, 0)",
-          background: OCEAN_COLOR,
-          zIndex: 30,
-          willChange: "height, opacity",
-        }}
-      />
-
-      {/* Wave crests — sit just above the fill, with continuous horizontal drift */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 top-0"
-        style={{
-          height: `${WAVE_HEIGHT}px`,
-          transform: `translate3d(0, calc(var(--lume-wave-anchor, 0px) - ${WAVE_HEIGHT - SEAM_OVERLAP}px), 0)`,
-          opacity: "var(--lume-wave-opacity, 0)",
-          zIndex: 31,
-          willChange: "transform, opacity",
-        }}
+        className="lume-wave-back absolute top-0 h-full"
+        style={{ left: "-50%", width: "200%", opacity: 0.55 }}
       >
-        {/* Back layer — slower, slightly transparent for depth */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div
-            className="lume-wave-back absolute top-0 h-full"
-            style={{ left: "-50%", width: "200%", opacity: 0.55 }}
-          >
-            <svg
-              viewBox="0 0 2880 60"
-              preserveAspectRatio="none"
-              style={{ display: "block", width: "100%", height: "100%" }}
-            >
-              <path
-                d="M0,36 C240,6 480,60 720,36 C960,6 1200,60 1440,36 C1680,6 1920,60 2160,36 C2400,6 2640,60 2880,36 L2880,60 L0,60 Z"
-                fill={OCEAN_COLOR}
-              />
-            </svg>
-          </div>
-        </div>
-
-        {/* Front layer — faster, opposite direction */}
-        <div className="absolute inset-0 overflow-hidden" style={{ top: 6 }}>
-          <div
-            className="lume-wave-front absolute top-0 h-full"
-            style={{ left: "-50%", width: "200%" }}
-          >
-            <svg
-              viewBox="0 0 2880 54"
-              preserveAspectRatio="none"
-              style={{ display: "block", width: "100%", height: "100%" }}
-            >
-              <path
-                d="M0,28 C180,2 420,52 720,28 C1020,6 1140,54 1440,28 C1740,2 1980,52 2160,28 C2340,6 2580,54 2880,28 L2880,54 L0,54 Z"
-                fill={OCEAN_COLOR}
-              />
-            </svg>
-          </div>
-        </div>
+        <svg
+          viewBox="0 0 2880 60"
+          preserveAspectRatio="none"
+          style={{ display: "block", width: "100%", height: "100%" }}
+        >
+          <path
+            d="M0,36 C240,6 480,60 720,36 C960,6 1200,60 1440,36 C1680,6 1920,60 2160,36 C2400,6 2640,60 2880,36 L2880,60 L0,60 Z"
+            fill={OCEAN_COLOR}
+          />
+        </svg>
       </div>
-    </>
-  );
-};
+    </div>
+
+    {/* Front layer — faster drift, opposite direction */}
+    <div className="absolute inset-0 overflow-hidden" style={{ top: 6 }}>
+      <div
+        className="lume-wave-front absolute top-0 h-full"
+        style={{ left: "-50%", width: "200%" }}
+      >
+        <svg
+          viewBox="0 0 2880 54"
+          preserveAspectRatio="none"
+          style={{ display: "block", width: "100%", height: "100%" }}
+        >
+          <path
+            d="M0,28 C180,2 420,52 720,28 C1020,6 1140,54 1440,28 C1740,2 1980,52 2160,28 C2340,6 2580,54 2880,28 L2880,54 L0,54 Z"
+            fill={OCEAN_COLOR}
+          />
+        </svg>
+      </div>
+    </div>
+  </div>
+);
+
+/**
+ * Fixed teal fill only — no crests (those live in <WaveCrest /> inside the
+ * section). Drop anywhere inside <WaveProvider>.
+ *
+ * z-index 30: above page content, below the navbar (z-50) and the
+ * section's own stacking context (z-[32]).
+ */
+export const WaveOverlay = () => (
+  <div
+    aria-hidden
+    className="pointer-events-none fixed inset-x-0 top-0"
+    style={{
+      height: "var(--lume-wave-fill-h, 0px)",
+      opacity: "var(--lume-wave-opacity, 0)",
+      background: OCEAN_COLOR,
+      zIndex: 30,
+      willChange: "height, opacity",
+    }}
+  />
+);
