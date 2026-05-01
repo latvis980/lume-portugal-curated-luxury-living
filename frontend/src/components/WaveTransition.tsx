@@ -39,7 +39,7 @@ const FILL_BUFFER  = WAVE_HEIGHT + 100; // px — fill overshoots by this much t
 const FADE_START   = 600;              // px — section.top above this: wave invisible
 const FADE_END     = 80;               // px — section.top below this: wave fully opaque
                                         //      also where navbar bg begins to fade
-const SUBMERGE_AT  = 0;               // px — section.top ≤ this: text/logo flip
+const SUBMERGE_AT  = 30;               // px — section.top ≤ this: navbar submerges (matches wave_demo_1)
 // ───────────────────────────────────────────────────────────────────────────
 
 interface WaveCtx {
@@ -88,13 +88,9 @@ export const WaveProvider = ({
         Math.min(1, (FADE_START - Math.max(S, FADE_END)) / fadeRange)
       );
 
-      // Navbar bg alpha: scroll-synced (1 = full sand, 0 = transparent).
-      const navBgAlpha = Math.max(0, Math.min(1, S / FADE_END));
-
       const root = document.documentElement;
       root.style.setProperty("--lume-wave-fill-h",  `${fillHeight}px`);
       root.style.setProperty("--lume-wave-opacity",  String(opacity));
-      root.style.setProperty("--lume-nav-bg-alpha",  String(navBgAlpha));
 
       const isSubmerged = S <= SUBMERGE_AT;
       if (isSubmerged !== lastSubmerged) {
@@ -119,7 +115,6 @@ export const WaveProvider = ({
       const root = document.documentElement;
       root.style.removeProperty("--lume-wave-fill-h");
       root.style.removeProperty("--lume-wave-opacity");
-      root.style.removeProperty("--lume-nav-bg-alpha");
       document.body.classList.remove("lume-wave-frozen");
     };
   }, [targetSelector]);

@@ -79,15 +79,19 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 border-b backdrop-blur-md ${
-        submerged ? "border-transparent" : ""
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 border-b"
       style={{
-        // Background and border fade out as the wave rises (driven by scroll
-        // position via --lume-nav-bg-alpha, so it's frame-synced not timed).
-        // Falls back to fully opaque on pages without a WaveProvider.
-        backgroundColor: `hsl(35 30% 88% / calc(0.85 * var(--lume-nav-bg-alpha, 1)))`,
-        borderColor: `hsl(var(--border) / calc(0.5 * var(--lume-nav-bg-alpha, 1)))`,
+        // Matches wave_demo_1: when the wave covers the navbar, bg AND
+        // backdrop-filter both go away so the wavy crest shows through cleanly.
+        // (Leaving backdrop-blur on smears the crest into a flat blue.)
+        backgroundColor: submerged ? "transparent" : "hsl(35 30% 88% / 0.85)",
+        borderColor:     submerged ? "transparent" : "hsl(var(--border) / 0.5)",
+        backdropFilter:        submerged ? "none" : "blur(8px)",
+        WebkitBackdropFilter:  submerged ? "none" : "blur(8px)",
+        transition:
+          "background-color 0.5s ease, border-color 0.5s ease, " +
+          "backdrop-filter 0.5s ease, -webkit-backdrop-filter 0.5s ease, " +
+          "color 0.5s ease",
       }}
     >
       {/* The descendant-target variant `[&_*]:!text-warm-white` flips every text
