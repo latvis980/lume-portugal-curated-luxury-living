@@ -20,6 +20,7 @@ import AdminListingForm from "./pages/admin/AdminListingForm.tsx";
 import AdminContacts from "./pages/admin/AdminContacts.tsx";
 import AdminServices from "./pages/admin/AdminServices.tsx";
 import AdminAbout from "./pages/admin/AdminAbout.tsx";
+import AdminInvestment from "./pages/admin/AdminInvestment.tsx";
 import AdminContactPage from "./pages/admin/AdminContactPage.tsx";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="contacts" element={<AdminContacts />} />
               <Route path="services" element={<AdminServices />} />
               <Route path="about" element={<AdminAbout />} />
+              <Route path="investment" element={<AdminInvestment />} />
               <Route path="contact-page" element={<AdminContactPage />} />
             </Route>
 

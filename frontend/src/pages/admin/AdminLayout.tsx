@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { to: "/admin/contacts",       label: "Contacts",     icon: "✉" },
   { to: "/admin/services",       label: "Services",     icon: "✦" },
   { to: "/admin/about",          label: "About",        icon: "✎" },
+  { to: "/admin/investment",     label: "Investment",   icon: "◉" },
   { to: "/admin/contact-page",   label: "Contact page", icon: "☎" },
 ];
 
