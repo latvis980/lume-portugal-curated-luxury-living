@@ -1,6 +1,7 @@
 // frontend/src/components/PrivateAccessSection.tsx
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { WaveCrest } from "@/components/WaveTransition";
 
 const PrivateAccessSection = () => {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
@@ -41,7 +42,9 @@ const PrivateAccessSection = () => {
   };
 
   return (
-    <section id="private-access" className="section-padding bg-[#4e8ba1]">
+    <section id="private-access" className="relative z-[32] section-padding bg-[#4e8ba1]">
+      {/* Wave crest scrolls with the section (compositor thread) — no rAF lag */}
+      <WaveCrest />
       <div className="max-w-3xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
