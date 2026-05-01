@@ -261,9 +261,35 @@ export default function AdminListingForm() {
     onError: (err: Error) => setError(err.message),
   });
 
+  // Pre-flight validation — surfaces missing required fields with a friendly
+  // message and jumps to the right tab, instead of letting Postgres reject the
+  // row with a raw check-constraint error (e.g. apartment_floor_check).
+  const validateRequired = (): { error: string; section: string } | null => {
+    const f = formRef.current;
+    if (NEEDS_FLOOR.includes(f.property_type) && (f.floor_number === "" || f.floor_number == null)) {
+      return {
+        error: `Floor number is required for ${f.property_type}. Please fill it in the Specs tab.`,
+        section: "specs",
+      };
+    }
+    if (NEEDS_PLOT.includes(f.property_type) && (f.plot_size === "" || f.plot_size == null)) {
+      return {
+        error: `Plot size is required for ${f.property_type}. Please fill it in the Specs tab.`,
+        section: "specs",
+      };
+    }
+    return null;
+  };
+
   // Save button handler — saves then navigates to listings
   const handleSave = () => {
     setError("");
+    const invalid = validateRequired();
+    if (invalid) {
+      setError(invalid.error);
+      setActiveSection(invalid.section);
+      return;
+    }
     saveMutation.mutate(buildPayload(), {
       onSuccess: () => navigate("/admin/listings"),
     });
