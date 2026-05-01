@@ -65,7 +65,7 @@ const InvestmentSection = () => {
       style={{ backgroundColor: "#0f0f0f" }}
     >
       <div
-        className="mx-auto"
+        className="mx-auto investment-container"
         style={{
           maxWidth: "620px",
           paddingTop: "clamp(48px, 8vw, 72px)",
@@ -263,6 +263,11 @@ const InvestmentSection = () => {
         .investment-cta-button:hover,
         .investment-cta-button:focus-visible {
           background: #ffd147 !important;
+        }
+        @media (min-width: 768px) {
+          .investment-container {
+            max-width: 1085px !important;
+          }
         }
       `}</style>
     </section>
