@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Globe, Check } from "lucide-react";
 import { LOCALES, LOCALE_LABELS, LOCALE_SHORT, useI18n, type Locale } from "@/lib/i18n";
+import { useWave, OCEAN_COLOR } from "@/components/WaveTransition";
 
 interface LanguageSwitcherProps {
   variant?: "navbar" | "mobile";
@@ -8,6 +9,7 @@ interface LanguageSwitcherProps {
 
 export default function LanguageSwitcher({ variant = "navbar" }: LanguageSwitcherProps) {
   const { locale, setLocale } = useI18n();
+  const { submerged } = useWave();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -51,7 +53,14 @@ export default function LanguageSwitcher({ variant = "navbar" }: LanguageSwitche
         <span>{LOCALE_SHORT[locale]}</span>
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-2 min-w-[160px] rounded-sm border border-border bg-background/95 backdrop-blur-md shadow-md py-1 z-50">
+        <div
+          className={`absolute right-0 top-full mt-2 min-w-[160px] rounded-sm border backdrop-blur-md shadow-md py-1 z-50 ${
+            submerged
+              ? "border-warm-white/20"
+              : "border-border bg-background/95"
+          }`}
+          style={submerged ? { backgroundColor: `${OCEAN_COLOR}f2` } : undefined}
+        >
           {LOCALES.map((loc) => (
             <button
               key={loc}
@@ -59,7 +68,11 @@ export default function LanguageSwitcher({ variant = "navbar" }: LanguageSwitche
                 setLocale(loc as Locale);
                 setOpen(false);
               }}
-              className="w-full flex items-center justify-between px-4 py-2 text-xs tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
+              className={`w-full flex items-center justify-between px-4 py-2 text-xs tracking-wider transition-colors ${
+                submerged
+                  ? "text-warm-white/80 hover:text-warm-white hover:bg-warm-white/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+              }`}
             >
               <span>{LOCALE_LABELS[loc]}</span>
               {locale === loc && <Check size={12} strokeWidth={2} />}
