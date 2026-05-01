@@ -1,0 +1,171 @@
+
+<h2 class="sr-only">Live preview of the wave-takeover navbar effect — scroll inside the frame to watch the contact section's ocean wave climb over a mock LUME navbar.</h2>
+
+<style>
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+.lume-controls{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
+.lume-stat{display:inline-flex;gap:6px;align-items:center;padding:4px 10px;font-size:12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-variant-numeric:tabular-nums;color:var(--color-text-secondary);}
+.lume-stat strong{color:var(--color-text-primary);font-weight:500;}
+.lume-frame{height:600px;border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);overflow:hidden;position:relative;}
+.lume-scroll{height:100%;overflow-y:auto;position:relative;background:#FBF8F0;font-family:var(--font-sans);scroll-behavior:auto;}
+.lume-navbar{position:sticky;top:0;left:0;right:0;z-index:50;height:64px;display:flex;align-items:center;padding:0 24px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);background:rgba(230,221,201,0.85);border-bottom:1px solid rgba(0,0,0,0.06);transition:background 0.5s ease, border-color 0.5s ease, color 0.5s ease, backdrop-filter 0.5s ease;color:#3A3A35;}
+.lume-navbar.submerged{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom-color:transparent;color:#FBF8F0;}
+.lume-logo{font-family:var(--font-serif);font-style:italic;font-size:20px;font-weight:500;letter-spacing:0.06em;flex-shrink:0;}
+.lume-nav-items{display:flex;gap:22px;margin-left:auto;align-items:center;}
+.lume-nav-items a{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:inherit;text-decoration:none;}
+.lume-content{position:relative;}
+.hero{height:480px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#FBF8F0,#F0E8D6);font-family:var(--font-serif);font-style:italic;font-size:32px;color:#5A554B;letter-spacing:0.02em;}
+.section{height:320px;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-style:italic;font-size:22px;color:#7A7569;}
+.section.alt{background:#F0E8D6;}
+.contact{height:700px;background:#4e8ba1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#FBF8F0;font-family:var(--font-serif);font-style:italic;font-size:26px;gap:12px;}
+.contact .label{font-family:var(--font-sans);font-style:normal;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;opacity:0.7;}
+.footer{height:280px;background:#1f2c33;display:flex;align-items:center;justify-content:center;color:#A0AEB6;font-family:var(--font-serif);font-style:italic;font-size:18px;}
+.wave-fill{position:absolute;left:0;right:0;top:0;height:0;background:#4e8ba1;z-index:30;pointer-events:none;will-change:transform,height,opacity;}
+.wave-crests{position:absolute;left:0;right:0;top:0;height:60px;z-index:31;pointer-events:none;will-change:transform,opacity;}
+.wave-back-wrap,.wave-front-wrap{position:absolute;inset:0;overflow:hidden;}
+.wave-front-wrap{top:6px;height:calc(100% - 6px);}
+.wave-strip{position:absolute;left:-50%;top:0;width:200%;height:100%;}
+.wave-back .wave-strip{opacity:0.55;animation:lume-drift-back 9s linear infinite;}
+.wave-front .wave-strip{animation:lume-drift-front 5.5s linear infinite;}
+.lume-frozen .wave-back .wave-strip,.lume-frozen .wave-front .wave-strip{animation-play-state:paused;}
+@keyframes lume-drift-back{from{transform:translate3d(0,0,0);}to{transform:translate3d(-25%,0,0);}}
+@keyframes lume-drift-front{from{transform:translate3d(-25%,0,0);}to{transform:translate3d(0,0,0);}}
+.hint{font-size:12px;color:var(--color-text-secondary);margin-top:10px;font-style:italic;font-family:var(--font-serif);}
+</style>
+
+<div class="lume-controls">
+  <button id="play-btn">Auto-scroll to bottom</button>
+  <button id="reset-btn">Reset to top</button>
+  <span class="lume-stat">section.top <strong id="stat-s">—</strong></span>
+  <span class="lume-stat">opacity <strong id="stat-o">—</strong></span>
+  <span class="lume-stat" id="stat-state">resting</span>
+</div>
+
+<div class="lume-frame">
+  <div class="lume-scroll" id="scroll">
+    <div class="lume-navbar" id="navbar">
+      <div class="lume-logo">Lume</div>
+      <div class="lume-nav-items">
+        <a href="#">Homes</a>
+        <a href="#">Services</a>
+        <a href="#">Investment</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+    <div class="lume-content">
+      <div class="hero">Discover Portugal, curated</div>
+      <div class="section">Our services</div>
+      <div class="section alt">Investment thinking</div>
+      <div class="contact" id="contact">
+        <div class="label">Private access</div>
+        <div>Get in touch</div>
+      </div>
+      <div class="footer">© Lume by Mark</div>
+
+      <div class="wave-fill" id="fill"></div>
+      <div class="wave-crests" id="crests">
+        <div class="wave-back-wrap wave-back">
+          <div class="wave-strip">
+            <svg viewBox="0 0 2880 60" preserveAspectRatio="none" style="display:block;width:100%;height:100%;">
+              <path d="M0,36 C240,6 480,60 720,36 C960,6 1200,60 1440,36 C1680,6 1920,60 2160,36 C2400,6 2640,60 2880,36 L2880,60 L0,60 Z" fill="#4e8ba1"/>
+            </svg>
+          </div>
+        </div>
+        <div class="wave-front-wrap wave-front">
+          <div class="wave-strip">
+            <svg viewBox="0 0 2880 54" preserveAspectRatio="none" style="display:block;width:100%;height:100%;">
+              <path d="M0,28 C180,2 420,52 720,28 C1020,6 1140,54 1440,28 C1740,2 1980,52 2160,28 C2340,6 2580,54 2880,28 L2880,54 L0,54 Z" fill="#4e8ba1"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="hint">Scroll inside the frame, or click auto-scroll. The exact same constants from your component (FADE_START 240, SUBMERGE_AT 30, WAVE_HEIGHT 60) drive the preview.</p>
+
+<script>
+(function(){
+  var scroll = document.getElementById('scroll');
+  var contact = document.getElementById('contact');
+  var fill = document.getElementById('fill');
+  var crests = document.getElementById('crests');
+  var navbar = document.getElementById('navbar');
+  var statS = document.getElementById('stat-s');
+  var statO = document.getElementById('stat-o');
+  var statState = document.getElementById('stat-state');
+  var playBtn = document.getElementById('play-btn');
+  var resetBtn = document.getElementById('reset-btn');
+
+  var WAVE_HEIGHT = 60;
+  var FADE_START = 240;
+  var FADE_END = 80;
+  var SUBMERGE_AT = 30;
+
+  var rafId = null;
+  var lastSubmerged = false;
+
+  function update(){
+    rafId = null;
+    var scrollTop = scroll.scrollTop;
+    var sectionTop = contact.offsetTop;
+    var sectionBottom = sectionTop + contact.offsetHeight;
+    var ch = scroll.clientHeight;
+
+    var S = sectionTop - scrollTop;
+    var sectionBottomVp = sectionBottom - scrollTop;
+
+    var anchorY = Math.max(S, 0);
+    var fillHeight = Math.max(0, Math.min(sectionBottomVp, ch) - anchorY);
+
+    var fadeRange = FADE_START - FADE_END;
+    var opacity = Math.max(0, Math.min(1, (FADE_START - Math.max(S, FADE_END)) / fadeRange));
+
+    var isSubmerged = S <= SUBMERGE_AT;
+
+    fill.style.height = fillHeight + 'px';
+    fill.style.transform = 'translate3d(0,' + (scrollTop + anchorY) + 'px,0)';
+    fill.style.opacity = opacity;
+
+    crests.style.transform = 'translate3d(0,' + (scrollTop + anchorY - WAVE_HEIGHT) + 'px,0)';
+    crests.style.opacity = opacity;
+
+    if(isSubmerged !== lastSubmerged){
+      lastSubmerged = isSubmerged;
+      navbar.classList.toggle('submerged', isSubmerged);
+      scroll.classList.toggle('lume-frozen', isSubmerged);
+    }
+
+    statS.textContent = Math.round(S) + 'px';
+    statO.textContent = opacity.toFixed(2);
+    statState.textContent = isSubmerged ? 'submerged (frozen)' : (opacity > 0.05 ? 'rising' : 'resting');
+  }
+
+  scroll.addEventListener('scroll', function(){
+    if(rafId === null) rafId = requestAnimationFrame(update);
+  }, { passive: true });
+
+  update();
+
+  playBtn.addEventListener('click', function(){
+    var start = scroll.scrollTop;
+    var target = scroll.scrollHeight - scroll.clientHeight;
+    if(target - start < 50){ start = 0; scroll.scrollTop = 0; }
+    var duration = 5000;
+    var t0 = performance.now();
+    function step(now){
+      var t = Math.min(1, (now - t0) / duration);
+      var ease = 1 - Math.pow(1 - t, 3);
+      scroll.scrollTop = start + (target - start) * ease;
+      if(t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+
+  resetBtn.addEventListener('click', function(){
+    scroll.scrollTop = 0;
+  });
+})();
+</script>
