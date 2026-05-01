@@ -640,6 +640,36 @@ def admin_get_listing(listing_id: str) -> Optional[Dict[str, Any]]:
         return None
 
 
+# internal_status drives the public-facing `status` so admins only have to
+# change one field to publish/unpublish. Finalized public statuses (sold,
+# reserved, rented) are preserved — they describe the deal outcome and
+# shouldn't be flipped just because the workflow state moved.
+_INTERNAL_TO_PUBLIC_STATUS = {
+    "live": "available",
+    "draft": "draft",
+    "ready_for_review": "draft",
+    "on_hold": "off_market",
+    "off_market": "off_market",
+}
+_PROTECTED_PUBLIC_STATUSES = {"sold", "reserved", "rented"}
+
+
+def _sync_public_status(data: Dict[str, Any], existing_status: Optional[str] = None) -> None:
+    """If internal_status is being set, mirror it onto the public `status`.
+
+    Skips when the caller explicitly passes `status` (their choice wins) and
+    when the existing public status is a finalized deal outcome.
+    """
+    if "internal_status" not in data or "status" in data:
+        return
+    target = _INTERNAL_TO_PUBLIC_STATUS.get(data["internal_status"])
+    if not target:
+        return
+    if existing_status in _PROTECTED_PUBLIC_STATUSES:
+        return
+    data["status"] = target
+
+
 def admin_create_listing(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Create a new listing. Auto-generates slug if not provided."""
     try:
@@ -650,6 +680,8 @@ def admin_create_listing(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
             base_slug = generate_slug(data["title"])
             city_slug = generate_slug(data.get("city", ""))
             data["slug"] = f"{base_slug}-{city_slug}" if city_slug else base_slug
+
+        _sync_public_status(data)
 
         result = client.table("listings").insert(data).execute()
         return result.data[0] if result.data else None
@@ -663,9 +695,15 @@ def admin_update_listing(listing_id: str, data: Dict[str, Any]) -> Optional[Dict
     try:
         client = _get_admin_client()
 
+        existing = None
+        if "internal_status" in data and "status" not in data:
+            existing = admin_get_listing(listing_id)
+            _sync_public_status(data, existing.get("status") if existing else None)
+
         # Re-generate slug if title changed and slug not explicitly set
         if "title" in data and "slug" not in data:
-            existing = admin_get_listing(listing_id)
+            if existing is None:
+                existing = admin_get_listing(listing_id)
             if existing:
                 old_slug = generate_slug(existing.get("title", ""))
                 current_slug = existing.get("slug", "")
