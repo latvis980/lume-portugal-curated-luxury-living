@@ -67,9 +67,11 @@ const SECTIONS: SectionDef[] = [
     fields: [
       { key: "phone_label",     label: "Phone section label",  rows: 1, hint: "Small uppercase label displayed above the phone number on the live site" },
       { key: "whatsapp_label",  label: "WhatsApp tooltip",     rows: 1, hint: "Accessible label / tooltip for the WhatsApp icon next to the phone number" },
+      { key: "email_label",     label: "Email section label",  rows: 1, hint: "Small uppercase label displayed above the email address on the live site" },
       { key: "address_label",   label: "Address section label", rows: 1, hint: "Small uppercase label displayed above the street address on the live site" },
       { key: "map_link",        label: '"View on map" link text', rows: 1, hint: 'Clickable text below the address that opens Google Maps' },
       { key: "phone",           label: "Phone number",         rows: 1, singleLocale: true, hint: "Displayed on the homepage and used for the tel: and WhatsApp links. Include country code, e.g. +351 912 345 678" },
+      { key: "email",           label: "Email address",        rows: 1, singleLocale: true, hint: "Displayed on the homepage and used for the mailto: link, e.g. hello@lume.pt" },
       { key: "address",         label: "Street address",       rows: 2, singleLocale: true, hint: "Displayed on the homepage. Line breaks are preserved." },
       { key: "maps_url",        label: "Google Maps URL",      rows: 1, singleLocale: true, hint: 'Full URL for the "View on map" link, e.g. https://maps.google.com/?q=...' },
     ],
