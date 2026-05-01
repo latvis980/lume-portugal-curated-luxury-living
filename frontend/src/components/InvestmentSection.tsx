@@ -19,7 +19,7 @@ const NumberedBlock = ({
       style={{
         color: ACCENT,
         fontWeight: 300,
-        fontSize: "clamp(28px, 4vw, 36px)",
+        fontSize: "clamp(34px, 4.8vw, 43px)",
       }}
     >
       {number}
@@ -36,7 +36,7 @@ const NumberedBlock = ({
       >
         {heading}
       </h3>
-      <div className="font-body" style={{ fontSize: "15px", lineHeight: 1.75, color: "#c8c2b6" }}>
+      <div className="font-body" style={{ fontSize: "18px", lineHeight: 1.75, color: "#c8c2b6" }}>
         {children}
       </div>
     </div>
@@ -54,10 +54,6 @@ const InvestmentSection = () => {
       aria-labelledby="investment-heading"
       style={{ backgroundColor: "#0f0f0f" }}
     >
-      <h2 id="investment-heading" className="sr-only">
-        Investment
-      </h2>
-
       <div
         className="mx-auto"
         style={{
@@ -68,21 +64,33 @@ const InvestmentSection = () => {
           paddingRight: "clamp(24px, 5vw, 56px)",
         }}
       >
-        {/* A. Eyebrow */}
-        <div className="flex flex-col items-center" style={{ marginBottom: "64px" }}>
-          <div style={{ width: "40px", height: "1px", backgroundColor: ACCENT }} />
+        {/* A. Eyebrow + Heading */}
+        <div className="flex flex-col items-center text-center" style={{ marginBottom: "64px" }}>
           <div
             className="font-body"
             style={{
-              marginTop: "16px",
               fontSize: "12px",
               letterSpacing: "3px",
               textTransform: "uppercase",
               color: ACCENT,
+              marginBottom: "16px",
             }}
           >
-            Investment
+            Quiet Opportunities
           </div>
+          <h2
+            id="investment-heading"
+            className="font-display text-white"
+            style={{
+              fontSize: "clamp(1.9rem, 4vw, 3rem)",
+              fontWeight: 300,
+              lineHeight: 1.25,
+              margin: 0,
+            }}
+          >
+            Investing in real estate in Portugal
+          </h2>
+          <div style={{ width: "40px", height: "1px", backgroundColor: ACCENT, marginTop: "24px" }} />
         </div>
 
         {/* B. Numbered sections */}
@@ -136,7 +144,7 @@ const InvestmentSection = () => {
                       flexShrink: 0,
                     }}
                   />
-                  <span style={{ fontSize: "15px", lineHeight: 1.7, color: "#e8e4dc" }}>
+                  <span style={{ fontSize: "18px", lineHeight: 1.7, color: "#e8e4dc" }}>
                     {value}
                   </span>
                 </li>
@@ -160,7 +168,7 @@ const InvestmentSection = () => {
             className="font-display text-center"
             style={{
               fontStyle: "italic",
-              fontSize: "17px",
+              fontSize: "20px",
               color: "#d8d2c4",
               lineHeight: 1.7,
               margin: 0,
@@ -191,7 +199,7 @@ const InvestmentSection = () => {
             style={{
               marginTop: "18px",
               maxWidth: "460px",
-              fontSize: "14px",
+              fontSize: "17px",
               lineHeight: 1.75,
               color: "#a8a29a",
             }}
@@ -212,7 +220,7 @@ const InvestmentSection = () => {
               backgroundColor: ACCENT,
               color: "#0f0f0f",
               padding: "14px 36px",
-              fontSize: "13px",
+              fontSize: "16px",
               fontWeight: 500,
               letterSpacing: "2px",
               textTransform: "uppercase",
