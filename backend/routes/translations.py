@@ -287,6 +287,38 @@ async def admin_team_delete(member_id: str, admin=Depends(require_admin)):
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# ADMIN — stateless text translation (no DB write — used by new-listing form)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TextTranslateRequest(BaseModel):
+    text: str
+    source_locale: str = "en"
+
+
+@router.post("/api/admin/translate-text")
+async def translate_text(body: TextTranslateRequest, admin=Depends(require_admin)):
+    """
+    Translate raw text to every other supported locale via DeepL, without
+    touching the database. Returns {"translations": {pt_pt, ru, es, en}} —
+    the source locale is omitted from the result.
+    """
+    source = body.source_locale
+    if source not in _LOCALES:
+        raise HTTPException(status_code=422, detail=f"Invalid source_locale '{source}'.")
+
+    src_text = (body.text or "").strip()
+    if not src_text:
+        raise HTTPException(status_code=422, detail="No source text provided.")
+
+    translations: dict[str, str] = {}
+    for target in _LOCALES:
+        if target == source:
+            continue
+        translations[target] = _deepl_translate(src_text, source=source, target=target)
+    return {"translations": translations}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # ADMIN — translate listing fields (JSONB _i18n columns)
 # ═══════════════════════════════════════════════════════════════════════════
 

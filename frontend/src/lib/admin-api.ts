@@ -147,6 +147,26 @@ export async function translateListingField(
   return res.json();
 }
 
+/**
+ * Translate raw text to every other supported locale via DeepL without
+ * touching the database. Used by the new-listing form before the row exists.
+ */
+export async function translateText(
+  text: string,
+  source_locale: "en" | "pt_pt" | "ru" | "es" = "en",
+): Promise<Record<string, string>> {
+  const res = await adminFetch("/translate-text", {
+    method: "POST",
+    body: JSON.stringify({ text, source_locale }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Translation failed");
+  }
+  const data = await res.json();
+  return data.translations as Record<string, string>;
+}
+
 export interface ContactsQuery {
   source?: string;
   search?: string;

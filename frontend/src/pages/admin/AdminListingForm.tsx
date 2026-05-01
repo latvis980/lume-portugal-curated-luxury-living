@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  getListing, createListing, updateListing, translateListingField,
+  getListing, createListing, updateListing, translateListingField, translateText,
   type ListingTranslatableField,
 } from "@/lib/admin-api";
 import { getToken } from "@/lib/admin-api";
@@ -573,9 +573,7 @@ export default function AdminListingForm() {
         <Section>
           <p className="text-xs text-admin-text-muted mb-4">
             Use the language tabs to enter or review content in each locale.
-            {isEdit
-              ? " Click ↺ Translate on the active tab to fill the other languages via DeepL."
-              : " Save the listing first, then return here to translate."}
+            {" Click ↺ Translate on the active tab to fill the other languages via DeepL."}
           </p>
 
           <LocalizedField
@@ -769,21 +767,36 @@ function LocalizedField({
   };
 
   const handleTranslate = async () => {
-    if (!listingId) return;
     setTranslating(true);
     setTranslateError("");
     try {
-      const updated = await translateListingField(listingId, {
-        field: fieldName as ListingTranslatableField,
-        source_locale: locale,
-        overwrite: false,
-      });
-      // Patch only the affected fields in form state
-      setForm((prev: any) => ({
-        ...prev,
-        [fieldName]: (updated as any)[fieldName] ?? prev[fieldName],
-        [i18nKey]:   (updated as any)[i18nKey]   ?? prev[i18nKey],
-      }));
+      if (listingId) {
+        // Existing listing: backend reads source from DB and persists results.
+        const updated = await translateListingField(listingId, {
+          field: fieldName as ListingTranslatableField,
+          source_locale: locale,
+          overwrite: false,
+        });
+        setForm((prev: any) => ({
+          ...prev,
+          [fieldName]: (updated as any)[fieldName] ?? prev[fieldName],
+          [i18nKey]:   (updated as any)[i18nKey]   ?? prev[i18nKey],
+        }));
+      } else {
+        // New listing: translate text in-memory, fill empty locales only.
+        const translations = await translateText(value, locale);
+        const currentI18n: Record<string, string> = { ...(form[i18nKey] || {}) };
+        let nextEn = String(form[fieldName] ?? "");
+        for (const [target, text] of Object.entries(translations)) {
+          if (target === "en") {
+            if (!nextEn.trim()) nextEn = text;
+          } else if (!String(currentI18n[target] ?? "").trim()) {
+            currentI18n[target] = text;
+          }
+        }
+        if (nextEn !== form[fieldName]) set(fieldName, nextEn);
+        set(i18nKey, currentI18n);
+      }
     } catch (e: any) {
       setTranslateError(e.message || "Translation failed");
     } finally {
@@ -791,7 +804,7 @@ function LocalizedField({
     }
   };
 
-  const canTranslate = Boolean(listingId) && value.trim().length > 0;
+  const canTranslate = value.trim().length > 0;
 
   return (
     <div className={`mb-4 ${width ?? "w-full"}`}>
@@ -824,27 +837,19 @@ function LocalizedField({
             </button>
           ))}
 
-          {listingId ? (
-            <button
-              type="button"
-              onClick={handleTranslate}
-              disabled={!canTranslate || translating}
-              title={
-                canTranslate
-                  ? `Translate from ${LOCALE_TABS.find(t => t.code === locale)?.name} to all other languages via DeepL`
-                  : "Enter text in this locale first"
-              }
-              className="ml-1.5 rounded border border-admin-accent/50 px-2 py-0.5 text-[11px] text-admin-accent transition hover:bg-admin-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {translating ? "Translating…" : "↺ Translate"}
-            </button>
-          ) : (
-            locale !== "en" && (
-              <span className="ml-1.5 text-[10px] italic text-admin-text-muted">
-                save first to translate
-              </span>
-            )
-          )}
+          <button
+            type="button"
+            onClick={handleTranslate}
+            disabled={!canTranslate || translating}
+            title={
+              canTranslate
+                ? `Translate from ${LOCALE_TABS.find(t => t.code === locale)?.name} to all other languages via DeepL`
+                : "Enter text in this locale first"
+            }
+            className="ml-1.5 rounded border border-admin-accent/50 px-2 py-0.5 text-[11px] text-admin-accent transition hover:bg-admin-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {translating ? "Translating…" : "↺ Translate"}
+          </button>
         </div>
       </div>
 
