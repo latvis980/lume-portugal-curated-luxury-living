@@ -5,12 +5,19 @@ import { Menu, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useT } from "@/lib/i18n";
+import { useWave } from "@/components/WaveTransition";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const t = useT();
+  // ── Wave-takeover state ──────────────────────────────────────────────
+  // `submerged` becomes true once the contact section reaches the navbar.
+  // We use it to fade the sand bg to transparent and flip text to white.
+  // On pages that don't render <WaveProvider> (e.g. /about, /properties),
+  // this returns the default { submerged: false } — safe fallback.
+  const { submerged } = useWave();
 
   const navItems = [
     {
@@ -71,15 +78,29 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-sand/85 backdrop-blur-md border-b border-border/50">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center h-14 md:h-[5.5rem] gap-6">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        submerged
+          ? "bg-transparent border-b border-transparent"
+          : "bg-sand/85 backdrop-blur-md border-b border-border/50"
+      }`}
+    >
+      {/* The descendant-target variant `[&_*]:!text-warm-white` flips every text
+          element inside the nav to warm-white when submerged, with a transition. */}
+      <div
+        className={`max-w-7xl mx-auto px-6 md:px-12 flex items-center h-14 md:h-[5.5rem] gap-6 transition-colors duration-500 ${
+          submerged ? "[&_*]:!text-warm-white" : ""
+        }`}
+      >
 
         {/* Logo */}
         <a href="/" className="flex items-center leading-none flex-shrink-0">
           <img
             src="/logo.png"
             alt="LUME by Mark"
-            className="h-[3.6rem] md:h-[4.8rem] w-auto"
+            className={`h-[3.6rem] md:h-[4.8rem] w-auto transition-all duration-500 ${
+              submerged ? "brightness-0 invert" : ""
+            }`}
           />
         </a>
 
