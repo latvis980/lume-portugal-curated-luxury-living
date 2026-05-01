@@ -1,0 +1,197 @@
+
+<style>
+.demo-stage {
+  position: relative;
+  height: 380px;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  background: #FBF8F0;
+  border: 0.5px solid var(--color-border-tertiary);
+}
+.nav {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 56px;
+  background: rgba(230, 221, 201, 0.92);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 22px;
+  z-index: 2;
+  border-bottom: 0.5px solid rgba(0,0,0,0.05);
+  transition: background 0.4s ease;
+}
+.nav-logo {
+  font-family: var(--font-serif);
+  font-size: 15px; font-weight: 500;
+  letter-spacing: 0.18em;
+  color: #2A2620;
+  transition: color 0.5s ease;
+}
+.nav-links {
+  display: flex; gap: 18px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #5F574B;
+  transition: color 0.5s ease;
+}
+.nav-covered { background: rgba(78, 139, 161, 0); }
+.nav-covered .nav-logo, .nav-covered .nav-links { color: #FBF8F0; }
+.filler {
+  position: absolute; top: 56px; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: #B4B2A9; font-size: 13px; font-style: italic;
+  background: linear-gradient(180deg, #FBF8F0 0%, #F1EFE8 100%);
+  z-index: 0;
+}
+.contact {
+  position: absolute; left: 0; right: 0;
+  top: 376px;
+  height: 320px;
+  background: #4e8ba1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  padding-top: 70px;
+  color: #FBF8F0; text-align: center;
+  z-index: 1;
+}
+.contact-eyebrow {
+  font-size: 10px; letter-spacing: 0.3em;
+  text-transform: uppercase; opacity: 0.85; margin-bottom: 8px;
+}
+.contact-title {
+  font-family: var(--font-serif); font-size: 22px; font-weight: 300;
+}
+.wave-layer {
+  position: absolute; left: -50%; width: 200%; height: 50px;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+.wave-layer svg { display: block; width: 100%; height: 100%; }
+.wave-back  { animation: wave-flow 9s linear infinite; opacity: 0.55; }
+.wave-front { animation: wave-flow 5.5s linear infinite reverse; }
+@keyframes wave-flow {
+  from { transform: translate3d(0,0,0); }
+  to   { transform: translate3d(-25%,0,0); }
+}
+.controls {
+  margin-top: 1rem;
+  display: flex; align-items: center; gap: 12px;
+}
+.controls label {
+  font-size: 13px; color: var(--color-text-secondary);
+  min-width: 110px;
+}
+.controls input[type="range"] { flex: 1; }
+.out { font-size: 13px; font-weight: 500; min-width: 38px; }
+.row { display: flex; gap: 8px; margin-top: 0.75rem; }
+.legend {
+  margin-top: 1rem;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; font-size: 12px;
+  color: var(--color-text-secondary);
+}
+.swatch {
+  display: inline-block; width: 10px; height: 10px;
+  border-radius: 2px; margin-right: 6px; vertical-align: middle;
+}
+</style>
+
+<h2 class="sr-only">Interactive demo: an ocean-blue wave climbs up to cover the sand-colored navbar as the contact section enters from the bottom.</h2>
+
+<div class="demo-stage" id="stage">
+  <div class="nav" id="nav">
+    <div class="nav-logo">LUME</div>
+    <div class="nav-links">
+      <span>Homes</span><span>Services</span><span>About</span><span>Contact</span>
+    </div>
+  </div>
+
+  <div class="filler">— page content —</div>
+
+  <div class="wave-layer wave-back" id="wave-back" style="top: 326px;">
+    <svg viewBox="0 0 2880 50" preserveAspectRatio="none">
+      <path d="M0,30 C240,5 480,50 720,30 C960,5 1200,50 1440,30 C1680,5 1920,50 2160,30 C2400,5 2640,50 2880,30 L2880,50 L0,50 Z" fill="#4e8ba1"/>
+    </svg>
+  </div>
+  <div class="wave-layer wave-front" id="wave-front" style="top: 334px;">
+    <svg viewBox="0 0 2880 50" preserveAspectRatio="none">
+      <path d="M0,25 C180,0 420,45 720,25 C1020,5 1140,50 1440,25 C1740,0 1980,45 2160,25 C2340,5 2580,50 2880,25 L2880,50 L0,50 Z" fill="#4e8ba1"/>
+    </svg>
+  </div>
+
+  <div class="contact" id="contact">
+    <div class="contact-eyebrow">Private Access</div>
+    <div class="contact-title">Begin the Conversation</div>
+  </div>
+</div>
+
+<div class="controls">
+  <label for="progress">Scroll progress</label>
+  <input type="range" id="progress" min="0" max="100" value="0" step="1"/>
+  <span class="out" id="out">0%</span>
+</div>
+<div class="row">
+  <button id="play">Play sweep</button>
+  <button id="reset">Reset</button>
+</div>
+
+<div class="legend">
+  <div><span class="swatch" style="background:#E6DDC9"></span>Sand navbar</div>
+  <div><span class="swatch" style="background:#4e8ba1"></span>Ocean section</div>
+  <div><span class="swatch" style="background:linear-gradient(180deg,#FBF8F0,#F1EFE8)"></span>Page body</div>
+</div>
+
+<script>
+(function(){
+  const slider = document.getElementById('progress');
+  const out = document.getElementById('out');
+  const contact = document.getElementById('contact');
+  const waveBack = document.getElementById('wave-back');
+  const waveFront = document.getElementById('wave-front');
+  const nav = document.getElementById('nav');
+  const playBtn = document.getElementById('play');
+  const resetBtn = document.getElementById('reset');
+
+  const startY = 376;
+  const endY = -90;
+
+  function setProgress(p) {
+    slider.value = p;
+    out.textContent = Math.round(p) + '%';
+    const top = startY + (endY - startY) * (p/100);
+    contact.style.top = top + 'px';
+    waveBack.style.top = (top - 42) + 'px';
+    waveFront.style.top = (top - 34) + 'px';
+
+    const waveCrestY = top - 30;
+    if (waveCrestY < 30) nav.classList.add('nav-covered');
+    else nav.classList.remove('nav-covered');
+  }
+
+  slider.addEventListener('input', function(){ setProgress(Number(slider.value)); });
+
+  let raf = null;
+  function play() {
+    cancelAnimationFrame(raf);
+    const start = performance.now();
+    const dur = 2400;
+    const from = Number(slider.value);
+    const to = 100;
+    function tick(now) {
+      const t = Math.min(1, (now - start)/dur);
+      const eased = t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2;
+      setProgress(from + (to - from)*eased);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
+  }
+  playBtn.addEventListener('click', play);
+  resetBtn.addEventListener('click', function(){
+    cancelAnimationFrame(raf);
+    setProgress(0);
+  });
+
+  setProgress(0);
+})();
+</script>
