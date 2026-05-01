@@ -41,8 +41,8 @@ const Navbar = () => {
       href:     "/about",
     },
     {
-      label:    t("nav", "request_private_access",      "Contact"),
-      subtitle: t("nav", "request_private_access_sub",  "Get in touch"),
+      label:    t("nav", "contact",      "Contact"),
+      subtitle: t("nav", "contact_sub",  "Get in touch"),
       href:     "/#private-access",
     },
   ];

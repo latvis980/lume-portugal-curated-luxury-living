@@ -7,7 +7,6 @@
 --   * questionnaire — never seeded (referenced from a missing
 --     populate-questionnaire-translations.sql script)
 --   * investment    — InvestmentSection.tsx used inline JSX strings
---   * private_access — PrivateAccessSection.tsx used inline JSX strings
 --   * footer        — Footer.tsx had a hardcoded © line
 --   * cookies       — CookieConsent.tsx had hardcoded banner copy
 --   * nav.*_sub     — Navbar.tsx renders subtitles that were never seeded
@@ -21,8 +20,7 @@ insert into public.translations (namespace, key, en) values
     ('nav', 'browse_homes_sub',      'View available places'),
     ('nav', 'discover_services_sub', 'What we take care of'),
     ('nav', 'collect_with_lume_sub', 'Thinking beyond the present'),
-    ('nav', 'about_sub',             'The idea behind Lume'),
-    ('nav', 'request_private_access_sub', 'Get in touch')
+    ('nav', 'about_sub',             'The idea behind Lume')
 on conflict (namespace, key) do nothing;
 
 
@@ -156,28 +154,6 @@ insert into public.translations (namespace, key, en) values
     ('investment', 'cta.button',      'Continue with Mark →'),
     ('investment', 'cta.button_aria', 'Continue with Mark on the OneMark website'),
     ('investment', 'cta.url_label',   'onemark.pt')
-on conflict (namespace, key) do nothing;
-
-
--- ── Private Access section (PrivateAccessSection.tsx) ─────────────────────
-
-insert into public.translations (namespace, key, en) values
-    ('private_access', 'eyebrow', 'Private Access'),
-    ('private_access', 'title',   'Begin the Conversation'),
-    ('private_access', 'intro',   'Request a private consultation with our team. Share your vision and we''ll curate a bespoke plan for your life in Portugal.'),
-
-    ('private_access', 'name_placeholder',    'Full Name'),
-    ('private_access', 'email_placeholder',   'Email'),
-    ('private_access', 'phone_placeholder',   'Phone'),
-    ('private_access', 'message_placeholder', 'Tell us about your vision...'),
-
-    ('private_access', 'submit',     'Request Private Access'),
-    ('private_access', 'submitting', 'Sending...'),
-
-    ('private_access', 'error_fallback', 'Something went wrong. Please try again.'),
-
-    ('private_access', 'thank_you_title', 'Thank you'),
-    ('private_access', 'thank_you_body',  'A member of our team will be in touch within 24 hours.')
 on conflict (namespace, key) do nothing;
 
 
