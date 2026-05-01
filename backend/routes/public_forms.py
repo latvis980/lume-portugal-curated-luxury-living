@@ -3,7 +3,7 @@
 Public form submission routes for LUME by Mark.
 
 These are unauthenticated endpoints that allow visitors to submit
-their information via the questionnaire and Private Access form.
+their information via the questionnaire and Contact form.
 
 The Supabase RLS policy allows anon INSERT on the contacts table.
 """
@@ -30,8 +30,8 @@ class QuestionnaireSubmission(BaseModel):
     branch: Optional[str] = None
 
 
-class PrivateAccessSubmission(BaseModel):
-    """Submitted from the Private Access form at the bottom of the page."""
+class ContactSubmission(BaseModel):
+    """Submitted from the Contact form at the bottom of the page."""
     name: str
     email: str
     phone: Optional[str] = None
@@ -95,11 +95,11 @@ async def submit_questionnaire(body: QuestionnaireSubmission):
         raise HTTPException(status_code=500, detail="Failed to save. Please try again.")
 
 
-@router.post("/submit/private-access", status_code=201)
-async def submit_private_access(body: PrivateAccessSubmission):
+@router.post("/submit/contact", status_code=201)
+async def submit_contact(body: ContactSubmission):
     """
-    Save Private Access form submission.
-    Called from the "Request Private Access" form at the bottom of the page.
+    Save Contact form submission.
+    Called from the Contact form at the bottom of the page.
     """
     from database import create_contact
 
@@ -109,7 +109,7 @@ async def submit_private_access(body: PrivateAccessSubmission):
             "name": body.name,
             "phone": body.phone,
             "message": body.message,
-            "source": "private_access",
+            "source": "contact",
         })
         return {"status": "ok", "message": "A member of our team will be in touch within 24 hours."}
     except Exception as e:
@@ -122,7 +122,7 @@ async def submit_private_access(body: PrivateAccessSubmission):
                     "name": body.name,
                     "phone": body.phone,
                     "message": body.message,
-                    "source": "private_access",
+                    "source": "contact",
                 }).eq("email", body.email).execute()
                 return {"status": "ok", "message": "Thank you! We've updated your request."}
             except Exception:

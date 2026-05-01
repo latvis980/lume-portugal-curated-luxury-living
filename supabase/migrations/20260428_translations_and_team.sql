@@ -81,7 +81,6 @@ insert into public.translations (namespace, key, en) values
     ('nav', 'browse_homes',          'Browse Homes'),
     ('nav', 'discover_services',     'Discover Services'),
     ('nav', 'collect_with_lume',     'Collect with LUME'),
-    ('nav', 'request_private_access','Request Private Access'),
     ('nav', 'about',                 'About'),
 
     ('about', 'eyebrow',  'About LUME'),

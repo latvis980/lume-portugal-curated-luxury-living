@@ -37,7 +37,7 @@ export default function AdminContacts() {
           className="rounded-md border border-admin-border bg-admin-surface px-3 py-2 text-sm text-admin-text-secondary outline-none transition focus:border-admin-text-muted">
           <option value="">All sources</option>
           <option value="questionnaire">Questionnaire</option>
-          <option value="private_access">Contact form</option>
+          <option value="contact">Contact form</option>
           <option value="newsletter">Newsletter</option>
         </select>
       </div>
@@ -116,12 +116,12 @@ function TH({ children, className = "" }: { children: React.ReactNode; className
 function SourceBadge({ source }: { source: string }) {
   const colors: Record<string, string> = {
     questionnaire: "bg-purple-50 text-purple-700 border-purple-200",
-    private_access: "bg-sky-50 text-sky-700 border-sky-200",
+    contact: "bg-sky-50 text-sky-700 border-sky-200",
     newsletter: "bg-emerald-50 text-emerald-700 border-emerald-200",
   };
   const labels: Record<string, string> = {
     questionnaire: "questionnaire",
-    private_access: "contact form",
+    contact: "contact form",
     newsletter: "newsletter",
   };
   return (

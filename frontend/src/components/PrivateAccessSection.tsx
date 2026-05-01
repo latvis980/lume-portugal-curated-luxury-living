@@ -19,7 +19,7 @@ const PrivateAccessSection = () => {
     setError("");
 
     try {
-      const res = await fetch("/api/submit/private-access", {
+      const res = await fetch("/api/submit/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
