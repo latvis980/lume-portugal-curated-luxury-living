@@ -149,16 +149,37 @@ async def create_listing(body: dict, admin=Depends(require_admin)):
     """
     from database import admin_create_listing
 
+    # Pre-flight: enforce conditional-required fields with a clean message,
+    # so callers don't see a raw Postgres check-constraint dump.
+    ptype = body.get("property_type")
+    if ptype in ("apartment", "penthouse") and body.get("floor_number") in (None, ""):
+        raise HTTPException(
+            status_code=422,
+            detail=f"Floor number is required for {ptype}.",
+        )
+    if ptype in ("villa", "estate", "farmhouse", "quinta", "land") and body.get("plot_size") in (None, ""):
+        raise HTTPException(
+            status_code=422,
+            detail=f"Plot size is required for {ptype}.",
+        )
+
     try:
         listing = admin_create_listing(body)
         if not listing:
             raise HTTPException(status_code=500, detail="Failed to create listing")
         return listing
+    except HTTPException:
+        raise
     except Exception as e:
         error_msg = str(e)
         # Surface Supabase/Postgres constraint errors clearly
         if "duplicate" in error_msg.lower():
             raise HTTPException(status_code=409, detail=f"Duplicate entry: {error_msg}")
+        if "apartment_floor_check" in error_msg:
+            raise HTTPException(
+                status_code=422,
+                detail="Floor number is required for apartments and penthouses.",
+            )
         if "violates" in error_msg.lower():
             raise HTTPException(status_code=422, detail=f"Validation error: {error_msg}")
         raise HTTPException(status_code=500, detail=error_msg)
