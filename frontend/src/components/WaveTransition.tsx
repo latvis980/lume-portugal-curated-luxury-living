@@ -31,7 +31,7 @@ import {
 // ─── Tunable constants ─────────────────────────────────────────────────────
 const OCEAN_COLOR = "#4e8ba1";   // must match PrivateAccessSection's bg
 const WAVE_HEIGHT = 60;          // px — height of the wavy crest area
-const FADE_START = 240;          // px — section.top above this: wave invisible
+const FADE_START = 600;          // px — section.top above this: wave invisible
 const FADE_END   = 80;           // px — section.top below this: wave fully opaque
 const SUBMERGE_AT = 30;          // px — section.top below this: navbar flips, drift freezes
 // ───────────────────────────────────────────────────────────────────────────
@@ -83,17 +83,15 @@ export const WaveProvider = ({
 
       const rect = target.getBoundingClientRect();
       const S = rect.top;                 // distance from top of viewport
-      const sectionBottom = rect.bottom;
-      const vh = window.innerHeight;
 
-      // Wave's bottom edge follows the section's top, but never goes above
-      // the viewport top — that's how it "freezes" once submerged.
+      // Wave crest bottom is clamped so it never goes above the viewport top.
       const anchorY = Math.max(S, 0);
 
-      // Fill height: covers the area between viewport top and section top
-      // (i.e., the navbar area, once the wave is high enough), capped to
-      // not extend past the actual section's bottom.
-      const fillHeight = Math.max(0, Math.min(sectionBottom, vh) - anchorY);
+      // Fill covers from viewport-top DOWN to the section's top edge.
+      // This paints the area above the section teal as it rises toward the
+      // navbar — the opposite of the old code, which covered the section's
+      // own content (making the form disappear).
+      const fillHeight = anchorY; // == max(S, 0)
 
       // Opacity fades in as the section approaches the navbar.
       const fadeRange = FADE_START - FADE_END;
@@ -155,17 +153,18 @@ export const WaveProvider = ({
 export const WaveOverlay = () => {
   return (
     <>
-      {/* Ocean fill — covers from the navbar area down to the section's top */}
+      {/* Ocean fill — covers from viewport-top DOWN to the section's top edge.
+           No transform: it always anchors to top:0 so it never overlaps the
+           section's own content (form, address, etc.). */}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-x-0 top-0"
         style={{
           height: "var(--lume-wave-fill-h, 0px)",
-          transform: "translate3d(0, var(--lume-wave-anchor, 0px), 0)",
           opacity: "var(--lume-wave-opacity, 0)",
           background: OCEAN_COLOR,
           zIndex: 30,
-          willChange: "transform, height, opacity",
+          willChange: "height, opacity",
         }}
       />
 
