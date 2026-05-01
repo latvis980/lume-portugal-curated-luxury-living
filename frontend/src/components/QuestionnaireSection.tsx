@@ -4,7 +4,10 @@
 //   Q1 (intent) → branch-specific questions → email capture → thank-you screen
 //
 // All visible text comes from the `questionnaire` namespace in the
-// translations table (see populate-questionnaire-translations.sql).
+// translations table — there are no in-component fallback strings, so any
+// missing row will render as empty. Seeded by
+// supabase/migrations/20260501_homepage_translations.sql and resynced by
+// supabase/migrations/20260501_questionnaire_copy_resync.sql.
 //
 // Answers are stored to Supabase contacts.questionnaire_answers as a flat
 // JSONB blob keyed by question ID, e.g.
@@ -162,12 +165,12 @@ const QuestionnaireSection = () => {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.detail || t("questionnaire", "error.generic", "Something went wrong. Please try again."));
+        throw new Error(data.detail || t("questionnaire", "error.generic"));
       }
 
       setStep({ kind: "thanks" });
     } catch (err: any) {
-      setError(err.message || t("questionnaire", "error.generic", "Something went wrong. Please try again."));
+      setError(err.message || t("questionnaire", "error.generic"));
     } finally {
       setIsSubmitting(false);
     }
@@ -190,13 +193,13 @@ const QuestionnaireSection = () => {
           aria-hidden={step.kind === "thanks"}
         >
           <p className="text-xs tracking-[0.3em] uppercase text-primary mb-4">
-            {t("questionnaire", "intro.eyebrow", "Discover your match")}
+            {t("questionnaire", "intro.eyebrow")}
           </p>
           <h2 className="font-display text-3xl md:text-5xl font-light text-foreground mb-4">
-            {t("questionnaire", "intro.title", "Tell us what you seek")}
+            {t("questionnaire", "intro.title")}
           </h2>
           <p className="text-sm text-muted-foreground/70 font-light max-w-md mx-auto">
-            {t("questionnaire", "intro.subtitle", "Answer a few quick questions to receive a list of exclusive listings curated for you.")}
+            {t("questionnaire", "intro.subtitle")}
           </p>
         </motion.div>
 
@@ -225,7 +228,7 @@ const QuestionnaireSection = () => {
               className="text-center"
             >
               <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground mb-3">
-                {t("questionnaire", "progress.label", "Question {current} of {total}")
+                {t("questionnaire", "progress.label")
                   .replace("{current}", String(stepIndex + 1))
                   .replace("{total}", String(total))}
               </p>
@@ -265,17 +268,17 @@ const QuestionnaireSection = () => {
               className="text-center max-w-md mx-auto"
             >
               <h3 className="font-display text-2xl md:text-3xl font-light text-foreground mb-4">
-                {t("questionnaire", "email.title", "Excited to see what Lume has for you?")}
+                {t("questionnaire", "email.title")}
               </h3>
               <p className="text-sm text-muted-foreground mb-8">
-                {t("questionnaire", "email.subtitle", "Enter your email to receive our exclusive properties and services list.")}
+                {t("questionnaire", "email.subtitle")}
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t("questionnaire", "email.placeholder", "your@email.com")}
+                  placeholder={t("questionnaire", "email.placeholder")}
                   required
                   disabled={isSubmitting}
                   className="flex-1 px-4 py-3 bg-background border border-border text-foreground text-base sm:text-sm tracking-wider placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary transition-colors disabled:opacity-50"
@@ -286,8 +289,8 @@ const QuestionnaireSection = () => {
                   className="px-8 py-3 bg-primary text-primary-foreground text-xs tracking-[0.2em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
                   {isSubmitting
-                    ? t("questionnaire", "email.button_loading", "Sending…")
-                    : t("questionnaire", "email.button", "Send")}
+                    ? t("questionnaire", "email.button_loading")
+                    : t("questionnaire", "email.button")}
                 </button>
               </div>
               {error && (
@@ -318,7 +321,7 @@ const QuestionnaireSection = () => {
                 }}
                 className="font-display text-4xl md:text-6xl font-light text-foreground mb-6"
               >
-                {t("questionnaire", "thanks.title", "Thank you!")}
+                {t("questionnaire", "thanks.title")}
               </motion.h2>
               <motion.div
                 variants={{
@@ -334,13 +337,13 @@ const QuestionnaireSection = () => {
                 }}
                 className="text-base md:text-lg text-muted-foreground font-light leading-relaxed mb-12"
               >
-                {t("questionnaire", "thanks.message", "While we prepare your selection,")}
+                {t("questionnaire", "thanks.message")}
                 <br />
                 <Link
                   to="/properties"
                   className="text-primary underline-offset-4 hover:underline transition-colors"
                 >
-                  {t("questionnaire", "thanks.cta", "explore our current homes")}
+                  {t("questionnaire", "thanks.cta")}
                 </Link>
                 .
               </motion.p>
@@ -391,7 +394,7 @@ const QuestionnaireSection = () => {
                   <motion.button
                     type="button"
                     onClick={closeMobileThanks}
-                    aria-label={t("questionnaire", "thanks.close", "Close")}
+                    aria-label={t("questionnaire", "thanks.close")}
                     initial={{ opacity: 0, rotate: -90 }}
                     animate={{ opacity: 1, rotate: 0 }}
                     transition={{ delay: 0.4, duration: 0.4 }}
@@ -410,7 +413,7 @@ const QuestionnaireSection = () => {
                       transition={{ delay: 0.15, duration: 0.6 }}
                       className="font-display text-3xl font-light text-foreground mb-4"
                     >
-                      {t("questionnaire", "thanks.title", "Thank you!")}
+                      {t("questionnaire", "thanks.title")}
                     </motion.h2>
                     <motion.div
                       initial={{ opacity: 0, scaleX: 0 }}
@@ -424,13 +427,13 @@ const QuestionnaireSection = () => {
                       transition={{ delay: 0.4, duration: 0.6 }}
                       className="text-sm text-muted-foreground font-light leading-relaxed mb-6 px-2"
                     >
-                      {t("questionnaire", "thanks.message", "While we prepare your selection,")}
+                      {t("questionnaire", "thanks.message")}
                       <br />
                       <Link
                         to="/properties"
                         className="text-primary underline-offset-4 hover:underline transition-colors"
                       >
-                        {t("questionnaire", "thanks.cta", "explore our current homes")}
+                        {t("questionnaire", "thanks.cta")}
                       </Link>
                       .
                     </motion.p>
