@@ -51,9 +51,10 @@ export const BRANCHES: Record<Branch, Question[]> = {
       id: "relocation_q2_companions",
       titleKey: "relocation.q2.title",
       options: [
-        { value: "solo",   labelKey: "relocation.q2.opt.solo" },
-        { value: "couple", labelKey: "relocation.q2.opt.couple" },
-        { value: "family", labelKey: "relocation.q2.opt.family" },
+        { value: "solo",     labelKey: "relocation.q2.opt.solo" },
+        { value: "couple",   labelKey: "relocation.q2.opt.couple" },
+        { value: "children", labelKey: "relocation.q2.opt.children" },
+        { value: "family",   labelKey: "relocation.q2.opt.family" },
       ],
     },
     {
@@ -72,6 +73,7 @@ export const BRANCHES: Record<Branch, Question[]> = {
       options: [
         { value: "now",       labelKey: "relocation.q4.opt.now" },
         { value: "6_months",  labelKey: "relocation.q4.opt.6_months" },
+        { value: "1_year",    labelKey: "relocation.q4.opt.1_year" },
         { value: "exploring", labelKey: "relocation.q4.opt.exploring" },
       ],
     },
@@ -98,6 +100,16 @@ export const BRANCHES: Record<Branch, Question[]> = {
       ],
     },
     {
+      id: "second_home_q_regions",
+      titleKey: "second_home.q_regions.title",
+      options: [
+        { value: "lisboa",   labelKey: "second_home.q_regions.opt.lisboa" },
+        { value: "algarve",  labelKey: "second_home.q_regions.opt.algarve" },
+        { value: "porto",    labelKey: "second_home.q_regions.opt.porto" },
+        { value: "alentejo", labelKey: "second_home.q_regions.opt.alentejo" },
+      ],
+    },
+    {
       id: "second_home_q3_lifestyle",
       titleKey: "second_home.q3.title",
       options: [
@@ -114,6 +126,7 @@ export const BRANCHES: Record<Branch, Question[]> = {
         { value: "year_round",    labelKey: "second_home.q4.opt.year_round" },
         { value: "seasonally",    labelKey: "second_home.q4.opt.seasonally" },
         { value: "holidays_only", labelKey: "second_home.q4.opt.holidays_only" },
+        { value: "as_evolves",    labelKey: "second_home.q4.opt.as_evolves" },
       ],
     },
     {
@@ -133,9 +146,10 @@ export const BRANCHES: Record<Branch, Question[]> = {
       id: "investment_q2_type",
       titleKey: "investment.q2.title",
       options: [
-        { value: "lead",    labelKey: "investment.q2.opt.lead" },
-        { value: "co",      labelKey: "investment.q2.opt.co" },
-        { value: "various", labelKey: "investment.q2.opt.various" },
+        { value: "lead",     labelKey: "investment.q2.opt.lead" },
+        { value: "co",       labelKey: "investment.q2.opt.co" },
+        { value: "guidance", labelKey: "investment.q2.opt.guidance" },
+        { value: "various",  labelKey: "investment.q2.opt.various" },
       ],
     },
     {
@@ -150,6 +164,18 @@ export const BRANCHES: Record<Branch, Question[]> = {
   ],
 
   exploring: [
+    // Display order swapped: lifestyle is now shown before regions.
+    // Question IDs stay stable for analytics/answer-blob continuity.
+    {
+      id: "exploring_q3_lifestyle",
+      titleKey: "exploring.q3.title",
+      options: [
+        { value: "ocean",         labelKey: "exploring.q3.opt.ocean" },
+        { value: "countryside",   labelKey: "exploring.q3.opt.countryside" },
+        { value: "historic_city", labelKey: "exploring.q3.opt.historic_city" },
+        { value: "wine_region",   labelKey: "exploring.q3.opt.wine_region" },
+      ],
+    },
     {
       id: "exploring_q2_regions",
       titleKey: "exploring.q2.title",
@@ -161,13 +187,13 @@ export const BRANCHES: Record<Branch, Question[]> = {
       ],
     },
     {
-      id: "exploring_q3_lifestyle",
-      titleKey: "exploring.q3.title",
+      id: "exploring_q4_draws",
+      titleKey: "exploring.q4.title",
       options: [
-        { value: "ocean",         labelKey: "exploring.q3.opt.ocean" },
-        { value: "countryside",   labelKey: "exploring.q3.opt.countryside" },
-        { value: "historic_city", labelKey: "exploring.q3.opt.historic_city" },
-        { value: "wine_region",   labelKey: "exploring.q3.opt.wine_region" },
+        { value: "slower_pace", labelKey: "exploring.q4.opt.slower_pace" },
+        { value: "culture",     labelKey: "exploring.q4.opt.culture" },
+        { value: "nature",      labelKey: "exploring.q4.opt.nature" },
+        { value: "possibility", labelKey: "exploring.q4.opt.possibility" },
       ],
     },
   ],
