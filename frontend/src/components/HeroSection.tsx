@@ -49,13 +49,11 @@ const HeroSection = () => {
           transition={{ duration: 1, delay: 0.5 }}
           className="flex flex-col items-center"
         >
-          <span className="logo-shimmer font-display text-5xl md:text-7xl lg:text-8xl font-light tracking-wider inline-flex items-baseline relative">
-            {t("hero", "logo", "LUME")}
-            <span className="sun-dot" />
-          </span>
-          <span className="font-body text-sm md:text-base tracking-[0.3em] uppercase text-sand-light/85 mt-2 font-medium">
-            {t("hero", "logo_subtitle", "by Mark")}
-          </span>
+          <img
+            src="/hero-logo.png"
+            alt={t("hero", "logo_alt", "LUME by Mark")}
+            className="w-[18rem] md:w-[28rem] lg:w-[34rem] h-auto"
+          />
         </motion.h1>
 
         <motion.div
