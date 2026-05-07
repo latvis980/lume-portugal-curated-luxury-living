@@ -38,7 +38,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="text-sm md:text-base tracking-[0.35em] uppercase text-sand-light mb-6"
+          className="text-sm md:text-base tracking-[0.35em] uppercase text-sand-light mb-24"
         >
           {t("hero", "eyebrow", "Homes · Living · Collecting")}
         </motion.p>
@@ -60,7 +60,7 @@ const HeroSection = () => {
           initial={{ width: 0 }}
           animate={{ width: "4rem" }}
           transition={{ duration: 1, delay: 1 }}
-          className="h-px bg-primary my-8"
+          className="h-px bg-primary my-3"
         />
 
         <motion.p
@@ -76,7 +76,7 @@ const HeroSection = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 1.8 }}
-          className="mt-12 flex flex-col sm:flex-row gap-4"
+          className="mt-6 flex flex-col sm:flex-row gap-4"
         >
           <Link
             to="/properties"
