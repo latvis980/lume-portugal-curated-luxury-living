@@ -156,10 +156,10 @@ const Navbar = () => {
                 transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
                 className="flex flex-col"
               >
-                <span className="flex items-center justify-center h-9 text-[12.65px] tracking-[0.22em] uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-300 whitespace-nowrap">
+                <span className="flex items-center justify-center h-9 text-[13.92px] font-medium tracking-[0.22em] uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-300 whitespace-nowrap">
                   {item.label}
                 </span>
-                <span className="flex items-center justify-center h-9 text-[12.65px] italic font-serif tracking-wide text-foreground whitespace-nowrap">
+                <span className="flex items-center justify-center h-9 text-[13.92px] italic font-serif font-medium tracking-wide text-foreground whitespace-nowrap">
                   {item.subtitle}
                 </span>
               </motion.div>
