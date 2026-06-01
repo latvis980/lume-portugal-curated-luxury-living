@@ -16,13 +16,25 @@
 -- guarded with IF NOT EXISTS / DO blocks.
 
 -- ---------------------------------------------------------------------------
--- 1. Helper: generic updated_at trigger function
+-- 1. Trigger functions
 -- ---------------------------------------------------------------------------
 
 create or replace function public.set_updated_at()
 returns trigger language plpgsql as $$
 begin
-    new.updated_at := now();
+    new.updated_at = now();
+    return new;
+end;
+$$;
+
+create or replace function public.set_published_at()
+returns trigger language plpgsql as $$
+begin
+    if new.status = 'available' and (old.status is null or old.status != 'available') then
+        if new.published_at is null then
+            new.published_at = now();
+        end if;
+    end if;
     return new;
 end;
 $$;
@@ -382,18 +394,51 @@ create table if not exists public.listings (
     constraint listings_slug_key      unique (slug)
 );
 
--- TODO(check-constraints): fill in once query (H) is run. The named CHECK
--- constraints in production are:
---   listings_balcony_area_check, listings_bathrooms_check,
---   listings_bedrooms_check, listings_build_year_check,
---   listings_floors_check, listings_garden_area_check,
---   listings_gross_built_area_check, listings_gross_private_area_check,
---   listings_guest_wc_check, listings_interior_living_area_check,
---   listings_living_rooms_check, listings_outdoor_area_total_check,
---   listings_parking_spaces_check, listings_partner_commission_percent_check,
---   listings_plot_size_check, listings_renovation_year_check,
---   listings_suites_check, listings_terrace_area_check,
---   apartment_floor_check, land_plot_required_check
+-- Business-rule CHECK constraints (added separately so they can be checked
+-- for existence -- ADD CONSTRAINT IF NOT EXISTS is PG 16+ only, hence the
+-- DO block).
+do $$
+declare
+    c record;
+begin
+    for c in
+        select * from (values
+            ('apartment_floor_check',
+                'CHECK (property_type <> ALL (ARRAY[''apartment''::property_type, ''penthouse''::property_type]) OR floor_number IS NOT NULL)'),
+            ('land_plot_required_check',
+                'CHECK (property_type <> ALL (ARRAY[''villa''::property_type, ''estate''::property_type, ''farmhouse''::property_type, ''quinta''::property_type, ''land''::property_type]) OR plot_size IS NOT NULL)'),
+            ('listings_balcony_area_check',                  'CHECK (balcony_area >= 0)'),
+            ('listings_bathrooms_check',                     'CHECK (bathrooms >= 0)'),
+            ('listings_bedrooms_check',                      'CHECK (bedrooms >= 0)'),
+            ('listings_build_year_check',                    'CHECK (build_year >= 1800 AND build_year <= 2100)'),
+            ('listings_floors_check',                        'CHECK (floors >= 0)'),
+            ('listings_garden_area_check',                   'CHECK (garden_area >= 0)'),
+            ('listings_gross_built_area_check',              'CHECK (gross_built_area >= 0)'),
+            ('listings_gross_private_area_check',            'CHECK (gross_private_area >= 0)'),
+            ('listings_guest_wc_check',                      'CHECK (guest_wc >= 0)'),
+            ('listings_interior_living_area_check',          'CHECK (interior_living_area >= 0)'),
+            ('listings_living_rooms_check',                  'CHECK (living_rooms >= 0)'),
+            ('listings_outdoor_area_total_check',            'CHECK (outdoor_area_total >= 0)'),
+            ('listings_parking_spaces_check',                'CHECK (parking_spaces >= 0)'),
+            ('listings_partner_commission_percent_check',    'CHECK (partner_commission_percent IS NULL OR (partner_commission_percent >= 0 AND partner_commission_percent <= 100))'),
+            ('listings_plot_size_check',                     'CHECK (plot_size >= 0)'),
+            ('listings_renovation_year_check',               'CHECK (renovation_year >= 1800 AND renovation_year <= 2100)'),
+            ('listings_suites_check',                        'CHECK (suites >= 0)'),
+            ('listings_terrace_area_check',                  'CHECK (terrace_area >= 0)')
+        ) as t(name, definition)
+    loop
+        if not exists (
+            select 1 from pg_constraint
+            where conname = c.name
+              and conrelid = 'public.listings'::regclass
+        ) then
+            execute format(
+                'alter table public.listings add constraint %I %s',
+                c.name, c.definition
+            );
+        end if;
+    end loop;
+end$$;
 
 create index if not exists idx_listings_bedrooms      on public.listings (bedrooms);
 create index if not exists idx_listings_city          on public.listings (city);
@@ -438,6 +483,7 @@ create trigger trg_listings_updated_at
     before update on public.listings
     for each row execute function public.set_updated_at();
 
--- TODO(published-at-trigger): trg_listings_published_at fires on INSERT and
--- UPDATE. The function body in production is not yet captured -- query (I)
--- will retrieve it so we can recreate it faithfully here.
+drop trigger if exists trg_listings_published_at on public.listings;
+create trigger trg_listings_published_at
+    before insert or update on public.listings
+    for each row execute function public.set_published_at();
