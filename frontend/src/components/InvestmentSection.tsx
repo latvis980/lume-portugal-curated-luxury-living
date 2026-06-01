@@ -1,9 +1,13 @@
 import type { ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 
-const ACCENT = "#fabe1e";
-const QUOTE_RULE = "rgba(250, 190, 30, 0.15)";
-const MARK_UNDERLINE = "rgba(250, 190, 30, 0.4)";
+// Sunny redesign — honey accent on deep espresso ground.
+const ACCENT = "#f1c454";
+const BG = "#2a1d10";
+const TEXT = "#f7ecd2";
+const TEXT_SOFT = "rgba(237, 226, 200, 0.78)";
+const QUOTE_RULE = "rgba(241, 196, 84, 0.18)";
+const MARK_UNDERLINE = "rgba(241, 196, 84, 0.45)";
 
 const NumberedBlock = ({
   number,
@@ -37,7 +41,7 @@ const NumberedBlock = ({
       >
         {heading}
       </h3>
-      <div className="font-body" style={{ fontSize: "18px", lineHeight: 1.75, color: "#c8c2b6" }}>
+      <div className="font-body" style={{ fontSize: "18px", lineHeight: 1.75, color: TEXT_SOFT }}>
         {children}
       </div>
     </div>
@@ -62,7 +66,7 @@ const InvestmentSection = () => {
     <section
       id="investment"
       aria-labelledby="investment-heading"
-      style={{ backgroundColor: "#0f0f0f" }}
+      style={{ backgroundColor: BG }}
     >
       <div
         className="mx-auto investment-container"
@@ -149,7 +153,7 @@ const InvestmentSection = () => {
                       flexShrink: 0,
                     }}
                   />
-                  <span style={{ fontSize: "18px", lineHeight: 1.7, color: "#e8e4dc" }}>
+                  <span style={{ fontSize: "18px", lineHeight: 1.7, color: TEXT }}>
                     {value}
                   </span>
                 </li>
@@ -174,7 +178,7 @@ const InvestmentSection = () => {
             style={{
               fontStyle: "italic",
               fontSize: "20px",
-              color: "#d8d2c4",
+              color: TEXT,
               lineHeight: 1.7,
               margin: 0,
             }}
@@ -206,7 +210,7 @@ const InvestmentSection = () => {
               maxWidth: "460px",
               fontSize: "17px",
               lineHeight: 1.75,
-              color: "#a8a29a",
+              color: TEXT_SOFT,
             }}
           >
             <p style={{ margin: 0 }}>{t("investment", "cta.body.line1", "This is not for everyone — and it is not meant to be.")}</p>
@@ -222,16 +226,17 @@ const InvestmentSection = () => {
             style={{
               marginTop: "36px",
               display: "inline-block",
-              backgroundColor: ACCENT,
-              color: "#0f0f0f",
+              background: "linear-gradient(120deg, #f1c454 0%, #e89446 100%)",
+              color: BG,
               padding: "14px 36px",
               fontSize: "16px",
-              fontWeight: 500,
+              fontWeight: 600,
               letterSpacing: "2px",
               textTransform: "uppercase",
               borderRadius: "2px",
               textDecoration: "none",
-              transition: "background 0.2s ease",
+              boxShadow: "0 12px 40px -12px rgba(241,196,84,0.5)",
+              transition: "transform 0.3s ease, box-shadow 0.3s ease",
             }}
           >
             {t("investment", "cta.button", "Continue with Mark →")}
@@ -244,7 +249,7 @@ const InvestmentSection = () => {
               fontSize: "11px",
               letterSpacing: "1.5px",
               textTransform: "uppercase",
-              color: "#6b6660",
+              color: "rgba(237,226,200,0.5)",
             }}
           >
             <a
@@ -262,7 +267,8 @@ const InvestmentSection = () => {
       <style>{`
         .investment-cta-button:hover,
         .investment-cta-button:focus-visible {
-          background: #ffd147 !important;
+          transform: translateY(-1px);
+          box-shadow: 0 18px 48px -12px rgba(241,196,84,0.7);
         }
         @media (min-width: 768px) {
           .investment-container {

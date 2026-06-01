@@ -34,7 +34,11 @@ import {
 } from "react";
 
 // ─── Tunable constants ─────────────────────────────────────────────────────
-export const OCEAN_COLOR  = "#4e8ba1";  // exported — must match PrivateAccessSection bg
+// "OCEAN_COLOR" name kept for continuity, but with the sunny redesign the
+// wave-takeover colour now matches the top of the contact section's warm
+// gradient (honey #ecbe5b) so the crest reads as molten sunshine rather
+// than seawater.
+export const OCEAN_COLOR  = "#ecbe5b";  // exported — must match PrivateAccessSection top edge
 export const WAVE_HEIGHT  = 60;         // px — height of the wavy crest strip
 export const SEAM_OVERLAP = 2;          // px — crest extends this far into the section
 const FADE_START   = 600;              // px — section.top above this: wave invisible
