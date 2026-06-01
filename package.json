@@ -6,7 +6,7 @@
     "build": "cd frontend && npm install && npm run build",
     "build:dev": "cd frontend && npm install && npm run build:dev",
     "preview": "cd frontend && npm run preview",
-    "db:link": "supabase link --project-ref dbsqvjodyahtzqbzqtsd",
+    "db:link": "supabase link --project-ref ryizbwtscuczqusoeuvc",
     "db:pull": "supabase db pull",
     "db:diff": "supabase db diff -f",
     "db:push": "supabase db push",

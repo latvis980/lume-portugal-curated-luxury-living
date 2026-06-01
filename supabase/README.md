@@ -1,7 +1,7 @@
 # Supabase migrations & schema
 
 This directory is the **single source of truth** for the Lume Postgres schema
-on Supabase (project `dbsqvjodyahtzqbzqtsd`).
+on Supabase (project `ryizbwtscuczqusoeuvc`).
 
 ## Files
 
