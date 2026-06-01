@@ -23,11 +23,23 @@ jobs:
         with:
           version: latest
 
+      - name: Diagnostic — list projects this token can access
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          echo "Projects visible to this access token:"
+          curl -sS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            https://api.supabase.com/v1/projects \
+            | jq -r '.[] | "  ref=\(.id)  name=\(.name)  org=\(.organization_id)"' \
+            || echo "  (jq failed; raw response above)"
+          echo ""
+          echo "Looking for project ref: dbsqvjodyahtzqbzqtsd"
+
       - name: Link project
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: supabase link --project-ref dbsqvjodyahtzqbzqtsd
+        run: supabase link --project-ref dbsqvjodyahtzqbzqtsd --debug
 
       - name: Dump production schema
         env:
