@@ -101,10 +101,12 @@ const Navbar = () => {
       style={{
         // Three visual states:
         //   overHero  → fully transparent (hero video shows through)
-        //   submerged → fully transparent (honey wave crest shows through)
+        //   submerged → opaque honey, matching the top of the contact gradient
+        //               so text in the navbar stays readable as the section
+        //               scrolls beneath it
         //   default   → cream tint with backdrop blur
         backgroundColor:
-          overHero || submerged ? "transparent" : "rgba(251, 244, 230, 0.86)",
+          overHero ? "transparent" : submerged ? "#ecbe5b" : "rgba(251, 244, 230, 0.86)",
         borderColor:
           overHero || submerged ? "transparent" : "rgba(176, 78, 26, 0.12)",
         backdropFilter:
