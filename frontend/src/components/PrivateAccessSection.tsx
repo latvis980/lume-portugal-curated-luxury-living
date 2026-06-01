@@ -51,21 +51,42 @@ const PrivateAccessSection = () => {
   const whatsappNumber = phone.replace(/\D/g, "");
 
   return (
-    <section id="private-access" className="relative z-[32] section-padding bg-[#4e8ba1]">
-      <div className="max-w-3xl mx-auto text-center">
+    <section
+      id="private-access"
+      className="relative z-[32] section-padding overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(180deg, #ecbe5b 0%, #e89446 60%, #d36a25 100%)",
+        color: "#2a1d10",
+      }}
+    >
+      {/* Soft sun glow + warm shadow — gives the section depth without
+          obscuring the form. Mirrors the contact panel in the mockup. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 60% at 30% 10%, rgba(255,240,200,0.6), transparent 60%), radial-gradient(ellipse 60% 50% at 90% 80%, rgba(176,78,26,0.4), transparent 60%)",
+        }}
+      />
+      <div className="relative max-w-3xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <p className="text-sm tracking-[0.3em] uppercase text-sun-light/90 mb-4">
+          <p className="text-sm tracking-[0.3em] uppercase mb-4" style={{ color: "rgba(42,29,16,0.6)" }}>
             {t("contact", "eyebrow", "Private Access")}
           </p>
-          <h2 className="font-display text-3xl md:text-5xl font-light text-warm-white mb-4">
+          <h2 className="font-display text-3xl md:text-5xl font-light mb-4" style={{ color: "#2a1d10" }}>
             {t("contact", "title", "Begin the Conversation")}
           </h2>
-          <div className="w-16 h-px bg-primary mx-auto mb-8" />
-          <p className="text-base text-ocean-light/90 leading-relaxed max-w-md mx-auto mb-12">
+          <div className="w-16 h-px mx-auto mb-8" style={{ background: "#2a1d10" }} />
+          <p
+            className="text-base leading-relaxed max-w-md mx-auto mb-12"
+            style={{ color: "rgba(42,29,16,0.7)" }}
+          >
             {t(
               "contact",
               "intro",
@@ -90,7 +111,7 @@ const PrivateAccessSection = () => {
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
               disabled={isSubmitting}
-              className="w-full px-4 py-3 bg-transparent border border-warm-white/25 text-warm-white text-base tracking-wider placeholder:text-warm-white/50 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
+              className="lume-contact-input w-full px-4 py-3 text-base tracking-wider focus:outline-none transition-colors disabled:opacity-50"
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <input
@@ -100,7 +121,7 @@ const PrivateAccessSection = () => {
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 required
                 disabled={isSubmitting}
-                className="w-full px-4 py-3 bg-transparent border border-warm-white/25 text-warm-white text-base tracking-wider placeholder:text-warm-white/50 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
+                className="lume-contact-input w-full px-4 py-3 text-base tracking-wider focus:outline-none transition-colors disabled:opacity-50"
               />
               <input
                 type="tel"
@@ -108,7 +129,7 @@ const PrivateAccessSection = () => {
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 disabled={isSubmitting}
-                className="w-full px-4 py-3 bg-transparent border border-warm-white/25 text-warm-white text-base tracking-wider placeholder:text-warm-white/50 focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
+                className="lume-contact-input w-full px-4 py-3 text-base tracking-wider focus:outline-none transition-colors disabled:opacity-50"
               />
             </div>
             <textarea
@@ -117,22 +138,43 @@ const PrivateAccessSection = () => {
               onChange={(e) => setForm({ ...form, message: e.target.value })}
               rows={4}
               disabled={isSubmitting}
-              className="w-full px-4 py-3 bg-transparent border border-warm-white/15 text-warm-white text-sm tracking-wider placeholder:text-warm-white/30 focus:outline-none focus:border-primary/50 transition-colors resize-none disabled:opacity-50"
+              className="lume-contact-input w-full px-4 py-3 text-sm tracking-wider focus:outline-none transition-colors resize-none disabled:opacity-50"
             />
 
             {error && (
-              <p className="text-sm text-red-400 text-center">{error}</p>
+              <p className="text-sm text-red-900 text-center">{error}</p>
             )}
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-4 bg-primary text-primary-foreground text-sm tracking-[0.25em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-4 text-sm tracking-[0.25em] uppercase font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ background: "#2a1d10", color: "#fbf4e6" }}
+              onMouseEnter={(e) => {
+                if (!isSubmitting) e.currentTarget.style.background = "#b04e1a";
+              }}
+              onMouseLeave={(e) => {
+                if (!isSubmitting) e.currentTarget.style.background = "#2a1d10";
+              }}
             >
               {isSubmitting
                 ? t("contact", "submitting", "Sending...")
                 : t("contact", "submit", "Request Private Access")}
             </button>
+
+            <style>{`
+              .lume-contact-input {
+                background: rgba(255,243,220,0.4);
+                border: 1px solid rgba(42,29,16,0.18);
+                color: #2a1d10;
+                border-radius: 2px;
+              }
+              .lume-contact-input::placeholder { color: rgba(42,29,16,0.5); }
+              .lume-contact-input:focus {
+                border-color: #2a1d10;
+                background: rgba(255,243,220,0.7);
+              }
+            `}</style>
           </motion.form>
         ) : (
           <motion.div
@@ -140,10 +182,10 @@ const PrivateAccessSection = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="py-16"
           >
-            <p className="font-display text-2xl font-light text-warm-white italic mb-3">
+            <p className="font-display text-2xl font-light italic mb-3" style={{ color: "#2a1d10" }}>
               {t("contact", "thank_you_title", "Thank you")}
             </p>
-            <p className="text-base text-ocean-light/85">
+            <p className="text-base" style={{ color: "rgba(42,29,16,0.75)" }}>
               {t("contact", "thank_you_body", "A member of our team will be in touch within 24 hours.")}
             </p>
           </motion.div>
@@ -155,17 +197,19 @@ const PrivateAccessSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="mt-16 pt-10 border-t border-warm-white/15 grid grid-cols-1 sm:grid-cols-3 gap-8 text-left max-w-lg mx-auto"
+            className="mt-16 pt-10 grid grid-cols-1 sm:grid-cols-3 gap-8 text-left max-w-lg mx-auto"
+            style={{ borderTop: "1px solid rgba(42,29,16,0.18)" }}
           >
             {phone && (
               <div>
-                <p className="text-xs tracking-[0.25em] uppercase text-[#b8dce8]/90 mb-3">
+                <p className="text-xs tracking-[0.25em] uppercase mb-3" style={{ color: "rgba(42,29,16,0.6)" }}>
                   {t("contact", "phone_label", "Phone")}
                 </p>
                 <div className="flex items-center gap-3">
                   <a
                     href={`tel:${phone}`}
-                    className="font-display text-base font-light text-warm-white hover:text-white transition-colors"
+                    className="font-display text-base font-light transition-colors"
+                    style={{ color: "#2a1d10" }}
                   >
                     {phone}
                   </a>
@@ -175,7 +219,8 @@ const PrivateAccessSection = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       title={t("contact", "whatsapp_label", "WhatsApp")}
-                      className="text-warm-white/60 hover:text-warm-white/90 transition-colors flex-shrink-0"
+                      className="transition-colors flex-shrink-0"
+                      style={{ color: "rgba(42,29,16,0.55)" }}
                       aria-label={t("contact", "whatsapp_label", "WhatsApp")}
                     >
                       <svg
@@ -194,12 +239,13 @@ const PrivateAccessSection = () => {
 
             {email && (
               <div>
-                <p className="text-xs tracking-[0.25em] uppercase text-[#b8dce8]/90 mb-3">
+                <p className="text-xs tracking-[0.25em] uppercase mb-3" style={{ color: "rgba(42,29,16,0.6)" }}>
                   {t("contact", "email_label", "Email")}
                 </p>
                 <a
                   href={`mailto:${email}`}
-                  className="font-display text-base font-light text-warm-white hover:text-white transition-colors break-all"
+                  className="font-display text-base font-light transition-colors break-all"
+                  style={{ color: "#2a1d10" }}
                 >
                   {email}
                 </a>
@@ -208,10 +254,10 @@ const PrivateAccessSection = () => {
 
             {address && (
               <div>
-                <p className="text-xs tracking-[0.25em] uppercase text-[#b8dce8]/90 mb-3">
+                <p className="text-xs tracking-[0.25em] uppercase mb-3" style={{ color: "rgba(42,29,16,0.6)" }}>
                   {t("contact", "address_label", "Address")}
                 </p>
-                <p className="text-warm-white/90 text-sm leading-relaxed whitespace-pre-line">
+                <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: "rgba(42,29,16,0.85)" }}>
                   {address}
                 </p>
                 {mapsUrl && (
@@ -219,7 +265,8 @@ const PrivateAccessSection = () => {
                     href={mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block mt-2 text-xs text-[#b8dce8]/80 hover:text-white transition-colors underline underline-offset-2"
+                    className="inline-block mt-2 text-xs transition-colors underline underline-offset-2"
+                    style={{ color: "rgba(42,29,16,0.7)" }}
                   >
                     {t("contact", "map_link", "View on map")}
                   </a>

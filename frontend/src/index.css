@@ -6,44 +6,70 @@
 
 @layer base {
   :root {
-    --background: 38 33% 97%;
-    --foreground: 220 20% 15%;
+    /* ── Sunny palette (Lume redesign) ──────────────────────────────────
+       Mapped onto the existing token aliases so all current components
+       pick up the new look without per-component rewrites.
 
-    --card: 38 25% 95%;
-    --card-foreground: 220 20% 15%;
+       Hex reference:
+         cream        #fbf4e6   ← background / sand-light
+         cream-deep   #f4e8cf   ← card / sand
+         honey        #f1c454   ← primary / sun / ring
+         sun          #e9a92e
+         apricot      #e89446
+         tangerine    #d36a25   ← accent / secondary (warm CTA tone)
+         terracotta   #b04e1a
+         espresso     #2a1d10   ← charcoal / foreground
+         ink-soft     #5a4630   ← muted-foreground                       */
 
-    --popover: 38 33% 97%;
-    --popover-foreground: 220 20% 15%;
+    --background: 39 71% 94%;          /* cream  #fbf4e6 */
+    --foreground: 27 41% 12%;          /* espresso */
 
-    --primary: 38 55% 52%;
-    --primary-foreground: 38 33% 97%;
+    --card: 39 66% 88%;                /* cream-deep #f4e8cf */
+    --card-foreground: 27 41% 12%;
 
-    --secondary: 200 30% 40%;
-    --secondary-foreground: 38 33% 97%;
+    --popover: 39 71% 94%;
+    --popover-foreground: 27 41% 12%;
 
-    --muted: 35 25% 90%;
-    --muted-foreground: 220 14% 30%;
+    --primary: 41 84% 64%;             /* honey #f1c454 */
+    --primary-foreground: 27 41% 12%;
 
-    --accent: 200 30% 40%;
-    --accent-foreground: 38 33% 97%;
+    --secondary: 23 70% 49%;           /* tangerine #d36a25 */
+    --secondary-foreground: 39 71% 94%;
+
+    --muted: 39 50% 84%;
+    --muted-foreground: 30 31% 27%;    /* ink-soft */
+
+    --accent: 23 70% 49%;              /* tangerine */
+    --accent-foreground: 39 71% 94%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 35 20% 85%;
-    --input: 35 20% 85%;
-    --ring: 38 55% 52%;
+    --border: 27 41% 12% / 12%;
+    --input: 35 30% 80%;
+    --ring: 41 84% 64%;                /* honey */
 
     --radius: 0.25rem;
 
-    --sand: 35 30% 88%;
-    --sand-light: 38 33% 97%;
-    --ocean: 200 30% 40%;
-    --ocean-light: 200 25% 70%;
-    --sun: 38 55% 52%;
-    --sun-light: 38 50% 75%;
-    --charcoal: 220 20% 15%;
-    --warm-white: 40 30% 98%;
+    --sand: 39 66% 88%;                /* cream-deep */
+    --sand-light: 39 71% 94%;          /* cream */
+    /* --ocean tokens are kept around for legacy uses (e.g. the previous
+       contact bg) but remapped to warm tones so any stale reference
+       blends with the new palette rather than reading as teal. */
+    --ocean: 23 70% 49%;               /* tangerine */
+    --ocean-light: 36 60% 80%;         /* warm sand */
+    --sun: 41 84% 64%;                 /* honey */
+    --sun-light: 41 90% 75%;
+    --charcoal: 27 41% 12%;            /* espresso */
+    --warm-white: 39 71% 94%;          /* cream */
+
+    /* Extended hue palette used by the redesigned hero/contact gradients */
+    --honey: 41 84% 64%;               /* #f1c454 */
+    --apricot: 27 78% 59%;             /* #e89446 */
+    --tangerine: 23 70% 49%;           /* #d36a25 */
+    --terracotta: 18 75% 40%;          /* #b04e1a */
+    --espresso: 27 41% 12%;            /* #2a1d10 */
+    --espresso-deep: 30 41% 7%;        /* #1a1108 */
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -177,6 +203,53 @@ body.lume-wave-frozen .lume-wave-front {
 @media (prefers-reduced-motion: reduce) {
   .lume-wave-back,
   .lume-wave-front {
+    animation: none;
+  }
+}
+
+/* ─── Sun-wave at the bottom of the hero ─────────────────────────────────
+   Three stacked SVG strips (back/mid/front) that scroll horizontally at
+   different speeds, creating a layered sunlit wave horizon. The path
+   inside each SVG is tileable across exactly 2 viewport widths, so a
+   translateX of -50% loops seamlessly. */
+
+.sun-wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 360px;
+  pointer-events: none;
+  z-index: 4;
+  overflow: hidden;
+}
+.sun-wave .sun-wave-svg {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 100%;
+  width: 200%;
+  will-change: transform;
+}
+.sun-wave .sun-wave-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 100%, rgba(255, 210, 120, 0.55), transparent 60%);
+  mix-blend-mode: screen;
+}
+.sun-wave .sun-wave-back  { animation: sun-wave-loop 180s linear infinite; filter: blur(1px); opacity: 0.85; }
+.sun-wave .sun-wave-mid   { animation: sun-wave-loop 130s linear infinite; opacity: 0.92; }
+.sun-wave .sun-wave-front { animation: sun-wave-loop  90s linear infinite; }
+
+@keyframes sun-wave-loop {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sun-wave .sun-wave-back,
+  .sun-wave .sun-wave-mid,
+  .sun-wave .sun-wave-front {
     animation: none;
   }
 }

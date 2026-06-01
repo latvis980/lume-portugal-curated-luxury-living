@@ -81,24 +81,24 @@ const Navbar = () => {
     <nav
       className="fixed top-0 left-0 right-0 z-50 border-b"
       style={{
-        // Matches wave_demo_1: when the wave covers the navbar, bg AND
-        // backdrop-filter both go away so the wavy crest shows through cleanly.
-        // (Leaving backdrop-blur on smears the crest into a flat blue.)
-        backgroundColor: submerged ? "transparent" : "hsl(35 30% 88% / 0.85)",
-        borderColor:     submerged ? "transparent" : "hsl(var(--border) / 0.5)",
-        backdropFilter:        submerged ? "none" : "blur(8px)",
-        WebkitBackdropFilter:  submerged ? "none" : "blur(8px)",
+        // When the (now sunny) wave covers the navbar, bg AND backdrop-filter
+        // both go away so the wavy crest shows through cleanly. Cream tint
+        // (#fbf4e6 at 86%) when un-submerged, matching the new page palette.
+        backgroundColor: submerged ? "transparent" : "rgba(251, 244, 230, 0.86)",
+        borderColor:     submerged ? "transparent" : "rgba(176, 78, 26, 0.12)",
+        backdropFilter:        submerged ? "none" : "blur(14px)",
+        WebkitBackdropFilter:  submerged ? "none" : "blur(14px)",
         transition:
           "background-color 0.5s ease, border-color 0.5s ease, " +
           "backdrop-filter 0.5s ease, -webkit-backdrop-filter 0.5s ease, " +
           "color 0.5s ease",
       }}
     >
-      {/* The descendant-target variant `[&_*]:!text-warm-white` flips every text
-          element inside the nav to warm-white when submerged, with a transition. */}
+      {/* When the honey wave submerges the navbar, every nested text element
+          flips to deep espresso so it stays readable on the warm wave colour. */}
       <div
         className={`max-w-7xl mx-auto px-6 md:px-12 flex items-center h-14 md:h-[5.5rem] gap-6 transition-colors duration-300 ${
-          submerged ? "[&_*]:!text-warm-white" : ""
+          submerged ? "[&_*]:!text-charcoal" : ""
         }`}
       >
 
@@ -108,7 +108,7 @@ const Navbar = () => {
             src="/navbar-logo.png"
             alt="LUME by Mark"
             className={`h-[3.6rem] md:h-[4.8rem] w-auto transition-all duration-500 ${
-              submerged ? "brightness-0 invert" : ""
+              submerged ? "brightness-0" : ""
             }`}
           />
         </a>
