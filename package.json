@@ -5,9 +5,19 @@
     "dev": "cd frontend && npm install && npm run dev",
     "build": "cd frontend && npm install && npm run build",
     "build:dev": "cd frontend && npm install && npm run build:dev",
-    "preview": "cd frontend && npm run preview"
+    "preview": "cd frontend && npm run preview",
+    "db:link": "supabase link --project-ref dbsqvjodyahtzqbzqtsd",
+    "db:pull": "supabase db pull",
+    "db:diff": "supabase db diff -f",
+    "db:push": "supabase db push",
+    "db:reset": "supabase db reset",
+    "db:dump": "supabase db dump --schema public --file supabase/schema.sql",
+    "db:check": "supabase db reset && npm run db:dump && git diff --exit-code supabase/schema.sql"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.100.1"
+  },
+  "devDependencies": {
+    "supabase": "^1.200.3"
   }
 }

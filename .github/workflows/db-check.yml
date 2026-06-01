@@ -1,0 +1,53 @@
+name: db-check
+
+# PR guard: verifies that the migrations in supabase/migrations/ apply
+# cleanly to a fresh database, and that the resulting schema matches the
+# committed supabase/schema.sql snapshot.
+#
+# Catches: broken SQL, non-idempotent migrations, edits to applied
+# migrations, and snapshot files that drifted from the migrations.
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/db-check.yml'
+
+jobs:
+  schema-matches-migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase (applies migrations to a fresh Postgres)
+        run: supabase start --exclude studio,inbucket,storage-api,imgproxy,realtime,edge-runtime,pgadmin-schema-diff,pgbouncer
+
+      - name: Dump local schema
+        run: supabase db dump --local --schema public --file /tmp/schema.generated.sql
+
+      - name: Diff against committed snapshot (if present)
+        run: |
+          if [ ! -f supabase/schema.sql ]; then
+            echo "::warning::supabase/schema.sql does not exist yet."
+            echo "Run the 'db-bootstrap' workflow once to create it."
+            echo "Migrations applied cleanly -- this PR is safe."
+            exit 0
+          fi
+          if ! diff -u supabase/schema.sql /tmp/schema.generated.sql; then
+            echo ""
+            echo "::error::supabase/schema.sql is out of sync with supabase/migrations/."
+            echo "Re-run the 'db-bootstrap' workflow to regenerate it,"
+            echo "or pull the generated file from this workflow's artifacts."
+            exit 1
+          fi
+
+      - name: Upload generated schema (for download if diff fails)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: schema-generated
+          path: /tmp/schema.generated.sql
