@@ -9,18 +9,18 @@ const Footer = () => {
       className="px-6 md:px-12 lg:px-24 py-14"
       style={{ background: "#1a1108", color: "rgba(237,226,200,0.7)" }}
     >
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-14 items-center">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:justify-between md:items-center gap-10 md:gap-8">
         {/* Brand */}
         <div className="flex flex-col items-center md:items-start gap-4 text-center md:text-left">
           <img
             src="/footer-logo.png"
             alt={t("footer", "logo_alt", "LUME by Mark")}
-            className="h-[70px] w-auto opacity-95"
+            className="h-[110px] w-auto opacity-95"
           />
         </div>
 
         {/* Legal / registration */}
-        <div className="flex flex-col items-center md:items-start gap-1 text-center md:text-left">
+        <div className="flex flex-col items-center gap-1 text-center">
           <p className="text-[13px] leading-relaxed font-semibold text-[#edd9a8]/90">
             {t("footer", "legal_name", "LUME by Mark Lda")}
           </p>
