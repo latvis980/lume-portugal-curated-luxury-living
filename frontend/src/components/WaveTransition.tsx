@@ -81,15 +81,19 @@ export const WaveProvider = ({
         return;
       }
 
-      const S = target.getBoundingClientRect().top;
+      const rect = target.getBoundingClientRect();
+      const S = rect.top;
+      const B = rect.bottom;
       const anchorY = Math.max(S, 0);
       const ch = window.innerHeight;
 
-      // Fill anchored at the section's top, extending down to viewport bottom.
-      // Critically: it does NOT extend ABOVE anchorY — leaving the navbar zone
-      // transparent so the wavy crest is visible as it climbs over the navbar.
+      // Fill anchored at the section's top, extending down to whichever comes
+      // first: the section's own bottom edge, or the viewport bottom. Clamping
+      // to the section bottom is what keeps the overlay from covering the
+      // footer (and anything else) once the contact section has scrolled past.
       const fillY      = anchorY;
-      const fillHeight = Math.max(0, ch - anchorY);
+      const fillBottom = Math.min(ch, B);
+      const fillHeight = Math.max(0, fillBottom - anchorY);
 
       // Crest's TOP edge in the viewport = section top minus the wave height.
       // SEAM_OVERLAP nudges the crest down a hair so its solid teal bottom
@@ -109,7 +113,11 @@ export const WaveProvider = ({
       root.style.setProperty("--lume-wave-crest-y", `${crestY}px`);
       root.style.setProperty("--lume-wave-opacity",  String(opacity));
 
-      const isSubmerged = S <= SUBMERGE_AT;
+      // Submerged only while the contact section is actually overlapping the
+      // navbar zone. Once the section's bottom passes above the navbar (i.e.
+      // we've scrolled into the footer), drop submerged so the navbar
+      // returns to its normal cream-tinted state over the footer.
+      const isSubmerged = S <= SUBMERGE_AT && B > 0;
       if (isSubmerged !== lastSubmerged) {
         lastSubmerged = isSubmerged;
         setSubmerged(isSubmerged);
