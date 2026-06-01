@@ -1,5 +1,5 @@
 // frontend/src/components/Navbar.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -12,6 +12,19 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const t = useT();
+  // True once the viewport has scrolled past the hero region. While at the
+  // top of the page the navbar is fully transparent so the hero video shows
+  // through; after scrolling it picks up a soft cream-tinted blur.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  // On routes that don't render a hero (e.g. /properties, /about) the navbar
+  // is always over content, so it should never be transparent.
+  const overHero = location.pathname === "/" && !scrolled;
   // ── Wave-takeover state ──────────────────────────────────────────────
   // `submerged` becomes true once the contact section reaches the navbar.
   // We use it to fade the sand bg to transparent and flip text to white.
@@ -31,8 +44,13 @@ const Navbar = () => {
       href:     "/#services",
     },
     {
-      label:    t("nav", "collect_with_lume",           "Investment"),
-      subtitle: t("nav", "collect_with_lume_sub",       "Thinking beyond the present"),
+      label:    t("nav", "collecting",                  "Collecting"),
+      subtitle: t("nav", "collecting_sub",              "Lume signature services"),
+      href:     "/#collecting",
+    },
+    {
+      label:    t("nav", "investment",                  "Investment"),
+      subtitle: t("nav", "investment_sub",              "Thinking beyond the present"),
       href:     "/#investment",
     },
     {
@@ -81,24 +99,31 @@ const Navbar = () => {
     <nav
       className="fixed top-0 left-0 right-0 z-50 border-b"
       style={{
-        // When the (now sunny) wave covers the navbar, bg AND backdrop-filter
-        // both go away so the wavy crest shows through cleanly. Cream tint
-        // (#fbf4e6 at 86%) when un-submerged, matching the new page palette.
-        backgroundColor: submerged ? "transparent" : "rgba(251, 244, 230, 0.86)",
-        borderColor:     submerged ? "transparent" : "rgba(176, 78, 26, 0.12)",
-        backdropFilter:        submerged ? "none" : "blur(14px)",
-        WebkitBackdropFilter:  submerged ? "none" : "blur(14px)",
+        // Three visual states:
+        //   overHero  → fully transparent (hero video shows through)
+        //   submerged → fully transparent (honey wave crest shows through)
+        //   default   → cream tint with backdrop blur
+        backgroundColor:
+          overHero || submerged ? "transparent" : "rgba(251, 244, 230, 0.86)",
+        borderColor:
+          overHero || submerged ? "transparent" : "rgba(176, 78, 26, 0.12)",
+        backdropFilter:
+          overHero || submerged ? "none" : "blur(14px)",
+        WebkitBackdropFilter:
+          overHero || submerged ? "none" : "blur(14px)",
         transition:
           "background-color 0.5s ease, border-color 0.5s ease, " +
           "backdrop-filter 0.5s ease, -webkit-backdrop-filter 0.5s ease, " +
           "color 0.5s ease",
       }}
     >
-      {/* When the honey wave submerges the navbar, every nested text element
-          flips to deep espresso so it stays readable on the warm wave colour. */}
+      {/* Text colour adapts to the surface behind the navbar:
+            overHero  → cream (warm-white) over the dark hero video
+            submerged → espresso on the honey wave crest
+            default   → uses each item's own colour (espresso / muted) */}
       <div
         className={`max-w-7xl mx-auto px-6 md:px-12 flex items-center h-14 md:h-[5.5rem] gap-6 transition-colors duration-300 ${
-          submerged ? "[&_*]:!text-charcoal" : ""
+          overHero ? "[&_*]:!text-warm-white" : submerged ? "[&_*]:!text-charcoal" : ""
         }`}
       >
 
@@ -108,7 +133,7 @@ const Navbar = () => {
             src="/navbar-logo.png"
             alt="LUME by Mark"
             className={`h-[3.6rem] md:h-[4.8rem] w-auto transition-all duration-500 ${
-              submerged ? "brightness-0" : ""
+              overHero ? "brightness-0 invert" : submerged ? "brightness-0" : ""
             }`}
           />
         </a>

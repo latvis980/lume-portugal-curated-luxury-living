@@ -30,8 +30,11 @@
     --popover: 39 71% 94%;
     --popover-foreground: 27 41% 12%;
 
-    --primary: 41 84% 64%;             /* honey #f1c454 */
-    --primary-foreground: 27 41% 12%;
+    /* Light honey reads barely against cream — accents (eyebrows, numerals,
+       hair lines) need a darker tone to stay legible. Use a deep gold here
+       and reserve the brighter --honey token for dark-bg contexts. */
+    --primary: 27 78% 49%;             /* deep apricot/gold */
+    --primary-foreground: 39 71% 94%;
 
     --secondary: 23 70% 49%;           /* tangerine #d36a25 */
     --secondary-foreground: 39 71% 94%;
@@ -58,7 +61,7 @@
        blends with the new palette rather than reading as teal. */
     --ocean: 23 70% 49%;               /* tangerine */
     --ocean-light: 36 60% 80%;         /* warm sand */
-    --sun: 41 84% 64%;                 /* honey */
+    --sun: 38 81% 54%;                 /* sun #e9a92e — gold accent line */
     --sun-light: 41 90% 75%;
     --charcoal: 27 41% 12%;            /* espresso */
     --warm-white: 39 71% 94%;          /* cream */
