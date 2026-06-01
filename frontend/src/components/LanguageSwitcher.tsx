@@ -70,8 +70,8 @@ export default function LanguageSwitcher({ variant = "navbar" }: LanguageSwitche
               }}
               className={`w-full flex items-center justify-between px-4 py-2 text-xs tracking-wider transition-colors ${
                 submerged
-                  ? "text-warm-white/80 hover:text-warm-white hover:bg-warm-white/10"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                  ? "text-warm-white/90 hover:text-warm-white hover:bg-warm-white/10"
+                  : "text-foreground/80 hover:text-foreground hover:bg-muted/40"
               }`}
             >
               <span>{LOCALE_LABELS[loc]}</span>
