@@ -45,7 +45,8 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { fetchListingBySlug, type Listing } from "@/lib/public-api";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, useT } from "@/lib/i18n";
+import { getPropertyTypeLabel } from "@/lib/property-types";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────
 
@@ -488,6 +489,7 @@ function EnquirySidebar({ listing }: { listing: Listing }) {
 export default function ListingPage() {
   const { slug } = useParams<{ slug: string }>();
   const { locale } = useI18n();
+  const t = useT();
   const navigate = useNavigate();
   const [galleryOpen, setGalleryOpen] = useState<number | null>(null);
 
@@ -648,7 +650,7 @@ export default function ListingPage() {
                   {LISTING_TYPE_LABELS[listing.listing_type] || listing.listing_type}
                 </span>
                 <span className="px-3 py-1 bg-muted text-muted-foreground text-[10px] tracking-[0.2em] uppercase font-body">
-                  {capitalize(listing.property_type)}
+                  {getPropertyTypeLabel(listing.property_type, t)}
                 </span>
                 {listing.featured && (
                   <span className="px-3 py-1 bg-primary text-primary-foreground text-[10px] tracking-[0.2em] uppercase font-body font-medium">

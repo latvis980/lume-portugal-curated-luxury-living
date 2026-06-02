@@ -93,13 +93,10 @@ ALTER TYPE "public"."property_condition" OWNER TO "postgres";
 CREATE TYPE "public"."property_type" AS ENUM (
     'apartment',
     'penthouse',
-    'villa',
     'townhouse',
-    'estate',
-    'farmhouse',
-    'quinta',
-    'land',
-    'new_development_unit'
+    'villa',
+    'project_apartment',
+    'project_villa'
 );
 
 
@@ -310,8 +307,8 @@ CREATE TABLE IF NOT EXISTS "public"."listings" (
     "short_description_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
     "full_description_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
     "ai_summary_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
-    CONSTRAINT "apartment_floor_check" CHECK ((("property_type" <> ALL (ARRAY['apartment'::"public"."property_type", 'penthouse'::"public"."property_type"])) OR ("floor_number" IS NOT NULL))),
-    CONSTRAINT "land_plot_required_check" CHECK ((("property_type" <> ALL (ARRAY['villa'::"public"."property_type", 'estate'::"public"."property_type", 'farmhouse'::"public"."property_type", 'quinta'::"public"."property_type", 'land'::"public"."property_type"])) OR ("plot_size" IS NOT NULL))),
+    CONSTRAINT "apartment_floor_check" CHECK ((("property_type" <> ALL (ARRAY['apartment'::"public"."property_type", 'penthouse'::"public"."property_type", 'project_apartment'::"public"."property_type"])) OR ("floor_number" IS NOT NULL))),
+    CONSTRAINT "land_plot_required_check" CHECK ((("property_type" <> ALL (ARRAY['villa'::"public"."property_type", 'project_villa'::"public"."property_type"])) OR ("plot_size" IS NOT NULL))),
     CONSTRAINT "listings_balcony_area_check" CHECK (("balcony_area" >= (0)::numeric)),
     CONSTRAINT "listings_bathrooms_check" CHECK (("bathrooms" >= (0)::numeric)),
     CONSTRAINT "listings_bedrooms_check" CHECK (("bedrooms" >= 0)),

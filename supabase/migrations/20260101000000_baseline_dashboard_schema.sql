@@ -74,8 +74,8 @@ begin
 
     if not exists (select 1 from pg_type where typname = 'property_type') then
         create type public.property_type as enum
-            ('apartment', 'penthouse', 'villa', 'townhouse', 'estate',
-             'farmhouse', 'quinta', 'land', 'new_development_unit');
+            ('apartment', 'penthouse', 'townhouse', 'villa',
+             'project_apartment', 'project_villa');
     end if;
 
     -- service_category: legacy 4 values + current 7 values. The legacy
@@ -404,9 +404,9 @@ begin
     for c in
         select * from (values
             ('apartment_floor_check',
-                'CHECK (property_type <> ALL (ARRAY[''apartment''::property_type, ''penthouse''::property_type]) OR floor_number IS NOT NULL)'),
+                'CHECK (property_type <> ALL (ARRAY[''apartment''::property_type, ''penthouse''::property_type, ''project_apartment''::property_type]) OR floor_number IS NOT NULL)'),
             ('land_plot_required_check',
-                'CHECK (property_type <> ALL (ARRAY[''villa''::property_type, ''estate''::property_type, ''farmhouse''::property_type, ''quinta''::property_type, ''land''::property_type]) OR plot_size IS NOT NULL)'),
+                'CHECK (property_type <> ALL (ARRAY[''villa''::property_type, ''project_villa''::property_type]) OR plot_size IS NOT NULL)'),
             ('listings_balcony_area_check',                  'CHECK (balcony_area >= 0)'),
             ('listings_bathrooms_check',                     'CHECK (bathrooms >= 0)'),
             ('listings_bedrooms_check',                      'CHECK (bedrooms >= 0)'),

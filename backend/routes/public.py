@@ -229,7 +229,7 @@ async def list_properties(
     lifestyle:       Optional[str]   = Query(None, description="ocean | city | countryside | wine_region"),
 
     # ── Property classification ───────────────────────────────────────────────
-    type:            Optional[str]   = Query(None, description="property_type enum"),
+    type:            Optional[str]   = Query(None, description="apartment | penthouse | townhouse | villa | project_apartment | project_villa"),
     listing_type:    Optional[str]   = Query(None, description="sale | rent"),
 
     # ── Price range ───────────────────────────────────────────────────────────

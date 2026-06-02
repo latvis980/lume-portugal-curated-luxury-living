@@ -129,7 +129,7 @@ async def create_listing(body: dict, admin=Depends(require_admin)):
     {
         "reference": "LM-001",
         "title": "Riverfront Penthouse in Santos",
-        "property_type": "penthouse",
+        "property_type": "penthouse",  # one of: apartment, penthouse, townhouse, villa, project_apartment, project_villa
         "listing_type": "sale",
         "price": 2850000,
         "region": "Lisbon",
@@ -152,12 +152,12 @@ async def create_listing(body: dict, admin=Depends(require_admin)):
     # Pre-flight: enforce conditional-required fields with a clean message,
     # so callers don't see a raw Postgres check-constraint dump.
     ptype = body.get("property_type")
-    if ptype in ("apartment", "penthouse") and body.get("floor_number") in (None, ""):
+    if ptype in ("apartment", "penthouse", "project_apartment") and body.get("floor_number") in (None, ""):
         raise HTTPException(
             status_code=422,
             detail=f"Floor number is required for {ptype}.",
         )
-    if ptype in ("villa", "estate", "farmhouse", "quinta", "land") and body.get("plot_size") in (None, ""):
+    if ptype in ("villa", "project_villa") and body.get("plot_size") in (None, ""):
         raise HTTPException(
             status_code=422,
             detail=f"Plot size is required for {ptype}.",
