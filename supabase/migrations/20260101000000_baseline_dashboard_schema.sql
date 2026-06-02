@@ -1,15 +1,13 @@
--- Baseline migration: rebuild every schema object that was originally created
--- in the Supabase dashboard (before this migrations folder became the source
--- of truth).
+-- Baseline migration: rebuild the entire `public` schema as it exists in
+-- production. This is the single starting point for every database — the
+-- previous per-feature migrations (2026-04-28 through 2026-05-06) have all
+-- been folded into this file and removed from the migrations folder.
 --
--- Mirrors the live `public` schema as of 2026-06-01:
---   - 5 dashboard-only tables: contacts, listings, locations, regions, services
+-- What it creates:
+--   - 7 tables: contacts, listings, locations, regions, services,
+--     translations, team_members
 --   - 10 enums used by listings + services
 --   - GIN/btree indexes, RLS policies, updated_at + published_at triggers
---
--- The translations and team_members tables, plus the service_category enum
--- value extensions, live in later migrations (2026-04-28 onwards) which run
--- on top of this baseline.
 --
 -- Idempotent: safe to run against the live database (already has everything)
 -- and against a fresh database (builds from scratch). All statements are
@@ -487,3 +485,85 @@ drop trigger if exists trg_listings_published_at on public.listings;
 create trigger trg_listings_published_at
     before insert or update on public.listings
     for each row execute function public.set_published_at();
+
+-- ---------------------------------------------------------------------------
+-- 7. translations  (multi-language CMS strings)
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.translations (
+    id uuid primary key default gen_random_uuid(),
+    namespace text not null,
+    key text not null,
+    en text,
+    pt_pt text,
+    ru text,
+    es text,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    unique (namespace, key)
+);
+
+create index if not exists translations_namespace_idx
+    on public.translations (namespace);
+
+alter table public.translations enable row level security;
+
+do $$
+begin
+    if not exists (select 1 from pg_policies
+        where schemaname='public' and tablename='translations'
+          and policyname='translations are public read') then
+        create policy "translations are public read"
+            on public.translations
+            for select
+            using (true);
+    end if;
+end$$;
+
+create or replace function public.translations_set_updated_at()
+returns trigger language plpgsql as $$
+begin
+    new.updated_at = now();
+    return new;
+end;
+$$;
+
+drop trigger if exists translations_set_updated_at on public.translations;
+create trigger translations_set_updated_at
+    before update on public.translations
+    for each row execute function public.translations_set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- 8. team_members  (About page founders)
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.team_members (
+    id uuid primary key default gen_random_uuid(),
+    slug text not null unique,
+    name text not null,
+    role text,
+    image_url text,
+    sort_order integer not null default 0,
+    is_active boolean not null default true,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+
+alter table public.team_members enable row level security;
+
+do $$
+begin
+    if not exists (select 1 from pg_policies
+        where schemaname='public' and tablename='team_members'
+          and policyname='team_members are public read') then
+        create policy "team_members are public read"
+            on public.team_members
+            for select
+            using (is_active);
+    end if;
+end$$;
+
+drop trigger if exists team_members_set_updated_at on public.team_members;
+create trigger team_members_set_updated_at
+    before update on public.team_members
+    for each row execute function public.translations_set_updated_at();
