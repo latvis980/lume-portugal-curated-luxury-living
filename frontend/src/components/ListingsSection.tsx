@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchListings, type Listing } from "@/lib/public-api";
+import { useT } from "@/lib/i18n";
+import { getPropertyTypeLabel } from "@/lib/property-types";
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -26,15 +28,16 @@ function formatSpecs(l: Listing): string {
   return parts.join(" · ");
 }
 
-function getTag(l: Listing): string {
+function getTag(
+  l: Listing,
+  t: (namespace: string, key: string, fallback?: string) => string,
+): string {
   if (l.views && l.views.length > 0) {
     const label = l.views[0].replace(/_/g, " ");
     return label.charAt(0).toUpperCase() + label.slice(1) + " View";
   }
   if (l.featured) return "Featured";
-  return l.property_type
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return getPropertyTypeLabel(l.property_type, t);
 }
 
 function locationString(l: Listing): string {
@@ -65,6 +68,7 @@ function SkeletonCard({ delay }: { delay: number }) {
 // ── Main Component ───────────────────────────────────────────────────────
 
 const ListingsSection = () => {
+  const t = useT();
   // Always fetch the latest 6 available listings — no questionnaire filtering.
   const { data, isLoading } = useQuery({
     queryKey: ["public-listings", { limit: 6 }],
@@ -137,7 +141,7 @@ const ListingsSection = () => {
                     />
                     <div className="absolute left-4 top-4">
                       <span className="bg-background/90 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-foreground">
-                        {getTag(listing)}
+                        {getTag(listing, t)}
                       </span>
                     </div>
                     {listing.listing_type === "rent" && (

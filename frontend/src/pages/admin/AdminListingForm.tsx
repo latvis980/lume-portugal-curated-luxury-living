@@ -23,7 +23,7 @@ const LOCALE_TABS: { code: I18nLocale; short: string; name: string }[] = [
 
 // ─── Enum options (must match Supabase enums) ─────────────────────────────────
 
-const PROPERTY_TYPES = ["apartment","penthouse","villa","townhouse","estate","farmhouse","quinta","land","new_development_unit"];
+const PROPERTY_TYPES = ["apartment","penthouse","townhouse","villa","project_apartment","project_villa"];
 const LISTING_TYPES  = ["sale", "rent", "seasonal_rent"];
 const STATUS_OPTIONS = ["draft", "available", "reserved", "sold", "rented", "off_market"];
 const INTERNAL_STATUS = ["draft", "ready_for_review", "live", "on_hold", "off_market"];
@@ -44,8 +44,8 @@ const NEARBY_OPTIONS = [
   ["coworking_space","Coworking Space"],["ski_resort","Ski Resort"],
 ];
 
-const NEEDS_FLOOR = ["apartment", "penthouse"];
-const NEEDS_PLOT  = ["villa", "estate", "farmhouse", "quinta", "land"];
+const NEEDS_FLOOR = ["apartment", "penthouse", "project_apartment"];
+const NEEDS_PLOT  = ["villa", "project_villa"];
 
 const SECTIONS = [
   { id: "ai_import", label: "✦ AI Import" }, 

@@ -1,15 +1,13 @@
--- Baseline migration: rebuild every schema object that was originally created
--- in the Supabase dashboard (before this migrations folder became the source
--- of truth).
+-- Baseline migration: rebuild the entire `public` schema as it exists in
+-- production. This is the single starting point for every database — the
+-- previous per-feature migrations (2026-04-28 through 2026-05-06) have all
+-- been folded into this file and removed from the migrations folder.
 --
--- Mirrors the live `public` schema as of 2026-06-01:
---   - 5 dashboard-only tables: contacts, listings, locations, regions, services
+-- What it creates:
+--   - 7 tables: contacts, listings, locations, regions, services,
+--     translations, team_members
 --   - 10 enums used by listings + services
 --   - GIN/btree indexes, RLS policies, updated_at + published_at triggers
---
--- The translations and team_members tables, plus the service_category enum
--- value extensions, live in later migrations (2026-04-28 onwards) which run
--- on top of this baseline.
 --
 -- Idempotent: safe to run against the live database (already has everything)
 -- and against a fresh database (builds from scratch). All statements are
@@ -74,8 +72,8 @@ begin
 
     if not exists (select 1 from pg_type where typname = 'property_type') then
         create type public.property_type as enum
-            ('apartment', 'penthouse', 'villa', 'townhouse', 'estate',
-             'farmhouse', 'quinta', 'land', 'new_development_unit');
+            ('apartment', 'penthouse', 'townhouse', 'villa',
+             'project_apartment', 'project_villa');
     end if;
 
     -- service_category: legacy 4 values + current 7 values. The legacy
@@ -295,7 +293,7 @@ create table if not exists public.listings (
     property_type               public.property_type not null,
     listing_type                public.listing_type not null,
     status                      public.listing_status not null default 'draft',
-    price                       numeric not null,
+    price                       numeric(14,2) not null,
     currency                    text not null default 'EUR',
     featured                    boolean not null default false,
     country                     text not null default 'Portugal',
@@ -304,20 +302,20 @@ create table if not exists public.listings (
     area                        text not null,
     development_name            text,
     address_visibility          public.address_visibility not null default 'approximate',
-    latitude                    numeric,
-    longitude                   numeric,
+    latitude                    numeric(10,7),
+    longitude                   numeric(10,7),
     bedrooms                    integer not null,
-    bathrooms                   numeric not null,
-    interior_living_area        numeric not null,
-    plot_size                   numeric,
+    bathrooms                   numeric(4,1) not null,
+    interior_living_area        numeric(10,2) not null,
+    plot_size                   numeric(12,2),
     views                       public.view_tag[] not null default '{}',
     build_year                  integer,
-    gross_built_area            numeric,
-    gross_private_area          numeric,
-    terrace_area                numeric,
-    balcony_area                numeric,
-    garden_area                 numeric,
-    outdoor_area_total          numeric,
+    gross_built_area            numeric(10,2),
+    gross_private_area          numeric(10,2),
+    terrace_area                numeric(10,2),
+    balcony_area                numeric(10,2),
+    garden_area                 numeric(10,2),
+    outdoor_area_total          numeric(10,2),
     suites                      integer,
     guest_wc                    integer,
     floors                      integer,
@@ -376,7 +374,7 @@ create table if not exists public.listings (
     company                     text not null,
     listing_agent               text not null,
     partner                     text,
-    partner_commission_percent  numeric,
+    partner_commission_percent  numeric(5,2),
     internal_status             public.internal_status not null default 'draft',
     source                      text,
     priority                    public.priority_level not null default 'medium',
@@ -394,6 +392,9 @@ create table if not exists public.listings (
     constraint listings_slug_key      unique (slug)
 );
 
+comment on column public.listings.nearby is
+    'Proximity tags: beach, airport, golf_course, marina, yacht_club, tennis_court, equestrian, fine_dining, wine_region, spa_wellness, international_school, private_hospital, historic_center, cultural_district, river_waterfront, park_nature, surf_spot, cycling_paths, peace_quiet, public_transport, coworking_space, ski_resort';
+
 -- Business-rule CHECK constraints (added separately so they can be checked
 -- for existence -- ADD CONSTRAINT IF NOT EXISTS is PG 16+ only, hence the
 -- DO block).
@@ -404,9 +405,9 @@ begin
     for c in
         select * from (values
             ('apartment_floor_check',
-                'CHECK (property_type <> ALL (ARRAY[''apartment''::property_type, ''penthouse''::property_type]) OR floor_number IS NOT NULL)'),
+                'CHECK (property_type <> ALL (ARRAY[''apartment''::property_type, ''penthouse''::property_type, ''project_apartment''::property_type]) OR floor_number IS NOT NULL)'),
             ('land_plot_required_check',
-                'CHECK (property_type <> ALL (ARRAY[''villa''::property_type, ''estate''::property_type, ''farmhouse''::property_type, ''quinta''::property_type, ''land''::property_type]) OR plot_size IS NOT NULL)'),
+                'CHECK (property_type <> ALL (ARRAY[''villa''::property_type, ''project_villa''::property_type]) OR plot_size IS NOT NULL)'),
             ('listings_balcony_area_check',                  'CHECK (balcony_area >= 0)'),
             ('listings_bathrooms_check',                     'CHECK (bathrooms >= 0)'),
             ('listings_bedrooms_check',                      'CHECK (bedrooms >= 0)'),
@@ -487,3 +488,85 @@ drop trigger if exists trg_listings_published_at on public.listings;
 create trigger trg_listings_published_at
     before insert or update on public.listings
     for each row execute function public.set_published_at();
+
+-- ---------------------------------------------------------------------------
+-- 7. translations  (multi-language CMS strings)
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.translations (
+    id uuid primary key default gen_random_uuid(),
+    namespace text not null,
+    key text not null,
+    en text,
+    pt_pt text,
+    ru text,
+    es text,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    unique (namespace, key)
+);
+
+create index if not exists translations_namespace_idx
+    on public.translations (namespace);
+
+alter table public.translations enable row level security;
+
+do $$
+begin
+    if not exists (select 1 from pg_policies
+        where schemaname='public' and tablename='translations'
+          and policyname='translations are public read') then
+        create policy "translations are public read"
+            on public.translations
+            for select
+            using (true);
+    end if;
+end$$;
+
+create or replace function public.translations_set_updated_at()
+returns trigger language plpgsql as $$
+begin
+    new.updated_at = now();
+    return new;
+end;
+$$;
+
+drop trigger if exists translations_set_updated_at on public.translations;
+create trigger translations_set_updated_at
+    before update on public.translations
+    for each row execute function public.translations_set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- 8. team_members  (About page founders)
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.team_members (
+    id uuid primary key default gen_random_uuid(),
+    slug text not null unique,
+    name text not null,
+    role text,
+    image_url text,
+    sort_order integer not null default 0,
+    is_active boolean not null default true,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+
+alter table public.team_members enable row level security;
+
+do $$
+begin
+    if not exists (select 1 from pg_policies
+        where schemaname='public' and tablename='team_members'
+          and policyname='team_members are public read') then
+        create policy "team_members are public read"
+            on public.team_members
+            for select
+            using (is_active);
+    end if;
+end$$;
+
+drop trigger if exists team_members_set_updated_at on public.team_members;
+create trigger team_members_set_updated_at
+    before update on public.team_members
+    for each row execute function public.translations_set_updated_at();

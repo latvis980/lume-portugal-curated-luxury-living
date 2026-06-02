@@ -13,15 +13,10 @@ import {
   fetchListings, fetchPropertyFacets,
   type ListingsQuery, type PropertyFacets, type Listing,
 } from "@/lib/public-api";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, useT } from "@/lib/i18n";
+import { getPropertyTypeLabel } from "@/lib/property-types";
 
 const PAGE_SIZE = 24;
-
-const PROPERTY_TYPE_LABELS: Record<string, string> = {
-  apartment: "Apartment", penthouse: "Penthouse", villa: "Villa",
-  townhouse: "Townhouse", estate: "Estate", farmhouse: "Farmhouse",
-  quinta: "Quinta", land: "Land", new_development_unit: "New Development",
-};
 
 const CONDITION_LABELS: Record<string, string> = {
   new: "New", excellent: "Excellent", renovated: "Renovated",
@@ -208,11 +203,12 @@ function RangeInputs({ label, minKey, maxKey, prefix, suffix, filters, onChange 
 function FilterChips({ filters, onRemove }: {
   filters: Filters; onRemove: (k: string, subKey?: string) => void;
 }) {
+  const t = useT();
   const chips: { key: string; label: string; subKey?: string }[] = [];
   if (filters.region)       chips.push({ key: "region",       label: filters.region });
   if (filters.city)         chips.push({ key: "city",         label: filters.city });
   if (filters.area)         chips.push({ key: "area",         label: filters.area });
-  if (filters.type)         chips.push({ key: "type",         label: PROPERTY_TYPE_LABELS[filters.type] ?? filters.type });
+  if (filters.type)         chips.push({ key: "type",         label: getPropertyTypeLabel(filters.type, t) });
   if (filters.listing_type && filters.listing_type !== "sale")
     chips.push({ key: "listing_type", label: "For Rent" });
   if (filters.min_price)    chips.push({ key: "min_price",    label: `From €${Number(filters.min_price).toLocaleString()}` });
@@ -246,6 +242,7 @@ function FilterChips({ filters, onRemove }: {
 export default function PropertiesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { locale } = useI18n();
+  const t = useT();
   const [filters, setFilters] = useState<Filters>(() => searchParamsToFilters(searchParams));
   const [draftFilters, setDraftFilters] = useState<Filters>(filters);
   const [page, setPage] = useState(0);
@@ -413,7 +410,7 @@ export default function PropertiesPage() {
             <div className="min-w-[120px]">
               <SelectDropdown
                 value={filters.type}
-                options={(facets?.property_types ?? []).map(t => ({ value: t, label: PROPERTY_TYPE_LABELS[t] ?? t }))}
+                options={(facets?.property_types ?? []).map(pt => ({ value: pt, label: getPropertyTypeLabel(pt, t) }))}
                 onChange={(v) => updateBasic("type", v)}
                 placeholder="Type"
               />
@@ -606,7 +603,7 @@ export default function PropertiesPage() {
                 <div className="space-y-4">
                   <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground font-body">Property</h3>
                   <SelectDropdown label="Type" value={draftFilters.type}
-                    options={(facets?.property_types ?? []).map(t => ({ value: t, label: PROPERTY_TYPE_LABELS[t] ?? t }))}
+                    options={(facets?.property_types ?? []).map(pt => ({ value: pt, label: getPropertyTypeLabel(pt, t) }))}
                     onChange={(v) => updateDraft("type", v)} placeholder="Any type"
                   />
                   <SelectDropdown label="Condition" value={draftFilters.condition}

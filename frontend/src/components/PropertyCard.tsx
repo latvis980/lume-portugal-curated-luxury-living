@@ -2,6 +2,8 @@
 import { Link } from "react-router-dom";
 import { Bed, Bath, Maximize, MapPin, ArrowUpRight } from "lucide-react";
 import type { Listing } from "@/lib/public-api";
+import { useT } from "@/lib/i18n";
+import { getPropertyTypeLabel } from "@/lib/property-types";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -11,12 +13,6 @@ function formatPrice(price: number, currency = "EUR", listingType = "sale"): str
       ? `€${price.toLocaleString("en-IE")}`
       : `${price.toLocaleString()} ${currency}`;
   return listingType === "rent" ? `${formatted}/mo` : formatted;
-}
-
-function getTag(listing: Listing): string {
-  return listing.property_type
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 const LISTING_TYPE_LABELS: Record<string, string> = {
@@ -39,6 +35,7 @@ interface PropertyCardProps {
 // ═════════════════════════════════════════════════════════════════════════════
 
 function VerticalCard({ listing }: { listing: Listing }) {
+  const t = useT();
   const {
     slug, title, city, area, region,
     price, currency, listing_type,
@@ -49,7 +46,7 @@ function VerticalCard({ listing }: { listing: Listing }) {
   const href      = `/properties/${slug}`;
   const saleLabel = LISTING_TYPE_LABELS[listing_type] ?? listing_type;
   const location  = [area, city].filter(Boolean).join(", ") || region;
-  const tag       = getTag(listing);
+  const tag       = getPropertyTypeLabel(listing.property_type, t);
 
   return (
     <Link to={href} className="group block">
@@ -113,6 +110,7 @@ function VerticalCard({ listing }: { listing: Listing }) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 function HorizontalCard({ listing }: { listing: Listing }) {
+  const t = useT();
   const {
     slug, title, city, area, region,
     price, currency, listing_type, property_type,
@@ -122,7 +120,7 @@ function HorizontalCard({ listing }: { listing: Listing }) {
 
   const href       = `/properties/${slug}`;
   const saleLabel  = LISTING_TYPE_LABELS[listing_type] ?? listing_type;
-  const typeLabel  = property_type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const typeLabel  = getPropertyTypeLabel(property_type, t);
   const location   = [area, city].filter(Boolean).join(", ") || region;
 
   return (
