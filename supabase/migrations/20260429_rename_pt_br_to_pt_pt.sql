@@ -4,9 +4,22 @@
 -- Listings and services store other locales as JSONB under <field>_i18n,
 -- with a "pt_br" key → rename that key to "pt_pt" wherever it exists.
 
--- 1. Rename the column on the translations table.
-alter table public.translations
-    rename column pt_br to pt_pt;
+-- 1. Rename the column on the translations table — only if the legacy
+--    pt_br column is still around. On fresh databases the baseline migration
+--    already creates the column as pt_pt, so this becomes a no-op.
+do $$
+begin
+    if exists (
+        select 1
+        from information_schema.columns
+        where table_schema = 'public'
+          and table_name   = 'translations'
+          and column_name  = 'pt_br'
+    ) then
+        alter table public.translations
+            rename column pt_br to pt_pt;
+    end if;
+end $$;
 
 -- 2. Migrate the JSONB i18n keys on listings.
 update public.listings
