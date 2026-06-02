@@ -1,12 +1,36 @@
 -- Rename Brazilian Portuguese (pt_br) to Portugal Portuguese (pt_pt).
 --
--- The translations table has a dedicated pt_br column for Braziilan Portuguese → rename it.
--- Listings and services store other locales as JSONB under <field>_i18n,
--- with a "pt_br" key → rename that key to "pt_pt" wherever it exists.
+-- Historical migration: at the time it was written, the translations table
+-- had a pt_br column and listings/services stored a "pt_br" key in their
+-- *_i18n JSONB columns. Since then the baseline schema snapshot was
+-- regenerated and no longer carries those pt_br artifacts (the translations
+-- column is created as pt_pt directly, and services.subtitle_i18n was
+-- dropped). On a fresh DB this migration is therefore a no-op — every step
+-- below is guarded so the SQL never references a column that doesn't exist.
+-- Production databases that still have pt_br data are unaffected.
 
--- 1. Rename the column on the translations table — only if the legacy
---    pt_br column is still around. On fresh databases the baseline migration
---    already creates the column as pt_pt, so this becomes a no-op.
+-- Helper: rename a JSONB key from pt_br → pt_pt on a given column, but
+-- only if that column actually exists on the target table.
+create or replace function pg_temp.migrate_pt_br_key(tbl text, col text) returns void
+language plpgsql as $$
+begin
+    if exists (
+        select 1
+        from information_schema.columns
+        where table_schema = 'public'
+          and table_name   = tbl
+          and column_name  = col
+    ) then
+        execute format(
+            'update public.%I
+                set %I = (%I - ''pt_br'') || jsonb_build_object(''pt_pt'', %I -> ''pt_br'')
+              where %I ? ''pt_br''',
+            tbl, col, col, col, col
+        );
+    end if;
+end $$;
+
+-- 1. Rename the column on the translations table.
 do $$
 begin
     if exists (
@@ -22,31 +46,12 @@ begin
 end $$;
 
 -- 2. Migrate the JSONB i18n keys on listings.
-update public.listings
-set title_i18n = (title_i18n - 'pt_br') || jsonb_build_object('pt_pt', title_i18n -> 'pt_br')
-where title_i18n ? 'pt_br';
-
-update public.listings
-set short_description_i18n = (short_description_i18n - 'pt_br') || jsonb_build_object('pt_pt', short_description_i18n -> 'pt_br')
-where short_description_i18n ? 'pt_br';
-
-update public.listings
-set full_description_i18n = (full_description_i18n - 'pt_br') || jsonb_build_object('pt_pt', full_description_i18n -> 'pt_br')
-where full_description_i18n ? 'pt_br';
-
-update public.listings
-set ai_summary_i18n = (ai_summary_i18n - 'pt_br') || jsonb_build_object('pt_pt', ai_summary_i18n -> 'pt_br')
-where ai_summary_i18n ? 'pt_br';
+select pg_temp.migrate_pt_br_key('listings', 'title_i18n');
+select pg_temp.migrate_pt_br_key('listings', 'short_description_i18n');
+select pg_temp.migrate_pt_br_key('listings', 'full_description_i18n');
+select pg_temp.migrate_pt_br_key('listings', 'ai_summary_i18n');
 
 -- 3. Migrate the JSONB i18n keys on services.
-update public.services
-set title_i18n = (title_i18n - 'pt_br') || jsonb_build_object('pt_pt', title_i18n -> 'pt_br')
-where title_i18n ? 'pt_br';
-
-update public.services
-set subtitle_i18n = (subtitle_i18n - 'pt_br') || jsonb_build_object('pt_pt', subtitle_i18n -> 'pt_br')
-where subtitle_i18n ? 'pt_br';
-
-update public.services
-set description_i18n = (description_i18n - 'pt_br') || jsonb_build_object('pt_pt', description_i18n -> 'pt_br')
-where description_i18n ? 'pt_br';
+select pg_temp.migrate_pt_br_key('services', 'title_i18n');
+select pg_temp.migrate_pt_br_key('services', 'subtitle_i18n');
+select pg_temp.migrate_pt_br_key('services', 'description_i18n');
