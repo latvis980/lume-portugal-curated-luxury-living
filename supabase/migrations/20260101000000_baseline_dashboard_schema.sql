@@ -293,7 +293,7 @@ create table if not exists public.listings (
     property_type               public.property_type not null,
     listing_type                public.listing_type not null,
     status                      public.listing_status not null default 'draft',
-    price                       numeric not null,
+    price                       numeric(14,2) not null,
     currency                    text not null default 'EUR',
     featured                    boolean not null default false,
     country                     text not null default 'Portugal',
@@ -302,20 +302,20 @@ create table if not exists public.listings (
     area                        text not null,
     development_name            text,
     address_visibility          public.address_visibility not null default 'approximate',
-    latitude                    numeric,
-    longitude                   numeric,
+    latitude                    numeric(10,7),
+    longitude                   numeric(10,7),
     bedrooms                    integer not null,
-    bathrooms                   numeric not null,
-    interior_living_area        numeric not null,
-    plot_size                   numeric,
+    bathrooms                   numeric(4,1) not null,
+    interior_living_area        numeric(10,2) not null,
+    plot_size                   numeric(12,2),
     views                       public.view_tag[] not null default '{}',
     build_year                  integer,
-    gross_built_area            numeric,
-    gross_private_area          numeric,
-    terrace_area                numeric,
-    balcony_area                numeric,
-    garden_area                 numeric,
-    outdoor_area_total          numeric,
+    gross_built_area            numeric(10,2),
+    gross_private_area          numeric(10,2),
+    terrace_area                numeric(10,2),
+    balcony_area                numeric(10,2),
+    garden_area                 numeric(10,2),
+    outdoor_area_total          numeric(10,2),
     suites                      integer,
     guest_wc                    integer,
     floors                      integer,
@@ -374,7 +374,7 @@ create table if not exists public.listings (
     company                     text not null,
     listing_agent               text not null,
     partner                     text,
-    partner_commission_percent  numeric,
+    partner_commission_percent  numeric(5,2),
     internal_status             public.internal_status not null default 'draft',
     source                      text,
     priority                    public.priority_level not null default 'medium',
@@ -391,6 +391,9 @@ create table if not exists public.listings (
     constraint listings_reference_key unique (reference),
     constraint listings_slug_key      unique (slug)
 );
+
+comment on column public.listings.nearby is
+    'Proximity tags: beach, airport, golf_course, marina, yacht_club, tennis_court, equestrian, fine_dining, wine_region, spa_wellness, international_school, private_hospital, historic_center, cultural_district, river_waterfront, park_nature, surf_spot, cycling_paths, peace_quiet, public_transport, coworking_space, ski_resort';
 
 -- Business-rule CHECK constraints (added separately so they can be checked
 -- for existence -- ADD CONSTRAINT IF NOT EXISTS is PG 16+ only, hence the
