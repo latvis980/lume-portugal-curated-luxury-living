@@ -151,17 +151,17 @@ const Navbar = () => {
               initial="rest"
               whileHover="hover"
               animate="rest"
-              className="relative block overflow-hidden h-9 group flex-1 text-center"
+              className="relative block overflow-hidden h-12 group flex-1 text-center"
             >
               <motion.div
                 variants={slideVariants}
                 transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
                 className="flex flex-col"
               >
-                <span className="flex items-center justify-center h-9 text-[13.92px] font-medium tracking-[0.22em] uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-300 whitespace-nowrap">
+                <span className="flex items-center justify-center h-12 text-[11px] lg:text-[13.92px] font-medium tracking-[0.18em] lg:tracking-[0.22em] uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-300 whitespace-nowrap">
                   {item.label}
                 </span>
-                <span className="flex items-center justify-center h-9 text-[13.92px] italic font-serif font-medium tracking-wide text-foreground whitespace-nowrap">
+                <span className="flex items-center justify-center h-12 text-[11px] lg:text-[13.92px] italic font-serif font-medium tracking-wide text-foreground leading-tight px-1">
                   {item.subtitle}
                 </span>
               </motion.div>

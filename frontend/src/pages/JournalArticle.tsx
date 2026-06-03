@@ -158,6 +158,13 @@ export default function JournalArticle() {
               "linear-gradient(180deg, rgba(20,15,8,.30) 0%, rgba(20,15,8,.05) 38%, rgba(20,15,8,.62) 100%)",
           }}
         />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(58,38,20,.72) 0%, rgba(58,38,20,.35) 40%, transparent 70%)",
+          }}
+        />
         <div className="relative mx-auto w-full max-w-[1280px] px-6 pb-16 md:px-12">
           <div className="mb-5 flex flex-wrap items-center gap-4">
             <span
