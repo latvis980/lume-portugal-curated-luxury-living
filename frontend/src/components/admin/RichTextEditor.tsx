@@ -102,7 +102,9 @@ export function RichTextEditor({
   return (
     <div className="rounded-md border border-admin-border bg-admin-surface">
       <Toolbar editor={editor} />
-      <EditorContent editor={editor} />
+      <div className="max-h-[60vh] overflow-y-auto">
+        <EditorContent editor={editor} />
+      </div>
       <style>{`
         .ProseMirror p.is-editor-empty:first-child::before {
           color: var(--admin-text-muted, #9ca3af);
