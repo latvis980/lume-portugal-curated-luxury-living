@@ -133,7 +133,10 @@ export default function JournalArticle() {
       <Navbar />
 
       {/* HERO */}
-      <header className="relative mt-14 flex min-h-[448px] items-end overflow-hidden md:mt-[5.5rem]" style={{ height: "67vh" }}>
+      <header
+        className="relative mt-14 flex items-end md:mt-[5.5rem]"
+        style={{ minHeight: "max(448px, 67vh)" }}
+      >
         {article.cover_image ? (
           <img
             src={article.cover_image}
