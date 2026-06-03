@@ -100,12 +100,16 @@ export const WaveProvider = ({
       // overlaps the section, hiding any sub-pixel seam.
       const crestY = anchorY - WAVE_HEIGHT + SEAM_OVERLAP;
 
-      // Wave opacity: fades in as section approaches, fully opaque near navbar.
+      // Wave opacity: fades in as section approaches from below, fades out as
+      // the section's bottom scrolls above the viewport.
       const fadeRange = FADE_START - FADE_END;
-      const opacity = Math.max(
+      const fadeIn = Math.max(
         0,
         Math.min(1, (FADE_START - Math.max(S, FADE_END)) / fadeRange)
       );
+      const FADE_OUT_RANGE = 80; // px — how quickly to fade once bottom exits
+      const fadeOut = Math.max(0, Math.min(1, B / FADE_OUT_RANGE));
+      const opacity = Math.min(fadeIn, fadeOut);
 
       const root = document.documentElement;
       root.style.setProperty("--lume-wave-fill-y",  `${fillY}px`);
