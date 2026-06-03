@@ -44,11 +44,6 @@ const Navbar = () => {
       href:     "/#services",
     },
     {
-      label:    t("nav", "collecting",                  "Collecting"),
-      subtitle: t("nav", "collecting_sub",              "Lume signature services"),
-      href:     "/#collecting",
-    },
-    {
       label:    t("nav", "investment",                  "Investment"),
       subtitle: t("nav", "investment_sub",              "Thinking beyond the present"),
       href:     "/#investment",
@@ -57,6 +52,11 @@ const Navbar = () => {
       label:    t("nav", "about",                       "About us"),
       subtitle: t("nav", "about_sub",                   "The idea behind Lume"),
       href:     "/about",
+    },
+    {
+      label:    t("nav", "journal",                     "Journal"),
+      subtitle: t("nav", "journal_sub",                 "Articles about Portugal"),
+      href:     "/journal",
     },
     {
       label:    t("nav", "contact",      "Contact"),
