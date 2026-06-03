@@ -34,6 +34,18 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: supabase link --project-ref ryizbwtscuczqusoeuvc
 
+      - name: Repair phantom migration history
+        # The remote migration_history table still records versions 20260428 /
+        # 20260429 from the pre-baseline schema. Those files were collapsed
+        # into 20260101000000_baseline_dashboard_schema.sql and no longer
+        # exist locally, so `db push` aborts with "Remote migration versions
+        # not found in local migrations directory". Marking them reverted
+        # clears the mismatch. Idempotent — safe to re-run.
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: supabase migration repair --status reverted 20260428 20260429
+
       - name: Apply pending migrations
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
