@@ -69,7 +69,7 @@ export default function JournalIndex() {
       <Navbar />
 
       {/* PAGE HEAD */}
-      <header className="mx-auto max-w-[1280px] px-6 pt-16 pb-9 md:px-12">
+      <header className="mx-auto mt-14 max-w-[1280px] px-6 pt-16 pb-9 md:mt-[5.5rem] md:px-12">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <span className="font-hanken text-[11px] font-semibold uppercase tracking-[0.28em] text-lume-gold">
