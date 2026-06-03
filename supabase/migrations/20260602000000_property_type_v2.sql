@@ -16,12 +16,20 @@
 
 begin;
 
--- 0. Remap any remaining listings on the dropped `farmhouse` category to
---    `villa` so the column type swap below doesn't choke on values that
---    aren't in the new enum. Idempotent: no-op once nothing is left.
+-- 0. Remap any remaining listings on dropped categories to a surviving one
+--    so the column type swap below doesn't choke on values that aren't in
+--    the new enum. Following the mapping declared in this migration's
+--    header: quinta/estate/farmhouse/land collapse into villa,
+--    new_development_unit defaults to project_apartment. The ::text cast
+--    keeps the literals as strings — safe even if some of these values
+--    aren't present in the old enum on a given database. Idempotent.
 update public.listings
     set property_type = 'villa'
-    where property_type = 'farmhouse';
+    where property_type::text in ('farmhouse', 'estate', 'quinta', 'land');
+
+update public.listings
+    set property_type = 'project_apartment'
+    where property_type::text = 'new_development_unit';
 
 -- 1. Drop check constraints that reference the old enum values so the column
 --    type swap doesn't trip over them.
