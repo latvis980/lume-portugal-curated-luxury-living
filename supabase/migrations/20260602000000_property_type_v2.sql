@@ -16,6 +16,13 @@
 
 begin;
 
+-- 0. Remap any remaining listings on the dropped `farmhouse` category to
+--    `villa` so the column type swap below doesn't choke on values that
+--    aren't in the new enum. Idempotent: no-op once nothing is left.
+update public.listings
+    set property_type = 'villa'
+    where property_type = 'farmhouse';
+
 -- 1. Drop check constraints that reference the old enum values so the column
 --    type swap doesn't trip over them.
 alter table public.listings drop constraint if exists apartment_floor_check;
