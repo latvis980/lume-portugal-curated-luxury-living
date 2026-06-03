@@ -49,33 +49,11 @@ const HeroSection = () => {
             "84px clamp(24px, 7vw, 96px) clamp(260px, 34vh, 360px)",
         }}
       >
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.3 }}
-          className="m-0 leading-none self-start"
-          style={{
-            /* Logo PNG has ~13% transparent padding on the left; nudge it
-               back so the visible "L" lines up with the CTAs below. */
-            marginLeft: "calc(clamp(220px, 30vw, 440px) * -0.1307)",
-          }}
-        >
-          <img
-            src="/hero-logo.png"
-            alt={t("hero", "logo_alt", "LUME by Mark")}
-            className="block h-auto"
-            style={{
-              width: "clamp(220px, 30vw, 440px)",
-              filter: "drop-shadow(0 4px 40px rgba(0,0,0,0.18))",
-            }}
-          />
-        </motion.h1>
-
         <motion.p
           initial={{ clipPath: "inset(0 100% 0 0)" }}
           animate={{ clipPath: "inset(0 0 0 0)" }}
           transition={{ duration: 1.2, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display italic font-light self-start mt-9"
+          className="font-display italic font-light self-start"
           style={{
             fontSize: "clamp(28px, 4vw, 44px)",
             lineHeight: 1.1,
@@ -138,7 +116,7 @@ const HeroSection = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 2.5 }}
         className="absolute left-1/2 -translate-x-1/2 z-[6] flex flex-col items-center gap-2"
-        style={{ bottom: "calc(clamp(260px, 34vh, 360px) - 40px)" }}
+        style={{ bottom: "calc(clamp(260px, 34vh, 360px) - 140px)" }}
       >
         <span className="text-[9px] tracking-[0.4em] uppercase text-[#fff3dc]/70">
           {t("hero", "scroll", "Scroll")}
