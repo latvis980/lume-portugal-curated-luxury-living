@@ -135,7 +135,7 @@ export default function JournalArticle() {
       {/* HERO */}
       <header
         className="relative mt-14 flex items-end md:mt-[5.5rem]"
-        style={{ minHeight: "max(448px, 67vh)" }}
+        style={{ minHeight: "max(580px, 75vh)" }}
       >
         {article.cover_image ? (
           <img
@@ -166,7 +166,7 @@ export default function JournalArticle() {
               "linear-gradient(90deg, rgba(58,38,20,.72) 0%, rgba(58,38,20,.35) 40%, transparent 70%)",
           }}
         />
-        <div className="relative mx-auto w-full max-w-[1280px] px-6 pb-16 md:px-12">
+        <div className="relative mx-auto w-full max-w-[1280px] px-6 pt-28 pb-16 md:px-12 md:pt-36">
           {article.kicker && (
             <div className="mb-5 font-hanken text-[11px] font-semibold uppercase tracking-[0.28em] text-lume-gold-bright">
               {article.kicker}
