@@ -447,8 +447,8 @@ export interface JournalArticle {
   title_i18n: I18nValues;
   subtitle: string | null;
   subtitle_i18n: I18nValues;
-  excerpt: string | null;
-  excerpt_i18n: I18nValues;
+  main_sources: string | null;
+  main_sources_i18n: I18nValues;
   body: TiptapDoc | Record<string, never>;
   body_i18n: Record<string, TiptapDoc>;
   cover_image: string | null;
@@ -459,7 +459,7 @@ export interface JournalArticle {
   updated_at: string;
 }
 
-export type JournalTranslatableField = "kicker" | "title" | "subtitle" | "excerpt";
+export type JournalTranslatableField = "kicker" | "title" | "subtitle" | "main_sources";
 
 export interface JournalQuery {
   status?: ArticleStatus;

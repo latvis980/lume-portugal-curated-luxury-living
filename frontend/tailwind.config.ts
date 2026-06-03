@@ -18,6 +18,8 @@ export default {
         display: ['"Cormorant Garamond"', 'serif'],
         body: ['Raleway', 'sans-serif'],
         serif: ['Georgia', 'serif'], // ← added: enables font-serif in the navbar subtitle
+        spectral: ['Spectral', 'Georgia', 'serif'],
+        hanken: ['"Hanken Grotesk"', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -76,6 +78,24 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+        },
+        lume: {
+          cream: "#F7F1E5",
+          "cream-2": "#FBF6EC",
+          sand: "#EBDEC4",
+          "sand-deep": "#E4D6B7",
+          espresso: "#241B12",
+          "espresso-2": "#1B140C",
+          navy: "#15273B",
+          gold: "#B98E2C",
+          "gold-2": "#C9982E",
+          "gold-bright": "#E2B44E",
+          ink: "#2C281F",
+          "ink-soft": "#4A4334",
+          muted: "#8B7F69",
+          "muted-2": "#A89C84",
+          line: "#DCCFB4",
+          "line-soft": "#E6DBC4",
         },
         admin: {
           bg: "hsl(var(--admin-bg))",

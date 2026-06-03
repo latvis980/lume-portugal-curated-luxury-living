@@ -6,7 +6,12 @@ import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import TextStyle from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
+import Table from "@tiptap/extension-table";
+import TableRow from "@tiptap/extension-table-row";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
 import { CalloutNode, type CalloutVariant } from "./CalloutNode";
+import { FigRowNode, FigItemNode } from "./FigRowNode";
 import { uploadJournalImage, type TiptapDoc } from "@/lib/admin-api";
 
 // LUME brand colours pulled from the sample memoranda (docx run colours)
@@ -48,7 +53,7 @@ export function RichTextEditor({
     {
       extensions: [
         StarterKit.configure({
-          heading: { levels: [2, 3] },
+          heading: { levels: [1, 2, 3] },
           codeBlock: false,
           horizontalRule: false,
         }),
@@ -58,6 +63,12 @@ export function RichTextEditor({
         Link.configure({ openOnClick: false, autolink: true, HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" } }),
         Placeholder.configure({ placeholder }),
         CalloutNode,
+        FigRowNode,
+        FigItemNode,
+        Table.configure({ resizable: false, HTMLAttributes: { class: "rte-table" } }),
+        TableRow,
+        TableHeader,
+        TableCell,
       ],
       content: initialDoc,
       onUpdate({ editor }) {
@@ -83,7 +94,7 @@ export function RichTextEditor({
     const next = isUsableDoc(value) ? (value as TiptapDoc) : EMPTY_DOC;
     const current = editor.getJSON();
     if (JSON.stringify(current) === JSON.stringify(next)) return;
-    editor.commands.setContent(next, { emitUpdate: false });
+    editor.commands.setContent(next, false);
   }, [value, editor]);
 
   if (!editor) return null;
@@ -122,6 +133,73 @@ export function RichTextEditor({
           height: auto;
           margin: 1rem 0;
           border-radius: 0.25rem;
+        }
+        .ProseMirror h1 {
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-weight: 500;
+          font-size: 1.75rem;
+          line-height: 1.1;
+          color: #2C281F;
+          margin: 1.5rem 0 0.5rem;
+          padding-top: 0.5rem;
+          border-top: 1px solid #DCCFB4;
+        }
+        .ProseMirror h1::before {
+          content: "§ section ";
+          font-family: ui-sans-serif, system-ui, sans-serif;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: #B98E2C;
+          margin-right: 0.5rem;
+          vertical-align: middle;
+        }
+        .ProseMirror table.rte-table {
+          border-collapse: collapse;
+          margin: 1rem 0;
+          width: 100%;
+          table-layout: fixed;
+        }
+        .ProseMirror table.rte-table td,
+        .ProseMirror table.rte-table th {
+          border: 1px solid #DCCFB4;
+          padding: 0.5rem 0.75rem;
+          vertical-align: top;
+          min-width: 4rem;
+          position: relative;
+        }
+        .ProseMirror table.rte-table th {
+          background: #FBF6EC;
+          font-weight: 600;
+          text-align: left;
+        }
+        .ProseMirror [data-fig-row] {
+          display: grid;
+          grid-template-columns: repeat(var(--fig-cols, 4), 1fr);
+          gap: 1px;
+          background: #DCCFB4;
+          border: 1px solid #DCCFB4;
+          margin: 1rem 0;
+        }
+        .ProseMirror [data-fig-item] {
+          background: #FBF6EC;
+          padding: 0.75rem 0.75rem;
+        }
+        .ProseMirror [data-fig-item] p:first-child {
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-weight: 500;
+          font-size: 1.5rem;
+          line-height: 1;
+          color: #2C281F;
+          margin: 0;
+        }
+        .ProseMirror [data-fig-item] p:last-child {
+          font-family: ui-sans-serif, system-ui, sans-serif;
+          font-size: 0.7rem;
+          letter-spacing: 0.05em;
+          color: #8B7F69;
+          margin: 0.4rem 0 0;
         }
       `}</style>
     </div>
@@ -196,10 +274,18 @@ function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
 
       <Divider />
 
-      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={btn(editor.isActive("heading", { level: 2 }))} title="Heading">
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+        className={btn(editor.isActive("heading", { level: 1 }))}
+        title="Section header — auto-numbered (01, 02 …) on the public page"
+      >
+        Section
+      </button>
+      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={btn(editor.isActive("heading", { level: 2 }))} title="Sub-heading">
         H2
       </button>
-      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={btn(editor.isActive("heading", { level: 3 }))} title="Sub-heading">
+      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={btn(editor.isActive("heading", { level: 3 }))} title="Small sub-heading">
         H3
       </button>
 
@@ -291,6 +377,98 @@ function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
         className="hidden"
         onChange={handleImageChange}
       />
+
+      <Divider />
+
+      {/* Stat row — 4-up data figures (€307bn / Nominal GDP, 2025 …) */}
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().insertFigRow(4).run()}
+        className={btn(editor.isActive("figRow"))}
+        title="Insert 4-up stat row"
+      >
+        # Stat row
+      </button>
+      {editor.isActive("figRow") && (
+        <div className="flex items-center gap-1 rounded border border-admin-border px-1 py-0.5">
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().addFigItem().run()}
+            className="rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-admin-text-muted hover:text-admin-text"
+            title="Add stat"
+          >
+            + col
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().removeFigItem().run()}
+            className="rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-admin-text-muted hover:text-admin-text"
+            title="Remove this stat"
+          >
+            − col
+          </button>
+        </div>
+      )}
+
+      {/* Table */}
+      <button
+        type="button"
+        onClick={() =>
+          editor
+            .chain()
+            .focus()
+            .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+            .run()
+        }
+        className={btn(editor.isActive("table"))}
+        title="Insert table"
+      >
+        ▦ Table
+      </button>
+      {editor.isActive("table") && (
+        <div className="flex items-center gap-1 rounded border border-admin-border px-1 py-0.5">
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().addRowAfter().run()}
+            className="rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-admin-text-muted hover:text-admin-text"
+            title="Add row"
+          >
+            +row
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().addColumnAfter().run()}
+            className="rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-admin-text-muted hover:text-admin-text"
+            title="Add column"
+          >
+            +col
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().deleteRow().run()}
+            className="rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-admin-text-muted hover:text-admin-text"
+            title="Delete row"
+          >
+            −row
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().deleteColumn().run()}
+            className="rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-admin-text-muted hover:text-admin-text"
+            title="Delete column"
+          >
+            −col
+          </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().deleteTable().run()}
+            className="rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-red-400 hover:text-red-500"
+            title="Delete table"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       <Divider />
 
