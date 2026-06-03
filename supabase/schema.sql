@@ -736,15 +736,15 @@ CREATE POLICY "Public can read active services" ON "public"."services" FOR SELEC
 
 
 
-CREATE POLICY "Public can read published journal_articles" ON "public"."journal_articles" FOR SELECT TO "anon" USING (("status" = 'published'::"public"."article_status"));
-
-
-
 CREATE POLICY "Public can read available listings" ON "public"."listings" FOR SELECT TO "anon" USING (("status" = 'available'::"public"."listing_status"));
 
 
 
 CREATE POLICY "Public can read locations" ON "public"."locations" FOR SELECT TO "anon" USING (true);
+
+
+
+CREATE POLICY "Public can read published journal_articles" ON "public"."journal_articles" FOR SELECT TO "anon" USING (("status" = 'published'::"public"."article_status"));
 
 
 
