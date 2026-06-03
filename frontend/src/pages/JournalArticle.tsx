@@ -19,6 +19,7 @@ interface PublicArticle {
   title: string;
   subtitle: string | null;
   body: unknown;
+  body_i18n?: Record<string, unknown>;
   cover_image: string | null;
   author: string | null;
   main_sources: string | null;
@@ -67,8 +68,14 @@ export default function JournalArticle() {
       .catch((e: Error) => setError(e.message));
   }, [slug, locale]);
 
-  const toc = useMemo(() => walkH1Sections(article?.body), [article?.body]);
-  const readMinutes = useMemo(() => estimateReadTime(article?.body), [article?.body]);
+  const localizedBody = useMemo(() => {
+    if (!article) return undefined;
+    const translated = locale !== "en" && article.body_i18n?.[locale];
+    return translated || article.body;
+  }, [article, locale]);
+
+  const toc = useMemo(() => walkH1Sections(localizedBody), [localizedBody]);
+  const readMinutes = useMemo(() => estimateReadTime(localizedBody), [localizedBody]);
 
   // Scroll-spy: highlight the TOC entry currently in view.
   useEffect(() => {
@@ -260,7 +267,7 @@ export default function JournalArticle() {
           className="max-w-[680px] py-15"
           style={{ padding: "60px 0 40px" }}
         >
-          <TiptapRenderer doc={article.body} />
+          <TiptapRenderer doc={localizedBody} />
 
           {article.author && (
             <p
