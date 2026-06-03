@@ -93,12 +93,9 @@ const Navbar = () => {
     setTimeout(() => scrollToHash(hash), 300);
   };
 
-  // Variants drive the slide animation. The parent <motion.a> declares hover state,
-  // and the child <motion.div> consumes it via the named variants. This is the
-  // canonical Framer Motion pattern (variants flow down to children automatically).
   const slideVariants = {
     rest:  { y: "0%" },
-    hover: { y: "-50%" }, // -50% of the inner element (which is 2x h-9), so it shifts up by exactly one h-9
+    hover: { y: "-50%" },
   };
 
   return (
@@ -146,8 +143,6 @@ const Navbar = () => {
           />
         </a>
 
-        {/* Desktop nav — flex-1 absorbs remaining space; each item is flex-1 text-center
-            so all five share the row equally regardless of label length */}
         <div className="hidden md:flex flex-1 items-center justify-evenly">
           {navItems.map((item) => (
             <motion.a
@@ -157,17 +152,23 @@ const Navbar = () => {
               initial="rest"
               whileHover="hover"
               animate="rest"
-              className="relative block overflow-hidden h-12 group text-center px-2"
+              className="relative block h-12 group text-center px-2"
+              style={{ clipPath: "inset(0 -9999px)" }}
             >
+              {/* Invisible sizer — keeps the item width equal to the label only */}
+              <span aria-hidden className="invisible flex items-center justify-center h-12 text-[11px] lg:text-[13.92px] font-medium tracking-[0.18em] lg:tracking-[0.22em] uppercase whitespace-nowrap">
+                {item.label}
+              </span>
+              {/* Absolutely positioned so it doesn't affect item width */}
               <motion.div
                 variants={slideVariants}
                 transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-                className="flex flex-col"
+                className="absolute inset-x-0 top-0 flex flex-col items-center"
               >
                 <span className="flex items-center justify-center h-12 text-[11px] lg:text-[13.92px] font-medium tracking-[0.18em] lg:tracking-[0.22em] uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-300 whitespace-nowrap">
                   {item.label}
                 </span>
-                <span className="flex items-center justify-center h-12 text-[11px] lg:text-[13.92px] italic font-serif font-medium tracking-wide text-primary leading-tight px-1">
+                <span className="flex items-center justify-center h-12 text-[11px] lg:text-[13.92px] italic font-serif font-medium tracking-wide text-primary leading-tight whitespace-nowrap">
                   {item.subtitle}
                 </span>
               </motion.div>
