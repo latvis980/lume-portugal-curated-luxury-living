@@ -4,14 +4,51 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { useT } from "@/lib/i18n";
+import { useI18n, type Locale } from "@/lib/i18n";
 import { useWave } from "@/components/WaveTransition";
+
+type NavItem = { label: string; subtitle: string; href: string };
+
+const NAV_LABELS: Record<Locale, NavItem[]> = {
+  en: [
+    { label: "Homes",           subtitle: "View available places",        href: "/properties" },
+    { label: "Services",        subtitle: "What we take care of",         href: "/#services" },
+    { label: "Investment",      subtitle: "Thinking beyond the present",  href: "/#investment" },
+    { label: "About us",        subtitle: "The idea behind Lume",         href: "/about" },
+    { label: "Journal",         subtitle: "Articles about Portugal",      href: "/journal" },
+    { label: "Contact",         subtitle: "Get in touch",                 href: "/#private-access" },
+  ],
+  pt_pt: [
+    { label: "Casas",           subtitle: "Ver propriedades disponíveis", href: "/properties" },
+    { label: "Serviços",        subtitle: "O que tratamos por si",         href: "/#services" },
+    { label: "Investimento",    subtitle: "Pensar além do presente",       href: "/#investment" },
+    { label: "Sobre nós",       subtitle: "A ideia por detrás da Lume",   href: "/about" },
+    { label: "Revista",         subtitle: "Artigos sobre Portugal",        href: "/journal" },
+    { label: "Contacto",        subtitle: "Entre em contacto",             href: "/#private-access" },
+  ],
+  ru: [
+    { label: "Дома",            subtitle: "Доступные объекты",            href: "/properties" },
+    { label: "Услуги",          subtitle: "О чём мы заботимся",           href: "/#services" },
+    { label: "Инвестиции",      subtitle: "Думать о будущем",              href: "/#investment" },
+    { label: "О нас",           subtitle: "Идея Lume",                    href: "/about" },
+    { label: "Журнал",          subtitle: "Статьи о Португалии",          href: "/journal" },
+    { label: "Контакт",         subtitle: "Свяжитесь с нами",             href: "/#private-access" },
+  ],
+  es: [
+    { label: "Casas",           subtitle: "Ver propiedades disponibles",  href: "/properties" },
+    { label: "Servicios",       subtitle: "Lo que cuidamos",              href: "/#services" },
+    { label: "Inversión",       subtitle: "Pensar más allá del presente", href: "/#investment" },
+    { label: "Sobre nosotros",  subtitle: "La idea detrás de Lume",       href: "/about" },
+    { label: "Revista",         subtitle: "Artículos sobre Portugal",     href: "/journal" },
+    { label: "Contacto",        subtitle: "Ponerse en contacto",          href: "/#private-access" },
+  ],
+};
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const t = useT();
+  const { locale } = useI18n();
   // True once the viewport has scrolled past the hero region. While at the
   // top of the page the navbar is fully transparent so the hero video shows
   // through; after scrolling it picks up a soft cream-tinted blur.
@@ -32,38 +69,7 @@ const Navbar = () => {
   // this returns the default { submerged: false } — safe fallback.
   const { submerged } = useWave();
 
-  const navItems = [
-    {
-      label:    t("nav", "browse_homes",                "Homes"),
-      subtitle: t("nav", "browse_homes_sub",            "View available places"),
-      href:     "/properties",
-    },
-    {
-      label:    t("nav", "discover_services",           "Services"),
-      subtitle: t("nav", "discover_services_sub",       "What we take care of"),
-      href:     "/#services",
-    },
-    {
-      label:    t("nav", "investment",                  "Investment"),
-      subtitle: t("nav", "investment_sub",              "Thinking beyond the present"),
-      href:     "/#investment",
-    },
-    {
-      label:    t("nav", "about",                       "About us"),
-      subtitle: t("nav", "about_sub",                   "The idea behind Lume"),
-      href:     "/about",
-    },
-    {
-      label:    t("nav", "journal",                     "Journal"),
-      subtitle: t("nav", "journal_sub",                 "Articles about Portugal"),
-      href:     "/journal",
-    },
-    {
-      label:    t("nav", "contact",      "Contact"),
-      subtitle: t("nav", "contact_sub",  "Get in touch"),
-      href:     "/#private-access",
-    },
-  ];
+  const navItems = NAV_LABELS[locale];
 
   const scrollToHash = (hash: string) => {
     if (location.pathname === "/") {
