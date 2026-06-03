@@ -245,7 +245,7 @@ const QuestionnaireSection = () => {
                       className={`px-6 py-4 border text-sm tracking-wider transition-all duration-300 ${
                         selected
                           ? "border-primary bg-primary/10 text-foreground"
-                          : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                          : "border-border bg-white/70 text-muted-foreground hover:border-primary/50 hover:text-foreground"
                       }`}
                     >
                       {t("questionnaire", option.labelKey)}
