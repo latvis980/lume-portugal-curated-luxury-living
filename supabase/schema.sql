@@ -250,8 +250,6 @@ CREATE TABLE IF NOT EXISTS "public"."journal_articles" (
     "title_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
     "subtitle" "text",
     "subtitle_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
-    "excerpt" "text",
-    "excerpt_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
     "body" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
     "body_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
     "cover_image" "text",
@@ -259,7 +257,9 @@ CREATE TABLE IF NOT EXISTS "public"."journal_articles" (
     "sort_order" integer DEFAULT 0 NOT NULL,
     "published_at" timestamp with time zone,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "main_sources" "text",
+    "main_sources_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL
 );
 
 
@@ -576,7 +576,7 @@ CREATE INDEX "idx_contacts_source" ON "public"."contacts" USING "btree" ("source
 
 
 
-CREATE INDEX "idx_journal_articles_fts" ON "public"."journal_articles" USING "gin" ("to_tsvector"('"english"'::"regconfig", ((COALESCE("title", ''::"text") || ' '::"text") || COALESCE("excerpt", ''::"text"))));
+CREATE INDEX "idx_journal_articles_fts" ON "public"."journal_articles" USING "gin" ("to_tsvector"('"english"'::"regconfig", ((COALESCE("title", ''::"text") || ' '::"text") || COALESCE("subtitle", ''::"text"))));
 
 
 
