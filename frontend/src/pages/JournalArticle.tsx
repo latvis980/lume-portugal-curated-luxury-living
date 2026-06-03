@@ -128,14 +128,12 @@ export default function JournalArticle() {
     );
   }
 
-  const isMemo = article.type === "memorandum";
-
   return (
     <div className="min-h-screen bg-lume-cream font-hanken text-lume-ink">
       <Navbar />
 
       {/* HERO */}
-      <header className="relative mt-14 flex min-h-[560px] items-end md:mt-[5.5rem]" style={{ height: "84vh" }}>
+      <header className="relative mt-14 flex min-h-[448px] items-end overflow-hidden md:mt-[5.5rem]" style={{ height: "67vh" }}>
         {article.cover_image ? (
           <img
             src={article.cover_image}
@@ -166,21 +164,11 @@ export default function JournalArticle() {
           }}
         />
         <div className="relative mx-auto w-full max-w-[1280px] px-6 pb-16 md:px-12">
-          <div className="mb-5 flex flex-wrap items-center gap-4">
-            <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 font-hanken text-[10px] font-semibold uppercase tracking-[0.2em] text-[#EFE6D4] ${
-                isMemo ? "bg-lume-navy" : "bg-lume-gold-2"
-              }`}
-            >
-              <span className="h-[5px] w-[5px] rounded-full bg-white/85" />
-              {isMemo ? "Memorandum" : "News"}
-            </span>
-            {article.kicker && (
-              <span className="font-hanken text-[11px] font-semibold uppercase tracking-[0.28em] text-lume-gold-bright">
-                {article.kicker}
-              </span>
-            )}
-          </div>
+          {article.kicker && (
+            <div className="mb-5 font-hanken text-[11px] font-semibold uppercase tracking-[0.28em] text-lume-gold-bright">
+              {article.kicker}
+            </div>
+          )}
           <h1
             className="m-0 max-w-[18ch] font-display font-medium leading-[1.02] text-[#FBF6EC]"
             style={{
