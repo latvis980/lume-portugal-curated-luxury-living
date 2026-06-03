@@ -54,12 +54,7 @@ export default function LanguageSwitcher({ variant = "navbar" }: LanguageSwitche
       </button>
       {open && (
         <div
-          className={`absolute right-0 top-full mt-2 min-w-[160px] rounded-sm border backdrop-blur-md shadow-md py-1 z-50 ${
-            submerged
-              ? "border-warm-white/20"
-              : "border-border bg-background/95"
-          }`}
-          style={submerged ? { backgroundColor: `${OCEAN_COLOR}f2` } : undefined}
+          className="absolute right-0 top-full mt-2 min-w-[160px] rounded-sm border border-border bg-background/98 backdrop-blur-md shadow-md py-1 z-50"
         >
           {LOCALES.map((loc) => (
             <button
@@ -68,11 +63,7 @@ export default function LanguageSwitcher({ variant = "navbar" }: LanguageSwitche
                 setLocale(loc as Locale);
                 setOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-4 py-2 text-xs tracking-wider transition-colors ${
-                submerged
-                  ? "text-warm-white/90 hover:text-warm-white hover:bg-warm-white/10"
-                  : "text-foreground/80 hover:text-foreground hover:bg-muted/40"
-              }`}
+              className="w-full flex items-center justify-between px-4 py-2 text-xs tracking-wider transition-colors !text-foreground/80 hover:!text-foreground hover:bg-muted/40"
             >
               <span>{LOCALE_LABELS[loc]}</span>
               {locale === loc && <Check size={12} strokeWidth={2} />}
