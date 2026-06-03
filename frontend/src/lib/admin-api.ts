@@ -425,3 +425,159 @@ export async function deleteTeamMember(id: string): Promise<void> {
   const res = await adminFetch(`/team/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to delete team member");
 }
+
+// ─── Journal (News + Memorandum articles) ───────────────────────────────────
+
+export type ArticleType = "news" | "memorandum";
+export type ArticleStatus = "draft" | "published";
+
+export type TiptapDoc = {
+  type: "doc";
+  content?: unknown[];
+} & Record<string, unknown>;
+
+export interface JournalArticle {
+  id: string;
+  slug: string;
+  type: ArticleType;
+  status: ArticleStatus;
+  kicker: string | null;
+  kicker_i18n: I18nValues;
+  title: string;
+  title_i18n: I18nValues;
+  subtitle: string | null;
+  subtitle_i18n: I18nValues;
+  excerpt: string | null;
+  excerpt_i18n: I18nValues;
+  body: TiptapDoc | Record<string, never>;
+  body_i18n: Record<string, TiptapDoc>;
+  cover_image: string | null;
+  author: string | null;
+  sort_order: number;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type JournalTranslatableField = "kicker" | "title" | "subtitle" | "excerpt";
+
+export interface JournalQuery {
+  status?: ArticleStatus;
+  type?: ArticleType;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export async function listJournal(
+  params: JournalQuery = {},
+): Promise<{ articles: JournalArticle[]; total: number }> {
+  const q = new URLSearchParams();
+  if (params.status) q.set("status", params.status);
+  if (params.type) q.set("type", params.type);
+  if (params.search) q.set("search", params.search);
+  if (params.limit) q.set("limit", String(params.limit));
+  if (params.offset) q.set("offset", String(params.offset));
+  const qs = q.toString();
+  const res = await adminFetch(`/journal${qs ? `?${qs}` : ""}`);
+  if (!res.ok) throw new Error("Failed to fetch articles");
+  return res.json();
+}
+
+export async function getJournalArticle(id: string): Promise<JournalArticle> {
+  const res = await adminFetch(`/journal/${id}`);
+  if (!res.ok) throw new Error("Failed to fetch article");
+  return res.json();
+}
+
+export async function createJournalArticle(
+  data: Partial<JournalArticle>,
+): Promise<JournalArticle> {
+  const res = await adminFetch("/journal", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Failed to create article");
+  }
+  return res.json();
+}
+
+export async function updateJournalArticle(
+  id: string,
+  data: Partial<JournalArticle>,
+): Promise<JournalArticle> {
+  const res = await adminFetch(`/journal/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Failed to update article");
+  }
+  return res.json();
+}
+
+export async function deleteJournalArticle(id: string): Promise<void> {
+  const res = await adminFetch(`/journal/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to delete article");
+}
+
+export async function translateJournalField(
+  id: string,
+  options: { field: JournalTranslatableField; source_locale?: Locale; overwrite?: boolean },
+): Promise<JournalArticle> {
+  const res = await adminFetch(`/journal/${id}/translate`, {
+    method: "POST",
+    body: JSON.stringify({
+      field: options.field,
+      source_locale: options.source_locale ?? "en",
+      overwrite: options.overwrite ?? false,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Translation failed");
+  }
+  return res.json();
+}
+
+export async function translateJournalBody(
+  id: string,
+  options: { source_locale?: Locale; overwrite?: boolean } = {},
+): Promise<JournalArticle> {
+  const res = await adminFetch(`/journal/${id}/translate-body`, {
+    method: "POST",
+    body: JSON.stringify({
+      source_locale: options.source_locale ?? "en",
+      overwrite: options.overwrite ?? false,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Body translation failed");
+  }
+  return res.json();
+}
+
+export async function uploadJournalImage(file: File): Promise<{ url: string; path: string }> {
+  const token = getToken();
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch("/api/admin/journal/upload-image", {
+    method: "POST",
+    body: form,
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  if (res.status === 401) {
+    clearToken();
+    window.location.href = "/admin/login";
+    throw new Error("Session expired");
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Upload failed");
+  }
+  return res.json();
+}

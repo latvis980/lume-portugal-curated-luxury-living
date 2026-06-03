@@ -10,6 +10,8 @@ import NotFound from "./pages/NotFound.tsx";
 import ListingPage from "./pages/ListingPage.tsx";
 import PropertiesPage from "./pages/PropertiesPage.tsx";
 import AboutPage from "./pages/AboutPage.tsx";
+import JournalIndex from "./pages/JournalIndex.tsx";
+import JournalArticle from "./pages/JournalArticle.tsx";
 
 // Admin pages
 import AdminLogin from "./pages/admin/AdminLogin.tsx";
@@ -22,6 +24,8 @@ import AdminServices from "./pages/admin/AdminServices.tsx";
 import AdminAbout from "./pages/admin/AdminAbout.tsx";
 import AdminInvestment from "./pages/admin/AdminInvestment.tsx";
 import AdminContactPage from "./pages/admin/AdminContactPage.tsx";
+import AdminJournal from "./pages/admin/AdminJournal.tsx";
+import AdminJournalForm from "./pages/admin/AdminJournalForm.tsx";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +42,8 @@ const App = () => (
             <Route path="/about" element={<AboutPage />} />
             <Route path="/properties" element={<PropertiesPage />} />
             <Route path="/properties/:slug" element={<ListingPage />} />
+            <Route path="/journal" element={<JournalIndex />} />
+            <Route path="/journal/:slug" element={<JournalArticle />} />
 
             {/* Admin routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
@@ -51,6 +57,9 @@ const App = () => (
               <Route path="about" element={<AdminAbout />} />
               <Route path="investment" element={<AdminInvestment />} />
               <Route path="contact-page" element={<AdminContactPage />} />
+              <Route path="journal" element={<AdminJournal />} />
+              <Route path="journal/new" element={<AdminJournalForm />} />
+              <Route path="journal/:id" element={<AdminJournalForm />} />
             </Route>
 
             {/* Catch-all */}

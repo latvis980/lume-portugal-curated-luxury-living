@@ -1158,3 +1158,184 @@ def admin_delete_team_member(member_id: str) -> bool:
     except Exception as e:
         print(f"[DB] Error deleting team member {member_id}: {e}")
         return False
+
+
+# ---------------------------------------------------------------------------
+# Journal articles (CMS — News + Memorandum)
+# ---------------------------------------------------------------------------
+
+_JOURNAL_I18N_FIELDS = ("kicker", "title", "subtitle", "excerpt")
+
+
+def public_list_journal(
+    type_: Optional[str] = None,
+    locale: str = "en",
+    limit: int = 50,
+    offset: int = 0,
+) -> Dict[str, Any]:
+    """List published articles (anon-readable)."""
+    try:
+        client = _get_client()
+        q = (
+            client.table("journal_articles")
+            .select("*", count="exact")
+            .eq("status", "published")
+        )
+        if type_:
+            q = q.eq("type", type_)
+        result = (
+            q.order("published_at", desc=True)
+            .range(offset, offset + limit - 1)
+            .execute()
+        )
+        rows = result.data or []
+        return {
+            "articles": [_merge_locale(r, locale, _JOURNAL_I18N_FIELDS) for r in rows],
+            "total": result.count or 0,
+        }
+    except Exception as e:
+        print(f"[DB] Error listing public journal: {e}")
+        return {"articles": [], "total": 0}
+
+
+def public_get_journal_by_slug(slug: str, locale: str = "en") -> Optional[Dict[str, Any]]:
+    try:
+        client = _get_client()
+        result = (
+            client.table("journal_articles")
+            .select("*")
+            .eq("slug", slug)
+            .eq("status", "published")
+            .limit(1)
+            .execute()
+        )
+        row = result.data[0] if result.data else None
+        return _merge_locale(row, locale, _JOURNAL_I18N_FIELDS) if row else None
+    except Exception as e:
+        print(f"[DB] Error fetching journal article {slug}: {e}")
+        return None
+
+
+def admin_list_journal(
+    status: Optional[str] = None,
+    type_: Optional[str] = None,
+    search: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> Dict[str, Any]:
+    try:
+        client = _get_admin_client()
+        q = client.table("journal_articles").select("*", count="exact")
+        if status:
+            q = q.eq("status", status)
+        if type_:
+            q = q.eq("type", type_)
+        if search:
+            q = q.or_(f"title.ilike.%{search}%,slug.ilike.%{search}%,excerpt.ilike.%{search}%")
+        result = (
+            q.order("updated_at", desc=True)
+            .range(offset, offset + limit - 1)
+            .execute()
+        )
+        return {"articles": result.data or [], "total": result.count or 0}
+    except Exception as e:
+        print(f"[DB] Error listing admin journal: {e}")
+        return {"articles": [], "total": 0, "error": str(e)}
+
+
+def admin_get_journal(article_id: str) -> Optional[Dict[str, Any]]:
+    try:
+        client = _get_admin_client()
+        result = (
+            client.table("journal_articles")
+            .select("*")
+            .eq("id", article_id)
+            .limit(1)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"[DB] Error fetching journal article {article_id}: {e}")
+        return None
+
+
+def _ensure_unique_journal_slug(client, slug: str, ignore_id: Optional[str] = None) -> str:
+    """Return slug, appending -2/-3/... if a different row already owns it."""
+    base = slug
+    candidate = base
+    n = 2
+    while True:
+        q = client.table("journal_articles").select("id").eq("slug", candidate).limit(1)
+        rows = q.execute().data or []
+        if not rows or (ignore_id and rows[0]["id"] == ignore_id):
+            return candidate
+        candidate = f"{base}-{n}"
+        n += 1
+
+
+def admin_create_journal(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    try:
+        client = _get_admin_client()
+        if not data.get("slug") and data.get("title"):
+            data["slug"] = generate_slug(data["title"])
+        if data.get("slug"):
+            data["slug"] = _ensure_unique_journal_slug(client, data["slug"])
+        result = client.table("journal_articles").insert(data).execute()
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"[DB] Error creating journal article: {e}")
+        raise
+
+
+def admin_update_journal(article_id: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    try:
+        client = _get_admin_client()
+        if data.get("slug"):
+            data["slug"] = _ensure_unique_journal_slug(client, data["slug"], ignore_id=article_id)
+        result = (
+            client.table("journal_articles")
+            .update(data)
+            .eq("id", article_id)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"[DB] Error updating journal article {article_id}: {e}")
+        raise
+
+
+def admin_delete_journal(article_id: str) -> bool:
+    try:
+        client = _get_admin_client()
+        client.table("journal_articles").delete().eq("id", article_id).execute()
+        return True
+    except Exception as e:
+        print(f"[DB] Error deleting journal article {article_id}: {e}")
+        return False
+
+
+def admin_upload_journal_image(
+    file_bytes: bytes,
+    filename: str,
+    content_type: Optional[str] = None,
+) -> Dict[str, str]:
+    """Upload an image into the `journal-images` bucket and return its URL."""
+    import uuid
+    from pathlib import PurePosixPath
+
+    client = _get_admin_client()
+    suffix = PurePosixPath(filename).suffix.lower() or ""
+    safe_stem = generate_slug(PurePosixPath(filename).stem) or "image"
+    object_path = f"{safe_stem}-{uuid.uuid4().hex[:8]}{suffix}"
+
+    file_options = {"content-type": content_type or "application/octet-stream"}
+    client.storage.from_("journal-images").upload(
+        path=object_path,
+        file=file_bytes,
+        file_options=file_options,
+    )
+    public_url = client.storage.from_("journal-images").get_public_url(object_path)
+    # Some SDK versions append a trailing "?", strip it
+    if isinstance(public_url, str):
+        public_url = public_url.rstrip("?")
+    return {"url": public_url, "path": object_path}

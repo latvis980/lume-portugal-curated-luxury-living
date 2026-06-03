@@ -33,6 +33,24 @@ CREATE TYPE "public"."address_visibility" AS ENUM (
 ALTER TYPE "public"."address_visibility" OWNER TO "postgres";
 
 
+CREATE TYPE "public"."article_status" AS ENUM (
+    'draft',
+    'published'
+);
+
+
+ALTER TYPE "public"."article_status" OWNER TO "postgres";
+
+
+CREATE TYPE "public"."article_type" AS ENUM (
+    'news',
+    'memorandum'
+);
+
+
+ALTER TYPE "public"."article_type" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."internal_status" AS ENUM (
     'draft',
     'ready_for_review',
@@ -158,6 +176,23 @@ $$;
 ALTER FUNCTION "public"."set_published_at"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."set_published_at_journal"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+begin
+    if new.status = 'published'
+       and (old.status is null or old.status <> 'published')
+       and new.published_at is null then
+        new.published_at = now();
+    end if;
+    return new;
+end;
+$$;
+
+
+ALTER FUNCTION "public"."set_published_at_journal"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."set_updated_at"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$
@@ -202,6 +237,33 @@ CREATE TABLE IF NOT EXISTS "public"."contacts" (
 
 
 ALTER TABLE "public"."contacts" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."journal_articles" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "slug" "text" NOT NULL,
+    "type" "public"."article_type" DEFAULT 'memorandum'::"public"."article_type" NOT NULL,
+    "status" "public"."article_status" DEFAULT 'draft'::"public"."article_status" NOT NULL,
+    "kicker" "text",
+    "kicker_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
+    "title" "text" NOT NULL,
+    "title_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
+    "subtitle" "text",
+    "subtitle_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
+    "excerpt" "text",
+    "excerpt_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
+    "body" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
+    "body_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
+    "cover_image" "text",
+    "author" "text",
+    "sort_order" integer DEFAULT 0 NOT NULL,
+    "published_at" timestamp with time zone,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."journal_articles" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."listings" (
@@ -431,6 +493,16 @@ ALTER TABLE ONLY "public"."contacts"
 
 
 
+ALTER TABLE ONLY "public"."journal_articles"
+    ADD CONSTRAINT "journal_articles_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."journal_articles"
+    ADD CONSTRAINT "journal_articles_slug_key" UNIQUE ("slug");
+
+
+
 ALTER TABLE ONLY "public"."listings"
     ADD CONSTRAINT "listings_pkey" PRIMARY KEY ("id");
 
@@ -501,6 +573,26 @@ CREATE INDEX "idx_contacts_email" ON "public"."contacts" USING "btree" ("email")
 
 
 CREATE INDEX "idx_contacts_source" ON "public"."contacts" USING "btree" ("source");
+
+
+
+CREATE INDEX "idx_journal_articles_fts" ON "public"."journal_articles" USING "gin" ("to_tsvector"('"english"'::"regconfig", ((COALESCE("title", ''::"text") || ' '::"text") || COALESCE("excerpt", ''::"text"))));
+
+
+
+CREATE INDEX "idx_journal_articles_published" ON "public"."journal_articles" USING "btree" ("published_at" DESC NULLS LAST);
+
+
+
+CREATE INDEX "idx_journal_articles_slug" ON "public"."journal_articles" USING "btree" ("slug");
+
+
+
+CREATE INDEX "idx_journal_articles_status" ON "public"."journal_articles" USING "btree" ("status");
+
+
+
+CREATE INDEX "idx_journal_articles_type" ON "public"."journal_articles" USING "btree" ("type");
 
 
 
@@ -580,6 +672,14 @@ CREATE OR REPLACE TRIGGER "trg_contacts_updated_at" BEFORE UPDATE ON "public"."c
 
 
 
+CREATE OR REPLACE TRIGGER "trg_journal_articles_published_at" BEFORE INSERT OR UPDATE ON "public"."journal_articles" FOR EACH ROW EXECUTE FUNCTION "public"."set_published_at_journal"();
+
+
+
+CREATE OR REPLACE TRIGGER "trg_journal_articles_updated_at" BEFORE UPDATE ON "public"."journal_articles" FOR EACH ROW EXECUTE FUNCTION "public"."set_updated_at"();
+
+
+
 CREATE OR REPLACE TRIGGER "trg_listings_published_at" BEFORE INSERT OR UPDATE ON "public"."listings" FOR EACH ROW EXECUTE FUNCTION "public"."set_published_at"();
 
 
@@ -597,6 +697,10 @@ CREATE OR REPLACE TRIGGER "trg_services_updated_at" BEFORE UPDATE ON "public"."s
 
 
 CREATE POLICY "Admin full access to contacts" ON "public"."contacts" TO "authenticated" USING (true) WITH CHECK (true);
+
+
+
+CREATE POLICY "Admin full access to journal_articles" ON "public"."journal_articles" TO "authenticated" USING (true) WITH CHECK (true);
 
 
 
@@ -640,11 +744,18 @@ CREATE POLICY "Public can read locations" ON "public"."locations" FOR SELECT TO 
 
 
 
+CREATE POLICY "Public can read published journal_articles" ON "public"."journal_articles" FOR SELECT TO "anon" USING (("status" = 'published'::"public"."article_status"));
+
+
+
 CREATE POLICY "Service role has full access to contacts" ON "public"."contacts" USING (true) WITH CHECK (true);
 
 
 
 ALTER TABLE "public"."contacts" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."journal_articles" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."listings" ENABLE ROW LEVEL SECURITY;
@@ -686,6 +797,12 @@ GRANT ALL ON FUNCTION "public"."set_published_at"() TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."set_published_at_journal"() TO "anon";
+GRANT ALL ON FUNCTION "public"."set_published_at_journal"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."set_published_at_journal"() TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."set_updated_at"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_updated_at"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_updated_at"() TO "service_role";
@@ -701,6 +818,12 @@ GRANT ALL ON FUNCTION "public"."translations_set_updated_at"() TO "service_role"
 GRANT ALL ON TABLE "public"."contacts" TO "anon";
 GRANT ALL ON TABLE "public"."contacts" TO "authenticated";
 GRANT ALL ON TABLE "public"."contacts" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."journal_articles" TO "anon";
+GRANT ALL ON TABLE "public"."journal_articles" TO "authenticated";
+GRANT ALL ON TABLE "public"."journal_articles" TO "service_role";
 
 
 
