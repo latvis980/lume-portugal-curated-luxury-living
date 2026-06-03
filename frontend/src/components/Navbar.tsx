@@ -142,7 +142,7 @@ const Navbar = () => {
 
         {/* Desktop nav — flex-1 absorbs remaining space; each item is flex-1 text-center
             so all five share the row equally regardless of label length */}
-        <div className="hidden md:flex flex-1 items-center">
+        <div className="hidden md:flex flex-1 items-center justify-evenly">
           {navItems.map((item) => (
             <motion.a
               key={item.href}
@@ -151,7 +151,7 @@ const Navbar = () => {
               initial="rest"
               whileHover="hover"
               animate="rest"
-              className="relative block overflow-hidden h-12 group flex-1 text-center"
+              className="relative block overflow-hidden h-12 group text-center px-2"
             >
               <motion.div
                 variants={slideVariants}
