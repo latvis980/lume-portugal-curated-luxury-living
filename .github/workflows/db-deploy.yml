@@ -26,7 +26,10 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pin a known-good version so we don't hit GitHub's "find latest
+          # release" API rate limit on every run (that's what failed the
+          # auto-deploy after the farmhouse-remap PR).
+          version: 2.20.5
 
       - name: Link project
         env:
@@ -50,4 +53,7 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: supabase db push --include-all
+        # --debug surfaces the actual SQL the CLI sends and the full server
+        # response, which is what the CLI itself recommends when a migration
+        # aborts ("Try rerunning the command with --debug to troubleshoot").
+        run: supabase db push --include-all --debug
