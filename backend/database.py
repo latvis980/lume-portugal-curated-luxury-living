@@ -1164,7 +1164,7 @@ def admin_delete_team_member(member_id: str) -> bool:
 # Journal articles (CMS — News + Memorandum)
 # ---------------------------------------------------------------------------
 
-_JOURNAL_I18N_FIELDS = ("kicker", "title", "subtitle", "excerpt")
+_JOURNAL_I18N_FIELDS = ("kicker", "title", "subtitle", "main_sources")
 
 
 def public_list_journal(
@@ -1231,7 +1231,7 @@ def admin_list_journal(
         if type_:
             q = q.eq("type", type_)
         if search:
-            q = q.or_(f"title.ilike.%{search}%,slug.ilike.%{search}%,excerpt.ilike.%{search}%")
+            q = q.or_(f"title.ilike.%{search}%,slug.ilike.%{search}%,subtitle.ilike.%{search}%")
         result = (
             q.order("updated_at", desc=True)
             .range(offset, offset + limit - 1)

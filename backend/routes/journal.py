@@ -29,7 +29,7 @@ from routes.translations import _deepl_translate, _LOCALES
 
 router = APIRouter(tags=["journal"])
 
-_JOURNAL_TRANSLATABLE = ("kicker", "title", "subtitle", "excerpt")
+_JOURNAL_TRANSLATABLE = ("kicker", "title", "subtitle", "main_sources")
 _MAX_UPLOAD_BYTES = 8 * 1024 * 1024  # 8 MB
 
 

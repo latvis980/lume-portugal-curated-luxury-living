@@ -45,8 +45,8 @@ type FormState = {
   title_i18n: I18nValues;
   subtitle: string;
   subtitle_i18n: I18nValues;
-  excerpt: string;
-  excerpt_i18n: I18nValues;
+  main_sources: string;
+  main_sources_i18n: I18nValues;
 
   body: TiptapDoc;
   body_i18n: Record<string, TiptapDoc>;
@@ -67,8 +67,8 @@ const EMPTY_FORM: FormState = {
   title_i18n: { ...EMPTY_I18N },
   subtitle: "",
   subtitle_i18n: { ...EMPTY_I18N },
-  excerpt: "",
-  excerpt_i18n: { ...EMPTY_I18N },
+  main_sources: "",
+  main_sources_i18n: { ...EMPTY_I18N },
   body: EMPTY_DOC,
   body_i18n: {},
 };
@@ -87,8 +87,8 @@ function fromArticle(a: JournalArticle): FormState {
     title_i18n: { ...EMPTY_I18N, ...(a.title_i18n ?? {}) },
     subtitle: a.subtitle ?? "",
     subtitle_i18n: { ...EMPTY_I18N, ...(a.subtitle_i18n ?? {}) },
-    excerpt: a.excerpt ?? "",
-    excerpt_i18n: { ...EMPTY_I18N, ...(a.excerpt_i18n ?? {}) },
+    main_sources: a.main_sources ?? "",
+    main_sources_i18n: { ...EMPTY_I18N, ...(a.main_sources_i18n ?? {}) },
     body: isUsableDoc(a.body) ? (a.body as TiptapDoc) : EMPTY_DOC,
     body_i18n: a.body_i18n ?? {},
   };
@@ -108,8 +108,8 @@ function toPayload(s: FormState): Partial<JournalArticle> {
     title_i18n: s.title_i18n,
     subtitle: s.subtitle || null,
     subtitle_i18n: s.subtitle_i18n,
-    excerpt: s.excerpt || null,
-    excerpt_i18n: s.excerpt_i18n,
+    main_sources: s.main_sources || null,
+    main_sources_i18n: s.main_sources_i18n,
     body: s.body,
     body_i18n: s.body_i18n,
   };
@@ -380,39 +380,26 @@ export default function AdminJournalForm() {
           ))}
         </div>
 
-        <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-admin-text-secondary">
-              URL slug
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={form.slug}
-                onChange={(e) => patch("slug", e.target.value)}
-                placeholder="auto-generated from title if empty"
-                className="flex-1 rounded-md border border-admin-border bg-admin-bg px-3 py-2 text-sm text-admin-text outline-none focus:border-admin-text-muted"
-              />
-              <button
-                type="button"
-                onClick={() => patch("slug", slugify(form.title))}
-                disabled={!form.title}
-                className="rounded-md border border-admin-border px-3 py-2 text-xs text-admin-text-muted hover:text-admin-text disabled:opacity-50"
-              >
-                From title
-              </button>
-            </div>
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-admin-text-secondary">
-              Byline
-            </label>
+        <div className="mb-4">
+          <label className="mb-1.5 block text-xs font-medium text-admin-text-secondary">
+            URL slug
+          </label>
+          <div className="flex gap-2">
             <input
               type="text"
-              value={form.author}
-              onChange={(e) => patch("author", e.target.value)}
-              className="w-full rounded-md border border-admin-border bg-admin-bg px-3 py-2 text-sm text-admin-text outline-none focus:border-admin-text-muted"
+              value={form.slug}
+              onChange={(e) => patch("slug", e.target.value)}
+              placeholder="auto-generated from title if empty"
+              className="flex-1 rounded-md border border-admin-border bg-admin-bg px-3 py-2 text-sm text-admin-text outline-none focus:border-admin-text-muted"
             />
+            <button
+              type="button"
+              onClick={() => patch("slug", slugify(form.title))}
+              disabled={!form.title}
+              className="rounded-md border border-admin-border px-3 py-2 text-xs text-admin-text-muted hover:text-admin-text disabled:opacity-50"
+            >
+              From title
+            </button>
           </div>
         </div>
 
@@ -483,18 +470,6 @@ export default function AdminJournalForm() {
           disabledTranslate={isNew}
           placeholder="Italic tagline under the title"
         />
-        <PlainFieldRow
-          label="Excerpt"
-          field="excerpt"
-          locale={locale}
-          value={getPlain("excerpt", locale)}
-          onChange={(v) => setPlain("excerpt", locale, v)}
-          onTranslate={() => handleTranslateField("excerpt")}
-          disabledTranslate={isNew}
-          rows={3}
-          placeholder="2–3 sentence summary used on listing cards and SEO meta description"
-        />
-
         {/* Body editor */}
         <div className="mt-6">
           <div className="mb-1.5 flex items-center justify-between">
@@ -528,6 +503,38 @@ export default function AdminJournalForm() {
             }
           />
         </div>
+
+        <div className="mt-6">
+          <PlainFieldRow
+            label="Main sources (optional)"
+            field="main_sources"
+            locale={locale}
+            value={getPlain("main_sources", locale)}
+            onChange={(v) => setPlain("main_sources", locale, v)}
+            onTranslate={() => handleTranslateField("main_sources")}
+            disabledTranslate={isNew}
+            rows={3}
+            placeholder="e.g. Statistics Portugal (INE), Banco de Portugal, Eurostat. Reference period: 2024–2026."
+          />
+        </div>
+
+        {locale === "en" && (
+          <div className="mt-6 border-t border-admin-border pt-5">
+            <label className="mb-1.5 block text-xs font-medium text-admin-text-secondary">
+              Byline
+            </label>
+            <input
+              type="text"
+              value={form.author}
+              onChange={(e) => patch("author", e.target.value)}
+              className="w-full rounded-md border border-admin-border bg-admin-bg px-3 py-2 text-sm text-admin-text outline-none focus:border-admin-text-muted"
+              placeholder="LUME by Mark"
+            />
+            <p className="mt-1.5 text-[11px] italic text-admin-text-muted">
+              Shown as the italic endnote on the article page. Defaults to “LUME by Mark” — edit only if the article is sourced from elsewhere.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* ── Delete confirm ──────────────────────────────────────────────── */}
