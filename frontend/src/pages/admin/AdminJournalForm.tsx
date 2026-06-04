@@ -286,7 +286,7 @@ export default function AdminJournalForm() {
   const handleTranslateBody = async () => {
     if (isNew || !id) return;
     try {
-      const updated = await translateJournalBody(id, { source_locale: locale, overwrite: false });
+      const updated = await translateJournalBody(id, { source_locale: "en", overwrite: false });
       setForm(fromArticle(updated));
       queryClient.setQueryData(["admin-journal", id], updated);
     } catch (e: any) {
