@@ -70,7 +70,7 @@ export default function JournalIndex() {
   }, [articles, filter]);
 
   return (
-    <div className="min-h-screen bg-lume-cream font-hanken text-lume-ink">
+    <div className="min-h-screen bg-background font-hanken text-lume-ink">
       <Navbar />
 
       {/* PAGE HEAD */}
