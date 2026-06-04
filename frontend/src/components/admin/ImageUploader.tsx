@@ -12,7 +12,7 @@ export function ImageUploader({
   value,
   onChange,
   label = "Cover image",
-  hint = "PNG or JPG. Stored in Supabase Storage.",
+  hint = "JPG, PNG or WebP. Optimized and stored as WebP in Supabase Storage.",
 }: ImageUploaderProps) {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
