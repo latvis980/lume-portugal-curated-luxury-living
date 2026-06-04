@@ -56,6 +56,9 @@ export default function JournalArticle() {
 
   useEffect(() => {
     if (!slug) return;
+    // Start at the top so the navbar reads transparent over the hero on entry
+    // (navigating in from a scrolled listing would otherwise land mid-page).
+    window.scrollTo(0, 0);
     setError("");
     setArticle(null);
     fetch(`/api/journal/${slug}?locale=${encodeURIComponent(locale)}`)

@@ -59,20 +59,25 @@ const Navbar = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  // Pages that render a full-bleed hero behind the navbar. While at the top
-  // of these the navbar is transparent; on other routes (e.g. /properties,
-  // /about, the /journal index) it is always over content and never
-  // transparent.
+  // Pages where the navbar is transparent at the top of the page. There are
+  // two flavours of "hero" behind it:
+  //   • dark hero  — the homepage video and individual journal articles. The
+  //                  navbar needs light (cream) text/logo to read over it.
+  //   • light hero — the journal listing's cream header. The navbar keeps its
+  //                  default dark text/logo there.
+  // Everywhere else (/properties, /about, …) the navbar is always over content
+  // and never transparent.
   const isHome = location.pathname === "/";
-  // Individual journal articles render a dark photographic hero. Like the
-  // homepage the navbar starts transparent over it, but once scrolled it
-  // becomes the opaque espresso-brown used in the footer (rather than the
-  // cream tint), keeping its light text readable.
   const isArticle = location.pathname.startsWith("/journal/");
-  const overHero = (isHome || isArticle) && !scrolled;
-  const darkScrolled = isArticle && scrolled;
+  const isJournalIndex = location.pathname === "/journal";
+  const overDarkHero = (isHome || isArticle) && !scrolled;
+  const overLightHero = isJournalIndex && !scrolled;
+  const overHero = overDarkHero || overLightHero;
+  // Once scrolled, journal pages (listing + articles) turn the opaque
+  // espresso-brown used in the footer rather than the homepage's cream tint.
+  const darkScrolled = (isArticle || isJournalIndex) && scrolled;
   // Light navbar text/logo whenever the surface behind it is dark.
-  const lightText = overHero || darkScrolled;
+  const lightText = overDarkHero || darkScrolled;
   // ── Wave-takeover state ──────────────────────────────────────────────
   // `submerged` becomes true once the contact section reaches the navbar.
   // We use it to fade the sand bg to transparent and flip text to white.
@@ -119,7 +124,7 @@ const Navbar = () => {
         //                  so text in the navbar stays readable as the section
         //                  scrolls beneath it
         //   darkScrolled → opaque espresso-brown (the footer colour) on scrolled
-        //                  journal articles
+        //                  journal pages (listing + articles)
         //   default      → cream tint with backdrop blur
         backgroundColor:
           overHero
@@ -146,9 +151,9 @@ const Navbar = () => {
       }}
     >
       {/* Text colour adapts to the surface behind the navbar:
-            lightText (overHero / darkScrolled) → cream over a dark surface
-            submerged                            → espresso on the honey wave crest
-            default                              → each item's own colour (espresso / muted) */}
+            lightText (over a dark hero / darkScrolled) → cream over a dark surface
+            submerged                                    → espresso on the honey wave crest
+            default                                      → each item's own colour (espresso / muted) */}
       <div
         className={`px-[clamp(24px,7vw,96px)] flex items-center justify-between h-14 md:h-[5.5rem] gap-6 transition-colors duration-300 ${
           lightText ? "[&_*]:!text-warm-white" : submerged ? "[&_*]:!text-charcoal" : ""

@@ -51,6 +51,11 @@ export default function JournalIndex() {
   const [filter, setFilter] = useState<Filter>("all");
   const [view, setView] = useState<View>("grid");
 
+  // Land at the top on entry so the navbar reads transparent over the header.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     setLoading(true);
     fetch(`/api/journal?locale=${encodeURIComponent(locale)}&limit=100`)
