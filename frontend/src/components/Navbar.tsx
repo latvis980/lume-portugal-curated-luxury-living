@@ -59,9 +59,20 @@ const Navbar = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  // On routes that don't render a hero (e.g. /properties, /about) the navbar
-  // is always over content, so it should never be transparent.
-  const overHero = location.pathname === "/" && !scrolled;
+  // Pages that render a full-bleed hero behind the navbar. While at the top
+  // of these the navbar is transparent; on other routes (e.g. /properties,
+  // /about, the /journal index) it is always over content and never
+  // transparent.
+  const isHome = location.pathname === "/";
+  // Individual journal articles render a dark photographic hero. Like the
+  // homepage the navbar starts transparent over it, but once scrolled it
+  // becomes the opaque espresso-brown used in the footer (rather than the
+  // cream tint), keeping its light text readable.
+  const isArticle = location.pathname.startsWith("/journal/");
+  const overHero = (isHome || isArticle) && !scrolled;
+  const darkScrolled = isArticle && scrolled;
+  // Light navbar text/logo whenever the surface behind it is dark.
+  const lightText = overHero || darkScrolled;
   // ── Wave-takeover state ──────────────────────────────────────────────
   // `submerged` becomes true once the contact section reaches the navbar.
   // We use it to fade the sand bg to transparent and flip text to white.
@@ -102,16 +113,28 @@ const Navbar = () => {
     <nav
       className="fixed top-0 left-0 right-0 z-50 border-b"
       style={{
-        // Three visual states:
-        //   overHero  → fully transparent (hero video shows through)
-        //   submerged → opaque honey, matching the top of the contact gradient
-        //               so text in the navbar stays readable as the section
-        //               scrolls beneath it
-        //   default   → cream tint with backdrop blur
+        // Visual states:
+        //   overHero     → fully transparent (hero shows through)
+        //   submerged    → opaque honey, matching the top of the contact gradient
+        //                  so text in the navbar stays readable as the section
+        //                  scrolls beneath it
+        //   darkScrolled → opaque espresso-brown (the footer colour) on scrolled
+        //                  journal articles
+        //   default      → cream tint with backdrop blur
         backgroundColor:
-          overHero ? "transparent" : submerged ? "#ecbe5b" : "rgba(251, 244, 230, 0.86)",
+          overHero
+            ? "transparent"
+            : submerged
+            ? "#ecbe5b"
+            : darkScrolled
+            ? "#1a1108"
+            : "rgba(251, 244, 230, 0.86)",
         borderColor:
-          overHero || submerged ? "transparent" : "rgba(176, 78, 26, 0.12)",
+          overHero || submerged
+            ? "transparent"
+            : darkScrolled
+            ? "rgba(237, 217, 168, 0.12)"
+            : "rgba(176, 78, 26, 0.12)",
         backdropFilter:
           overHero || submerged ? "none" : "blur(14px)",
         WebkitBackdropFilter:
@@ -123,12 +146,12 @@ const Navbar = () => {
       }}
     >
       {/* Text colour adapts to the surface behind the navbar:
-            overHero  → cream (warm-white) over the dark hero video
-            submerged → espresso on the honey wave crest
-            default   → uses each item's own colour (espresso / muted) */}
+            lightText (overHero / darkScrolled) → cream over a dark surface
+            submerged                            → espresso on the honey wave crest
+            default                              → each item's own colour (espresso / muted) */}
       <div
-        className={`max-w-7xl mx-auto px-6 md:px-12 flex items-center h-14 md:h-[5.5rem] gap-6 transition-colors duration-300 ${
-          overHero ? "[&_*]:!text-warm-white" : submerged ? "[&_*]:!text-charcoal" : ""
+        className={`px-[clamp(24px,7vw,96px)] flex items-center h-14 md:h-[5.5rem] gap-6 transition-colors duration-300 ${
+          lightText ? "[&_*]:!text-warm-white" : submerged ? "[&_*]:!text-charcoal" : ""
         }`}
       >
 
@@ -138,7 +161,7 @@ const Navbar = () => {
             src="/navbar-logo.png"
             alt="LUME by Mark"
             className={`h-[3.6rem] md:h-[4.8rem] w-auto transition-all duration-500 ${
-              overHero ? "brightness-0 invert" : submerged ? "brightness-0" : ""
+              lightText ? "brightness-0 invert" : submerged ? "brightness-0" : ""
             }`}
           />
         </a>

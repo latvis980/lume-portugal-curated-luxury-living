@@ -132,9 +132,11 @@ export default function JournalArticle() {
     <div className="min-h-screen bg-lume-cream font-hanken text-lume-ink">
       <Navbar />
 
-      {/* HERO */}
+      {/* HERO — full-bleed to the very top so the fixed navbar sits over it
+          transparently. The content below is padded (pt-28 / md:pt-36) to
+          clear the navbar. */}
       <header
-        className="relative mt-14 flex items-end md:mt-[5.5rem]"
+        className="relative flex items-end"
         style={{ minHeight: "max(580px, 75vh)" }}
       >
         {article.cover_image ? (
