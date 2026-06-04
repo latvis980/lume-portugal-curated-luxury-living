@@ -186,22 +186,41 @@ export function RichTextEditor({
         }
         .ProseMirror [data-fig-item] {
           background: #FBF6EC;
-          padding: 0.75rem 0.75rem;
+          padding: 1.375rem 1.125rem;
+          position: relative;
         }
         .ProseMirror [data-fig-item] p:first-child {
           font-family: 'Cormorant Garamond', Georgia, serif;
           font-weight: 500;
-          font-size: 1.5rem;
+          font-size: 2.25rem;
           line-height: 1;
           color: #2C281F;
           margin: 0;
         }
         .ProseMirror [data-fig-item] p:last-child {
           font-family: ui-sans-serif, system-ui, sans-serif;
-          font-size: 0.7rem;
+          font-size: 0.72rem;
           letter-spacing: 0.05em;
           color: #8B7F69;
-          margin: 0.4rem 0 0;
+          margin: 0.625rem 0 0;
+          line-height: 1.4;
+        }
+        .ProseMirror [data-fig-item] p:has(> br:only-child)::before {
+          font-family: ui-sans-serif, system-ui, sans-serif;
+          font-size: 9px;
+          font-weight: 600;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: #CBBFA8;
+          pointer-events: none;
+          float: left;
+          height: 0;
+        }
+        .ProseMirror [data-fig-item] p:first-child:has(> br:only-child)::before {
+          content: "Value";
+        }
+        .ProseMirror [data-fig-item] p:last-child:has(> br:only-child)::before {
+          content: "Label";
         }
       `}</style>
     </div>
