@@ -7,40 +7,43 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useI18n, type Locale } from "@/lib/i18n";
 import { useWave } from "@/components/WaveTransition";
 
-type NavItem = { label: string; subtitle: string; href: string };
+// A subtitle is either a single string (rendered on one line) or a pair of
+// strings rendered as two stacked lines on hover. Longer subtitles are split
+// into two lines for a more balanced look; very short ones stay on one line.
+type NavItem = { label: string; subtitle: string | [string, string]; href: string };
 
 const NAV_LABELS: Record<Locale, NavItem[]> = {
   en: [
-    { label: "Homes",           subtitle: "View available places",        href: "/properties" },
-    { label: "Services",        subtitle: "What we take care of",         href: "/#services" },
-    { label: "Investment",      subtitle: "Thinking beyond the present",  href: "/#investment" },
-    { label: "About us",        subtitle: "The idea behind Lume",         href: "/about" },
-    { label: "Journal",         subtitle: "Articles about Portugal",      href: "/journal" },
-    { label: "Contact",         subtitle: "Get in touch",                 href: "/#private-access" },
+    { label: "Homes",           subtitle: ["View available", "places"],         href: "/properties" },
+    { label: "Services",        subtitle: ["What we", "take care of"],          href: "/#services" },
+    { label: "Investment",      subtitle: ["Thinking beyond", "the present"],   href: "/#investment" },
+    { label: "About us",        subtitle: ["The idea", "behind Lume"],          href: "/about" },
+    { label: "Journal",         subtitle: ["Articles about", "Portugal"],       href: "/journal" },
+    { label: "Contact",         subtitle: "Get in touch",                       href: "/#private-access" },
   ],
   pt_pt: [
-    { label: "Casas",           subtitle: "Ver propriedades disponíveis", href: "/properties" },
-    { label: "Serviços",        subtitle: "O que tratamos por si",         href: "/#services" },
-    { label: "Investimento",    subtitle: "Pensar além do presente",       href: "/#investment" },
-    { label: "Sobre nós",       subtitle: "A ideia por detrás da Lume",   href: "/about" },
-    { label: "Revista",         subtitle: "Artigos sobre Portugal",        href: "/journal" },
-    { label: "Contacto",        subtitle: "Entre em contacto",             href: "/#private-access" },
+    { label: "Casas",           subtitle: ["Ver propriedades", "disponíveis"],  href: "/properties" },
+    { label: "Serviços",        subtitle: ["O que tratamos", "por si"],         href: "/#services" },
+    { label: "Investimento",    subtitle: ["Pensar além", "do presente"],       href: "/#investment" },
+    { label: "Sobre nós",       subtitle: ["A ideia por", "detrás da Lume"],    href: "/about" },
+    { label: "Revista",         subtitle: ["Artigos sobre", "Portugal"],        href: "/journal" },
+    { label: "Contacto",        subtitle: "Entre em contacto",                  href: "/#private-access" },
   ],
   ru: [
-    { label: "Дома",            subtitle: "Доступные объекты",            href: "/properties" },
-    { label: "Услуги",          subtitle: "О чём мы заботимся",           href: "/#services" },
-    { label: "Инвестиции",      subtitle: "Думать о будущем",              href: "/#investment" },
-    { label: "О нас",           subtitle: "Идея Lume",                    href: "/about" },
-    { label: "Журнал",          subtitle: "Статьи о Португалии",          href: "/journal" },
-    { label: "Контакт",         subtitle: "Свяжитесь с нами",             href: "/#private-access" },
+    { label: "Дома",            subtitle: ["Доступные", "объекты"],             href: "/properties" },
+    { label: "Услуги",          subtitle: ["О чём мы", "заботимся"],            href: "/#services" },
+    { label: "Инвестиции",      subtitle: ["Думать о", "будущем"],              href: "/#investment" },
+    { label: "О нас",           subtitle: "Идея Lume",                          href: "/about" },
+    { label: "Журнал",          subtitle: ["Статьи о", "Португалии"],          href: "/journal" },
+    { label: "Контакт",         subtitle: "Свяжитесь с нами",                   href: "/#private-access" },
   ],
   es: [
-    { label: "Casas",           subtitle: "Ver propiedades disponibles",  href: "/properties" },
-    { label: "Servicios",       subtitle: "Lo que cuidamos",              href: "/#services" },
-    { label: "Inversión",       subtitle: "Pensar más allá del presente", href: "/#investment" },
-    { label: "Sobre nosotros",  subtitle: "La idea detrás de Lume",       href: "/about" },
-    { label: "Revista",         subtitle: "Artículos sobre Portugal",     href: "/journal" },
-    { label: "Contacto",        subtitle: "Ponerse en contacto",          href: "/#private-access" },
+    { label: "Casas",           subtitle: ["Ver propiedades", "disponibles"],   href: "/properties" },
+    { label: "Servicios",       subtitle: "Lo que cuidamos",                    href: "/#services" },
+    { label: "Inversión",       subtitle: ["Pensar más allá", "del presente"],  href: "/#investment" },
+    { label: "Sobre nosotros",  subtitle: ["La idea", "detrás de Lume"],        href: "/about" },
+    { label: "Revista",         subtitle: ["Artículos sobre", "Portugal"],      href: "/journal" },
+    { label: "Contacto",        subtitle: "Ponerse en contacto",                href: "/#private-access" },
   ],
 };
 
@@ -199,9 +202,16 @@ const Navbar = () => {
                 <span className="flex items-center justify-center h-12 text-[11px] lg:text-[13.92px] font-medium tracking-[0.18em] lg:tracking-[0.22em] uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-300 whitespace-nowrap">
                   {item.label}
                 </span>
-                <span className="flex items-center justify-center h-12 text-[11px] lg:text-[13.92px] italic font-serif font-medium tracking-wide text-primary leading-tight whitespace-nowrap">
-                  {item.subtitle}
-                </span>
+                {Array.isArray(item.subtitle) ? (
+                  <span className="flex flex-col items-center justify-center h-12 text-[11px] lg:text-[13.92px] italic font-serif font-medium tracking-wide text-primary leading-tight">
+                    <span className="whitespace-nowrap">{item.subtitle[0]}</span>
+                    <span className="whitespace-nowrap">{item.subtitle[1]}</span>
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center h-12 text-[11px] lg:text-[13.92px] italic font-serif font-medium tracking-wide text-primary leading-tight whitespace-nowrap">
+                    {item.subtitle}
+                  </span>
+                )}
               </motion.div>
             </motion.a>
           ))}
@@ -243,7 +253,7 @@ const Navbar = () => {
                     {item.label}
                   </span>
                   <span className="text-[13.8px] italic font-serif text-primary">
-                    {item.subtitle}
+                    {Array.isArray(item.subtitle) ? item.subtitle.join(" ") : item.subtitle}
                   </span>
                 </a>
               ))}
