@@ -20,6 +20,9 @@ httpx>=0.26.0
 # Environment variables
 python-dotenv>=1.0.0
 
+# Image optimisation (journal uploads -> resized WebP)
+Pillow>=10.3.0
+
 # AI editing
 python-multipart>=0.0.9
 anthropic>=0.40.0

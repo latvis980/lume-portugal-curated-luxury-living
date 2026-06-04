@@ -211,6 +211,7 @@ function Cover({ src, alt }: { src: string | null; alt: string }) {
         src={src}
         alt={alt}
         loading="lazy"
+        decoding="async"
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
       />
     );

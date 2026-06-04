@@ -1319,12 +1319,20 @@ def admin_upload_journal_image(
     filename: str,
     content_type: Optional[str] = None,
 ) -> Dict[str, str]:
-    """Upload an image into the `journal-images` bucket and return its URL."""
+    """Upload an image into the `journal-images` bucket and return its URL.
+
+    The bytes are optimised first (orientation-corrected, downscaled, re-encoded
+    to WebP) so the public site serves small, crisp images instead of multi-MB
+    originals. See ``image_utils.optimize_image``.
+    """
     import uuid
     from pathlib import PurePosixPath
+    from image_utils import optimize_image
 
     client = _get_admin_client()
-    suffix = PurePosixPath(filename).suffix.lower() or ""
+
+    file_bytes, suffix, content_type = optimize_image(file_bytes, content_type)
+
     safe_stem = generate_slug(PurePosixPath(filename).stem) or "image"
     object_path = f"{safe_stem}-{uuid.uuid4().hex[:8]}{suffix}"
 
