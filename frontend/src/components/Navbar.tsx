@@ -61,14 +61,16 @@ const Navbar = () => {
   }, []);
   // The navbar is transparent over a dark hero (homepage video / journal
   // article cover image) while at the top of the page, with light text/logo.
-  // Everywhere else (/properties, /about, the /journal listing, …) it uses the
-  // default cream surface with a subtle border — always over content.
+  // Everywhere else it opens on the default cream surface with a subtle border.
   const isHome = location.pathname === "/";
   const isArticle = location.pathname.startsWith("/journal/");
+  const isJournalIndex = location.pathname === "/journal";
   const overHero = (isHome || isArticle) && !scrolled;
-  // Individual articles turn the opaque espresso-brown footer colour once
-  // scrolled (the listing keeps the default cream navbar, like /properties).
-  const darkScrolled = isArticle && scrolled;
+  // Journal pages (the listing and individual articles) turn the opaque
+  // espresso-brown footer colour once scrolled. The listing still opens on the
+  // default cream navbar (matching /properties) — only its scrolled state goes
+  // dark.
+  const darkScrolled = (isArticle || isJournalIndex) && scrolled;
   // Light navbar text/logo whenever the surface behind it is dark.
   const lightText = overHero || darkScrolled;
   // ── Wave-takeover state ──────────────────────────────────────────────
@@ -117,7 +119,7 @@ const Navbar = () => {
         //                  so text in the navbar stays readable as the section
         //                  scrolls beneath it
         //   darkScrolled → opaque espresso-brown (the footer colour) on scrolled
-        //                  journal articles
+        //                  journal pages (listing + articles)
         //   default      → cream tint with backdrop blur
         backgroundColor:
           overHero
