@@ -12,13 +12,26 @@ const HeroSection = () => {
 
   // iOS only autoplays a video that is genuinely muted + inline. React doesn't
   // always reflect the `muted` prop to the DOM property, so set it imperatively
-  // and kick off playback once mounted (the promise rejects silently if the
-  // browser still blocks it, e.g. Low Power Mode).
+  // and kick off playback once mounted. If autoplay is blocked (e.g. iOS Low
+  // Power Mode), retry on the first user interaction anywhere on the page — a
+  // user gesture is enough to start a muted inline video.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     v.muted = true;
-    v.play().catch(() => {});
+    const tryPlay = () => {
+      v.muted = true;
+      const p = v.play();
+      if (p) p.catch(() => {});
+    };
+    tryPlay();
+    const onInteract = () => tryPlay();
+    document.addEventListener("touchstart", onInteract, { once: true, passive: true });
+    document.addEventListener("click", onInteract, { once: true });
+    return () => {
+      document.removeEventListener("touchstart", onInteract);
+      document.removeEventListener("click", onInteract);
+    };
   }, []);
 
   const handleGuideClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -46,9 +59,10 @@ const HeroSection = () => {
           <source src="/hero-video.mp4" type="video/mp4" />
         </video>
         {/* Warm sunset wash on top of the footage so the cream/honey palette
-            reads consistently with the rest of the page. */}
+            reads consistently with the rest of the page. pointer-events-none so
+            it never swallows taps meant for the video's play button. */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 pointer-events-none"
           style={{
             background:
               "linear-gradient(180deg, rgba(20,12,4,0.55) 0%, rgba(20,12,4,0.28) 30%, rgba(20,12,4,0.12) 55%, rgba(231,148,70,0.18) 85%, rgba(241,196,84,0) 100%), radial-gradient(ellipse at 70% 25%, rgba(255,210,120,0.22), transparent 60%)",
@@ -78,15 +92,16 @@ const HeroSection = () => {
             marginTop: "min(5vw, 8.89vh)",
           }}
         />
-        {/* gold hairline */}
+        {/* gold hairline — extra breathing room above/below on mobile, tighter
+            min()-scaled spacing from md up */}
         <div
+          className="mt-5 mb-4 md:mt-[min(1.17vw,2.08vh)] md:mb-[min(0.78vw,1.39vh)]"
           style={{
             width: "min(3.13vw, 5.56vh)",
             minWidth: "40px",
             maxWidth: "72px",
             height: "1px",
             background: "#e9a92e",
-            margin: "min(1.17vw, 2.08vh) 0 min(0.78vw, 1.39vh)",
           }}
         />
         <motion.p
