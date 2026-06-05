@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useT } from "@/lib/i18n";
@@ -7,6 +8,18 @@ const HeroSection = () => {
   const t = useT();
   const location = useLocation();
   const navigate = useNavigate();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // iOS only autoplays a video that is genuinely muted + inline. React doesn't
+  // always reflect the `muted` prop to the DOM property, so set it imperatively
+  // and kick off playback once mounted (the promise rejects silently if the
+  // browser still blocks it, e.g. Low Power Mode).
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = true;
+    v.play().catch(() => {});
+  }, []);
 
   const handleGuideClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -22,10 +35,12 @@ const HeroSection = () => {
       {/* Background video */}
       <div className="absolute inset-0 z-0">
         <video
+          ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
+          preload="auto"
           className="w-full h-full object-cover"
         >
           <source src="/hero-video.mp4" type="video/mp4" />
@@ -41,14 +56,13 @@ const HeroSection = () => {
         />
       </div>
 
-      {/* Left block — logo · gold line · handwritten tagline, vertically centred
-          and aligned to the same left gutter as the navbar logo. */}
+      {/* Left block — logo · gold line · handwritten tagline. On mobile it sits
+          in the upper half of the screen; from md up it is vertically centred.
+          Aligned to the same left gutter as the navbar logo. */}
       <div
-        className="absolute z-[5] flex flex-col items-start text-left text-warm-white"
+        className="absolute z-[5] flex flex-col items-start text-left text-warm-white top-[17%] translate-y-0 md:top-1/2 md:-translate-y-1/2"
         style={{
           left: "clamp(24px, 7vw, 96px)",
-          top: "50%",
-          transform: "translateY(-50%)",
         }}
       >
         {/* Sizes mirror the reference's fixed 1280×720 canvas scaled to fit:
@@ -158,28 +172,6 @@ const HeroSection = () => {
         </div>
         {/* vertical gold hairline to the right of the buttons */}
         <div style={{ width: "1px", background: "#e9a92e" }} />
-      </motion.div>
-
-      {/* Scroll indicator — centered just above the (now shorter) wave */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.5 }}
-        className="absolute left-1/2 -translate-x-1/2 z-[6] flex flex-col items-center gap-2"
-        style={{ bottom: "110px" }}
-      >
-        <span className="text-[9px] tracking-[0.4em] uppercase text-[#fff3dc]/70">
-          {t("hero", "scroll", "Scroll")}
-        </span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-px h-8"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(255,243,220,0.7), transparent)",
-          }}
-        />
       </motion.div>
 
       {/* Sunlit wave horizon at the bottom of the hero */}
