@@ -41,57 +41,70 @@ const HeroSection = () => {
         />
       </div>
 
-      {/* Content — left-aligned, raised above the wave crest at the bottom */}
+      {/* Left block — logo · gold line · handwritten tagline, vertically centred
+          and aligned to the same left gutter as the navbar logo. */}
       <div
-        className="relative z-[5] flex h-full flex-col items-start justify-center text-left text-warm-white"
+        className="absolute z-[5] flex flex-col items-start text-left text-warm-white"
         style={{
-          padding:
-            "84px clamp(24px, 7vw, 96px) clamp(260px, 34vh, 360px)",
+          left: "clamp(24px, 7vw, 96px)",
+          top: "50%",
+          transform: "translateY(-50%)",
         }}
       >
+        <img
+          src="/hero-logo.png"
+          alt="LUME by Mark"
+          className="block w-auto"
+          style={{
+            height: "clamp(54px, 5.5vw, 84px)",
+            filter: "brightness(0) invert(1)",
+            marginTop: "clamp(40px, 6vh, 64px)",
+          }}
+        />
+        {/* gold hairline */}
+        <div style={{ width: "40px", height: "1px", background: "#e9a92e", margin: "15px 0 10px" }} />
         <motion.p
           initial={{ clipPath: "inset(0 100% 0 0)" }}
           animate={{ clipPath: "inset(0 0 0 0)" }}
-          transition={{ duration: 1.2, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display italic font-light self-start"
+          transition={{ duration: 2, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="font-script m-0"
           style={{
-            fontSize: "clamp(28px, 4vw, 44px)",
-            lineHeight: 1.1,
-            textShadow: "0 2px 20px rgba(0,0,0,0.3)",
+            color: "#fbf4e6",
+            fontSize: "clamp(28px, 3vw, 40px)",
+            fontWeight: 400,
+            lineHeight: 1.32,
+            maxWidth: "500px",
+            paddingBottom: "24px",
+            textShadow: "0 2px 24px rgba(0,0,0,0.35)",
           }}
         >
           {t("hero", "tagline", "Your light to living in Portugal")}
         </motion.p>
+      </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 1.4 }}
-          className="mt-9 flex flex-wrap items-center gap-3.5 self-start"
-        >
-          <Link
-            to="/properties"
-            className="px-8 py-4 border text-[11px] tracking-[0.3em] uppercase font-medium transition-all duration-300"
-            style={{
-              color: "#fbf4e6",
-              borderColor: "rgba(255,243,220,0.7)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,243,220,0.12)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-            }}
-          >
-            {t("hero", "cta_explore_homes", "Explore Homes")}
-          </Link>
+      {/* CTA cluster — lower-right, stacked, with a vertical gold hairline */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 1.4 }}
+        className="absolute z-[5] flex items-stretch"
+        style={{
+          right: "clamp(24px, 7vw, 96px)",
+          bottom: "clamp(80px, 15vh, 128px)",
+          gap: "22px",
+        }}
+      >
+        <div className="flex flex-col items-end justify-end" style={{ gap: "14px" }}>
           <a
             href="/#questionnaire"
             onClick={handleGuideClick}
-            className="px-8 py-4 text-[11px] tracking-[0.3em] uppercase font-medium transition-all duration-300"
+            className="inline-flex items-center text-[11px] tracking-[0.3em] uppercase font-medium transition-all duration-300"
             style={{
               background: "linear-gradient(120deg, #f1c454 0%, #e89446 100%)",
               color: "#2a1d10",
+              borderRadius: "4px",
+              padding: "16px 32px",
+              lineHeight: 1,
               boxShadow: "0 8px 28px -8px rgba(233,169,46,0.6)",
             }}
             onMouseEnter={(e) => {
@@ -107,16 +120,37 @@ const HeroSection = () => {
           >
             {t("hero", "cta_let_us_guide_you", "Let Us Guide You")}
           </a>
-        </motion.div>
-      </div>
+          <Link
+            to="/properties"
+            className="inline-flex items-center gap-2.5 text-[11px] tracking-[0.3em] uppercase font-medium transition-all duration-300"
+            style={{
+              color: "#fbf4e6",
+              padding: "14px 2px",
+              lineHeight: 1,
+              borderBottom: "1px solid rgba(255,243,220,0.7)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderBottomColor = "rgba(255,243,220,1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderBottomColor = "rgba(255,243,220,0.7)";
+            }}
+          >
+            <span>{t("hero", "cta_explore_homes", "Explore Homes")}</span>
+            <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+        {/* vertical gold hairline to the right of the buttons */}
+        <div style={{ width: "1px", background: "#e9a92e" }} />
+      </motion.div>
 
-      {/* Scroll indicator — centered above the wave */}
+      {/* Scroll indicator — centered just above the (now shorter) wave */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2.5 }}
         className="absolute left-1/2 -translate-x-1/2 z-[6] flex flex-col items-center gap-2"
-        style={{ bottom: "calc(clamp(260px, 34vh, 360px) - 140px)" }}
+        style={{ bottom: "110px" }}
       >
         <span className="text-[9px] tracking-[0.4em] uppercase text-[#fff3dc]/70">
           {t("hero", "scroll", "Scroll")}
