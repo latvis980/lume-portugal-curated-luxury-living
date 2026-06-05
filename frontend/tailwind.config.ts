@@ -17,7 +17,6 @@ export default {
       fontFamily: {
         display: ['"Cormorant Garamond"', 'serif'],
         body: ['Raleway', 'sans-serif'],
-        script: ['Caveat', 'cursive'],
         serif: ['Georgia', 'serif'], // ← added: enables font-serif in the navbar subtitle
         spectral: ['Spectral', 'Georgia', 'serif'],
         hanken: ['"Hanken Grotesk"', 'system-ui', 'sans-serif'],

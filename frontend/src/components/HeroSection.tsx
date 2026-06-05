@@ -51,30 +51,43 @@ const HeroSection = () => {
           transform: "translateY(-50%)",
         }}
       >
+        {/* Sizes mirror the reference's fixed 1280×720 canvas scaled to fit:
+            scale = min(100vw/1280, 100vh/720), so each px value `n` becomes
+            min(n/12.8 vw, n/7.2 vh). Logo is 69px, tagline 38px on that canvas. */}
         <img
-          src="/hero-logo.png"
+          src="/logo-hero.png"
           alt="LUME by Mark"
           className="block w-auto"
           style={{
-            height: "clamp(54px, 5.5vw, 84px)",
+            height: "clamp(52px, min(5.39vw, 9.58vh), 128px)",
             filter: "brightness(0) invert(1)",
-            marginTop: "clamp(40px, 6vh, 64px)",
+            marginTop: "min(5vw, 8.89vh)",
           }}
         />
         {/* gold hairline */}
-        <div style={{ width: "40px", height: "1px", background: "#e9a92e", margin: "15px 0 10px" }} />
+        <div
+          style={{
+            width: "min(3.13vw, 5.56vh)",
+            minWidth: "40px",
+            maxWidth: "72px",
+            height: "1px",
+            background: "#e9a92e",
+            margin: "min(1.17vw, 2.08vh) 0 min(0.78vw, 1.39vh)",
+          }}
+        />
         <motion.p
           initial={{ clipPath: "inset(0 100% 0 0)" }}
           animate={{ clipPath: "inset(0 0 0 0)" }}
           transition={{ duration: 2, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="font-script m-0"
+          className="m-0"
           style={{
+            fontFamily: '"Caveat", cursive',
             color: "#fbf4e6",
-            fontSize: "clamp(28px, 3vw, 40px)",
+            fontSize: "clamp(24px, min(2.97vw, 5.28vh), 52px)",
             fontWeight: 400,
             lineHeight: 1.32,
-            maxWidth: "500px",
-            paddingBottom: "24px",
+            maxWidth: "min(39.06vw, 69.44vh)",
+            paddingBottom: "min(1.88vw, 3.33vh)",
             textShadow: "0 2px 24px rgba(0,0,0,0.35)",
           }}
         >
