@@ -56,8 +56,15 @@ const Navbar = () => {
   // top of the page the navbar is fully transparent so the hero video shows
   // through; after scrolling it picks up a soft cream-tinted blur.
   const [scrolled, setScrolled] = useState(false);
+  // Separate, slightly later threshold for revealing the navbar logo on hero
+  // pages: the logo stays hidden over the first screen and only fades in once
+  // we've scrolled a bit past the point where the bar turns opaque (80px).
+  const [pastHero, setPastHero] = useState(false);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 80);
+      setPastHero(window.scrollY > 150);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -81,6 +88,11 @@ const Navbar = () => {
   const darkScrolled = (isArticle || isJournalIndex) && scrolled;
   // Light navbar text/logo whenever the surface behind it is dark.
   const lightText = overDarkHero || darkScrolled;
+  // The logo is hidden while we sit on the first screen of a hero page (the big
+  // hero logo carries the branding there) and fades in once we've scrolled a
+  // little past the hero. On non-hero pages it is always visible.
+  const heroPage = isHome || isArticle || isJournalIndex;
+  const logoShown = !heroPage || pastHero;
   // ── Wave-takeover state ──────────────────────────────────────────────
   // `submerged` becomes true once the contact section reaches the navbar.
   // We use it to fade the sand bg to transparent and flip text to white.
@@ -171,6 +183,10 @@ const Navbar = () => {
             className={`h-[3.6rem] md:h-[4.8rem] w-auto transition-all duration-500 ${
               lightText ? "brightness-0 invert" : submerged ? "brightness-0" : ""
             }`}
+            style={{
+              opacity: logoShown ? 1 : 0,
+              transition: "opacity 0.5s ease, filter 0.5s ease",
+            }}
           />
         </a>
 
