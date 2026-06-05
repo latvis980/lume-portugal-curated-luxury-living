@@ -86,7 +86,10 @@ const HeroSection = () => {
             fontSize: "clamp(24px, min(2.97vw, 5.28vh), 52px)",
             fontWeight: 400,
             lineHeight: 1.32,
-            maxWidth: "min(39.06vw, 69.44vh)",
+            maxWidth: "min(46vw, 82vh)",
+            // Caveat's glyphs overshoot the text box; without right padding the
+            // clip-path reveal shaves the last letter (e.g. the "l" in Portugal).
+            paddingRight: "0.5em",
             paddingBottom: "min(1.88vw, 3.33vh)",
             textShadow: "0 2px 24px rgba(0,0,0,0.35)",
           }}
