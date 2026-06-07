@@ -45,7 +45,7 @@ function displayDate(a: PublicArticle): string {
 }
 
 export default function JournalIndex() {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const [articles, setArticles] = useState<PublicArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
@@ -81,7 +81,7 @@ export default function JournalIndex() {
               Notes &amp; Memoranda
             </span>
             <h1 className="mt-3 font-display text-5xl font-medium leading-none text-lume-ink md:text-[68px]">
-              Journal
+              {t("journal", "title", "About Portugal")}
             </h1>
           </div>
           <span className="font-hanken text-[13px] tracking-[0.05em] text-lume-muted">

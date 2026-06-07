@@ -1,49 +1,78 @@
 // frontend/src/components/Navbar.tsx
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useI18n, type Locale } from "@/lib/i18n";
 import { useWave } from "@/components/WaveTransition";
 
-// A subtitle is either a single string (rendered on one line) or a pair of
-// strings rendered as two stacked lines on hover. Longer subtitles are split
-// into two lines for a more balanced look; very short ones stay on one line.
-type NavItem = { label: string; subtitle: string | [string, string]; href: string };
+// A nav item is either a plain link (label + href) or a dropdown parent
+// (label + children). Dropdown parents are not navigable themselves — they
+// only reveal their children on hover (desktop) / expand inline (mobile).
+type NavLeaf = { label: string; href: string };
+type NavItem = { label: string; href?: string; children?: NavLeaf[] };
 
 const NAV_LABELS: Record<Locale, NavItem[]> = {
   en: [
-    { label: "Homes",           subtitle: ["View available", "places"],         href: "/properties" },
-    { label: "Services",        subtitle: ["What we", "take care of"],          href: "/#services" },
-    { label: "Investment",      subtitle: ["Thinking beyond", "the present"],   href: "/#investment" },
-    { label: "About us",        subtitle: ["The idea", "behind Lume"],          href: "/about" },
-    { label: "Journal",         subtitle: ["Articles about", "Portugal"],       href: "/journal" },
-    { label: "Contact",         subtitle: "Get in touch",                       href: "/#private-access" },
+    { label: "Homes", href: "/properties" },
+    { label: "Services", children: [
+      { label: "Relocation Services", href: "/#services" },
+      { label: "Collecting", href: "/#collecting" },
+    ] },
+    { label: "Investment", href: "/#investment" },
+    { label: "About Us", children: [
+      { label: "Our Vision", href: "/about" },
+      { label: "Team", href: "/about/team" },
+      { label: "Company News", href: "/about/news" },
+    ] },
+    { label: "About Portugal", href: "/journal" },
+    { label: "Contact", href: "/#private-access" },
   ],
   pt_pt: [
-    { label: "Casas",           subtitle: ["Ver propriedades", "disponíveis"],  href: "/properties" },
-    { label: "Serviços",        subtitle: ["O que tratamos", "por si"],         href: "/#services" },
-    { label: "Investimento",    subtitle: ["Pensar além", "do presente"],       href: "/#investment" },
-    { label: "Sobre nós",       subtitle: ["A ideia por", "detrás da Lume"],    href: "/about" },
-    { label: "Revista",         subtitle: ["Artigos sobre", "Portugal"],        href: "/journal" },
-    { label: "Contacto",        subtitle: "Entre em contacto",                  href: "/#private-access" },
+    { label: "Casas", href: "/properties" },
+    { label: "Serviços", children: [
+      { label: "Serviços de Relocação", href: "/#services" },
+      { label: "Colecionar", href: "/#collecting" },
+    ] },
+    { label: "Investimento", href: "/#investment" },
+    { label: "Sobre Nós", children: [
+      { label: "A Nossa Visão", href: "/about" },
+      { label: "Equipa", href: "/about/team" },
+      { label: "Media", href: "/about/news" },
+    ] },
+    { label: "Sobre Portugal", href: "/journal" },
+    { label: "Contacto", href: "/#private-access" },
   ],
   ru: [
-    { label: "Дома",            subtitle: ["Доступные", "объекты"],             href: "/properties" },
-    { label: "Услуги",          subtitle: ["О чём мы", "заботимся"],            href: "/#services" },
-    { label: "Инвестиции",      subtitle: ["Думать о", "будущем"],              href: "/#investment" },
-    { label: "О нас",           subtitle: "Идея Lume",                          href: "/about" },
-    { label: "Журнал",          subtitle: ["Статьи о", "Португалии"],          href: "/journal" },
-    { label: "Контакт",         subtitle: "Свяжитесь с нами",                   href: "/#private-access" },
+    { label: "Дома", href: "/properties" },
+    { label: "Услуги", children: [
+      { label: "Услуги по переезду", href: "/#services" },
+      { label: "Коллекционирование", href: "/#collecting" },
+    ] },
+    { label: "Инвестиции", href: "/#investment" },
+    { label: "О нас", children: [
+      { label: "Наше видение", href: "/about" },
+      { label: "Команда", href: "/about/team" },
+      { label: "Новости компании", href: "/about/news" },
+    ] },
+    { label: "О Португалии", href: "/journal" },
+    { label: "Контакт", href: "/#private-access" },
   ],
   es: [
-    { label: "Casas",           subtitle: ["Ver propiedades", "disponibles"],   href: "/properties" },
-    { label: "Servicios",       subtitle: "Lo que cuidamos",                    href: "/#services" },
-    { label: "Inversión",       subtitle: ["Pensar más allá", "del presente"],  href: "/#investment" },
-    { label: "Sobre nosotros",  subtitle: ["La idea", "detrás de Lume"],        href: "/about" },
-    { label: "Revista",         subtitle: ["Artículos sobre", "Portugal"],      href: "/journal" },
-    { label: "Contacto",        subtitle: "Ponerse en contacto",                href: "/#private-access" },
+    { label: "Casas", href: "/properties" },
+    { label: "Servicios", children: [
+      { label: "Servicios de Reubicación", href: "/#services" },
+      { label: "Coleccionismo", href: "/#collecting" },
+    ] },
+    { label: "Inversión", href: "/#investment" },
+    { label: "Sobre Nosotros", children: [
+      { label: "Nuestra Visión", href: "/about" },
+      { label: "Equipo", href: "/about/team" },
+      { label: "Noticias", href: "/about/news" },
+    ] },
+    { label: "Sobre Portugal", href: "/journal" },
+    { label: "Contacto", href: "/#private-access" },
   ],
 };
 
@@ -124,11 +153,6 @@ const Navbar = () => {
     setTimeout(() => scrollToHash(hash), 300);
   };
 
-  const slideVariants = {
-    rest:  { y: "0%" },
-    hover: { y: "-50%" },
-  };
-
   return (
     <nav
       className="fixed top-0 left-0 right-0 z-50 border-b"
@@ -170,7 +194,7 @@ const Navbar = () => {
             submerged                                    → espresso on the honey wave crest
             default                                      → each item's own colour (espresso / muted) */}
       <div
-        className={`px-[clamp(24px,7vw,96px)] flex items-center justify-between h-14 md:h-[5.5rem] gap-6 transition-colors duration-300 ${
+        className={`px-[clamp(20px,4vw,64px)] flex items-center justify-between h-14 md:h-[5.5rem] gap-4 transition-colors duration-300 ${
           lightText ? "[&_*]:!text-warm-white" : submerged ? "[&_*]:!text-charcoal" : ""
         }`}
       >
@@ -192,45 +216,56 @@ const Navbar = () => {
 
         {/* Nav items — a fixed-spacing cluster (no longer flex-1) so they stay
             grouped on wide screens instead of spreading to the edges; the
-            logo and language switcher sit at the borders via justify-between. */}
-        <div className="hidden md:flex items-center justify-center gap-x-2 lg:gap-x-6">
-          {navItems.map((item) => (
-            <motion.a
-              key={item.href}
-              href={item.href}
-              onClick={(e) => handleNavClick(e, item.href)}
-              initial="rest"
-              whileHover="hover"
-              animate="rest"
-              className="relative block h-12 group text-center px-2"
-              style={{ clipPath: "inset(0 -9999px)" }}
-            >
-              {/* Invisible sizer — keeps the item width equal to the label only */}
-              <span aria-hidden className="invisible flex items-center justify-center h-12 text-[11px] lg:text-[13.92px] font-medium tracking-[0.18em] lg:tracking-[0.22em] uppercase whitespace-nowrap">
-                {item.label}
-              </span>
-              {/* Absolutely positioned so it doesn't affect item width */}
-              <motion.div
-                variants={slideVariants}
-                transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute inset-x-0 top-0 flex flex-col items-center"
-              >
-                <span className="flex items-center justify-center h-12 text-[11px] lg:text-[13.92px] font-medium tracking-[0.18em] lg:tracking-[0.22em] uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-300 whitespace-nowrap">
+            logo and language switcher sit at the borders via justify-between.
+            Dropdown parents (Services, About Us) reveal their children on
+            hover; plain items link/scroll directly. */}
+        <div className="hidden md:flex items-center justify-center gap-x-3 lg:gap-x-5">
+          {navItems.map((item) =>
+            item.children ? (
+              <div key={item.label} className="relative group flex items-center h-12">
+                {/* Parent label — toggle only, not a link */}
+                <span className="flex items-center gap-1 cursor-default text-[11px] lg:text-[13.92px] font-medium tracking-[0.18em] lg:tracking-[0.22em] uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-300 whitespace-nowrap">
                   {item.label}
+                  <ChevronDown
+                    size={13}
+                    className="transition-transform duration-300 group-hover:rotate-180"
+                  />
                 </span>
-                {Array.isArray(item.subtitle) ? (
-                  <span className="flex flex-col items-center justify-center h-12 text-[11px] lg:text-[13.92px] italic font-serif font-medium tracking-wide text-primary leading-tight">
-                    <span className="whitespace-nowrap">{item.subtitle[0]}</span>
-                    <span className="whitespace-nowrap">{item.subtitle[1]}</span>
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center h-12 text-[11px] lg:text-[13.92px] italic font-serif font-medium tracking-wide text-primary leading-tight whitespace-nowrap">
-                    {item.subtitle}
-                  </span>
-                )}
-              </motion.div>
-            </motion.a>
-          ))}
+                {/* Hover-revealed dropdown panel */}
+                <div className="absolute left-1/2 top-full -translate-x-1/2 pt-3 opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300">
+                  <div
+                    className="min-w-[200px] py-2 rounded-sm border shadow-lg"
+                    style={{
+                      backgroundColor: lightText || darkScrolled ? "#1a1108" : "rgba(251, 244, 230, 0.98)",
+                      borderColor: lightText || darkScrolled ? "rgba(237, 217, 168, 0.14)" : "rgba(176, 78, 26, 0.14)",
+                      backdropFilter: "blur(14px)",
+                      WebkitBackdropFilter: "blur(14px)",
+                    }}
+                  >
+                    {item.children.map((child) => (
+                      <a
+                        key={child.href}
+                        href={child.href}
+                        onClick={(e) => handleNavClick(e, child.href)}
+                        className="block px-5 py-2.5 text-[12px] tracking-[0.14em] uppercase text-muted-foreground hover:text-primary transition-colors duration-200 whitespace-nowrap"
+                      >
+                        {child.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={(e) => handleNavClick(e, item.href!)}
+                className="flex items-center h-12 px-1 text-[11px] lg:text-[13.92px] font-medium tracking-[0.18em] lg:tracking-[0.22em] uppercase text-muted-foreground hover:text-foreground transition-colors duration-300 whitespace-nowrap"
+              >
+                {item.label}
+              </a>
+            ),
+          )}
         </div>
 
         {/* Language switcher — its own slot on the right, separate from nav items */}
@@ -258,21 +293,37 @@ const Navbar = () => {
             className="md:hidden bg-background border-b border-border overflow-hidden"
           >
             <div className="px-6 py-6 flex flex-col gap-6">
-              {navItems.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  onClick={(e) => handleMobileNavClick(e, item.href)}
-                  className="flex flex-col gap-0.5"
-                >
-                  <span className="text-[16.1px] tracking-[0.2em] uppercase text-foreground">
+              {navItems.map((item) =>
+                item.children ? (
+                  <div key={item.label} className="flex flex-col gap-3">
+                    {/* Group heading — not a link */}
+                    <span className="text-[16.1px] tracking-[0.2em] uppercase text-foreground">
+                      {item.label}
+                    </span>
+                    <div className="flex flex-col gap-3 pl-4 border-l border-border/50">
+                      {item.children.map((child) => (
+                        <a
+                          key={child.href}
+                          href={child.href}
+                          onClick={(e) => handleMobileNavClick(e, child.href)}
+                          className="text-[13.8px] tracking-[0.16em] uppercase text-primary"
+                        >
+                          {child.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={(e) => handleMobileNavClick(e, item.href!)}
+                    className="text-[16.1px] tracking-[0.2em] uppercase text-foreground"
+                  >
                     {item.label}
-                  </span>
-                  <span className="text-[13.8px] italic font-serif text-primary">
-                    {Array.isArray(item.subtitle) ? item.subtitle.join(" ") : item.subtitle}
-                  </span>
-                </a>
-              ))}
+                  </a>
+                ),
+              )}
               <div className="pt-4 border-t border-border/50">
                 <LanguageSwitcher variant="mobile" />
               </div>

@@ -10,6 +10,8 @@ import NotFound from "./pages/NotFound.tsx";
 import ListingPage from "./pages/ListingPage.tsx";
 import PropertiesPage from "./pages/PropertiesPage.tsx";
 import AboutPage from "./pages/AboutPage.tsx";
+import TeamPage from "./pages/TeamPage.tsx";
+import CompanyNewsPage from "./pages/CompanyNewsPage.tsx";
 import JournalIndex from "./pages/JournalIndex.tsx";
 import JournalArticle from "./pages/JournalArticle.tsx";
 
@@ -40,6 +42,8 @@ const App = () => (
             {/* Public routes */}
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/about/team" element={<TeamPage />} />
+            <Route path="/about/news" element={<CompanyNewsPage />} />
             <Route path="/properties" element={<PropertiesPage />} />
             <Route path="/properties/:slug" element={<ListingPage />} />
             <Route path="/journal" element={<JournalIndex />} />
