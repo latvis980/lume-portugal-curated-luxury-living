@@ -13,9 +13,9 @@ const Footer = () => {
         {/* Brand */}
         <div className="flex flex-col items-center md:items-start gap-4 text-center md:text-left">
           <img
-            src="/footer-logo.png"
+            src="/logo-footer-symbol.png"
             alt={t("footer", "logo_alt", "LUME by Mark")}
-            className="h-[110px] w-auto opacity-95"
+            className="h-16 w-auto opacity-95"
           />
         </div>
 

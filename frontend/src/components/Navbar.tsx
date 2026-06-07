@@ -98,30 +98,29 @@ const Navbar = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  // Pages where the navbar is transparent at the top of the page. There are
-  // two flavours of "hero" behind it:
-  //   • dark hero  — the homepage video and individual journal articles. The
-  //                  navbar needs light (cream) text/logo to read over it.
-  //   • light hero — the journal listing's cream header. The navbar keeps its
-  //                  default dark text/logo there.
-  // Everywhere else (/properties, /about, …) the navbar is always over content
-  // and never transparent.
+  // Pages where the navbar is transparent at the top of the page so the dark
+  // hero behind it (the homepage video and individual journal articles) shows
+  // through; the navbar uses light (cream) text/logo to read over it.
+  // Everywhere else (/properties, /about, /journal …) the navbar is always a
+  // solid surface over content and never transparent.
   const isHome = location.pathname === "/";
   const isArticle = location.pathname.startsWith("/journal/");
   const isJournalIndex = location.pathname === "/journal";
-  const overDarkHero = (isHome || isArticle) && !scrolled;
-  const overLightHero = isJournalIndex && !scrolled;
-  const overHero = overDarkHero || overLightHero;
+  const overHero = (isHome || isArticle) && !scrolled;
+  // "About Portugal" (journal listing) has a cream page background; at the top
+  // the navbar matches that background colour exactly (lume-cream #F7F1E5) so
+  // there is no visible seam between the bar and the page.
+  const journalTop = isJournalIndex && !scrolled;
   // Once scrolled, journal pages (listing + articles) turn the opaque
   // espresso-brown used in the footer rather than the homepage's cream tint.
   const darkScrolled = (isArticle || isJournalIndex) && scrolled;
   // Light navbar text/logo whenever the surface behind it is dark.
-  const lightText = overDarkHero || darkScrolled;
-  // The logo is hidden while we sit on the first screen of a hero page (the big
-  // hero logo carries the branding there) and fades in once we've scrolled a
-  // little past the hero. On non-hero pages it is always visible.
-  const heroPage = isHome || isArticle || isJournalIndex;
-  const logoShown = !heroPage || pastHero;
+  const lightText = overHero || darkScrolled;
+  // The logo is hidden on load only on the homepage, whose hero video carries
+  // the big centred logo; it fades in once we've scrolled past that hero.
+  // Everywhere else (including the article and About Portugal pages) the logo
+  // is shown immediately.
+  const logoShown = !isHome || pastHero;
   // ── Wave-takeover state ──────────────────────────────────────────────
   // `submerged` becomes true once the contact section reaches the navbar.
   // We use it to fade the sand bg to transparent and flip text to white.
@@ -164,6 +163,7 @@ const Navbar = () => {
         //                  scrolls beneath it
         //   darkScrolled → opaque espresso-brown (the footer colour) on scrolled
         //                  journal pages (listing + articles)
+        //   journalTop   → opaque lume-cream matching the About Portugal page bg
         //   default      → cream tint with backdrop blur
         backgroundColor:
           overHero
@@ -172,17 +172,19 @@ const Navbar = () => {
             ? "#ecbe5b"
             : darkScrolled
             ? "#1a1108"
+            : journalTop
+            ? "#F7F1E5"
             : "rgba(251, 244, 230, 0.86)",
         borderColor:
-          overHero || submerged
+          overHero || submerged || journalTop
             ? "transparent"
             : darkScrolled
             ? "rgba(237, 217, 168, 0.12)"
             : "rgba(176, 78, 26, 0.12)",
         backdropFilter:
-          overHero || submerged ? "none" : "blur(14px)",
+          overHero || submerged || journalTop ? "none" : "blur(14px)",
         WebkitBackdropFilter:
-          overHero || submerged ? "none" : "blur(14px)",
+          overHero || submerged || journalTop ? "none" : "blur(14px)",
         transition:
           "background-color 0.5s ease, border-color 0.5s ease, " +
           "backdrop-filter 0.5s ease, -webkit-backdrop-filter 0.5s ease, " +
