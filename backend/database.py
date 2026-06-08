@@ -217,6 +217,22 @@ def get_all_property_slugs() -> List[Dict[str, Any]]:
         return []
 
 
+def get_all_journal_slugs() -> List[Dict[str, Any]]:
+    """Fetch all published journal slugs + dates for the sitemap."""
+    try:
+        client = _get_client()
+        result = (
+            client.table("journal_articles")
+            .select("slug, updated_at, published_at")
+            .eq("status", "published")
+            .execute()
+        )
+        return result.data or []
+    except Exception as e:
+        print(f"[DB] Error fetching journal slugs: {e}")
+        return []
+
+
 def query_properties(
     locale: str = "en",
     region: Optional[str] = None,
@@ -224,6 +240,7 @@ def query_properties(
     area: Optional[str] = None,
     lifestyle: Optional[str] = None,
     property_type: Optional[str] = None,
+    property_types: Optional[List[str]] = None,  # match any of several types (e.g. new developments)
     listing_type: Optional[str] = None,
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
@@ -281,6 +298,8 @@ def query_properties(
                 q = q.ilike("area", f"%{area}%")
             if property_type:
                 q = q.eq("property_type", property_type)
+            elif property_types:
+                q = q.in_("property_type", property_types)
             if listing_type:
                 q = q.eq("listing_type", listing_type)
             if min_price is not None:

@@ -15,6 +15,7 @@ import {
   type ReactNode,
 } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { localeFromPath, localePrefix, stripLocale } from "@/lib/locale-path";
 
 export const LOCALES = ["en", "pt_pt", "ru", "es"] as const;
 export type Locale = (typeof LOCALES)[number];
@@ -53,15 +54,13 @@ interface I18nContextValue {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
+// The URL prefix is the source of truth (so a localised URL always renders
+// that locale, and English URLs render English — keeping content in sync with
+// the server-rendered canonical/hreflang). localStorage only remembers the
+// last explicit choice; it never overrides the URL.
 function detectInitialLocale(): Locale {
   if (typeof window === "undefined") return "en";
-  const stored = window.localStorage.getItem(STORAGE_KEY) as Locale | null;
-  if (stored && LOCALES.includes(stored)) return stored;
-  const nav = window.navigator.language?.toLowerCase() ?? "";
-  if (nav.startsWith("pt")) return "pt_pt";
-  if (nav.startsWith("ru")) return "ru";
-  if (nav.startsWith("es")) return "es";
-  return "en";
+  return localeFromPath(window.location.pathname);
 }
 
 async function fetchTranslations(): Promise<TranslationRow[]> {
@@ -78,12 +77,22 @@ async function fetchTranslations(): Promise<TranslationRow[]> {
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(detectInitialLocale);
 
+  // Switching locale navigates to the locale-prefixed equivalent of the
+  // current path (full reload). Because I18nProvider sits above <BrowserRouter>
+  // and the router basename is derived from the URL at load, a full navigation
+  // is the simplest way to keep prefix, basename, and rendered locale in sync.
   const setLocale = useCallback((l: Locale) => {
-    setLocaleState(l);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(STORAGE_KEY, l);
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(STORAGE_KEY, l);
+    const { pathname, search, hash } = window.location;
+    const target = `${localePrefix(l)}${stripLocale(pathname)}`.replace(/\/$/, "") || "/";
+    const current = pathname.replace(/\/$/, "") || "/";
+    if (target === current) {
+      setLocaleState(l);
       document.documentElement.lang = l === "pt_pt" ? "pt-PT" : l;
+      return;
     }
+    window.location.assign(`${target}${search}${hash}`);
   }, []);
 
   useEffect(() => {

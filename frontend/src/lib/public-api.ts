@@ -155,7 +155,8 @@ export interface ListingsQuery {
   lifestyle?: string;
 
   // ── Classification ─────────────────────────────────────────────────────────
-  type?: string;            // property_type
+  type?: string;            // property_type (single)
+  types?: string[];         // property_type values (match any) — section pages
   listing_type?: string;    // sale | rent
 
   // ── Price ──────────────────────────────────────────────────────────────────
@@ -208,6 +209,7 @@ export async function fetchListings(
   if (params.area)         q.set("area",           params.area);
   if (params.lifestyle)    q.set("lifestyle",       params.lifestyle);
   if (params.type)         q.set("type",           params.type);
+  if (params.types?.length) q.set("types",         params.types.join(","));
   if (params.listing_type) q.set("listing_type",   params.listing_type);
   if (params.min_price  != null) q.set("min_price",  String(params.min_price));
   if (params.max_price  != null) q.set("max_price",  String(params.max_price));
