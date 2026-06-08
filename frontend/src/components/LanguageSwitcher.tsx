@@ -4,7 +4,7 @@ import { LOCALES, LOCALE_LABELS, LOCALE_SHORT, useI18n, type Locale } from "@/li
 import { useWave, OCEAN_COLOR } from "@/components/WaveTransition";
 
 interface LanguageSwitcherProps {
-  variant?: "navbar" | "mobile";
+  variant?: "navbar" | "mobile" | "footer";
 }
 
 export default function LanguageSwitcher({ variant = "navbar" }: LanguageSwitcherProps) {
@@ -21,6 +21,29 @@ export default function LanguageSwitcher({ variant = "navbar" }: LanguageSwitche
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
+
+  if (variant === "footer") {
+    return (
+      <div className="flex items-center gap-1.5">
+        <Globe size={13} strokeWidth={1.5} className="text-[#edd9a8]/50" />
+        {LOCALES.map((loc, i) => (
+          <span key={loc} className="flex items-center">
+            {i > 0 && <span className="mx-1.5 text-[#edd9a8]/25">|</span>}
+            <button
+              onClick={() => setLocale(loc as Locale)}
+              className={`text-[13px] tracking-wide transition-colors ${
+                locale === loc
+                  ? "text-[#edd9a8] font-medium"
+                  : "text-[#edd9a8]/55 hover:text-[#edd9a8]/90"
+              }`}
+            >
+              {LOCALE_LABELS[loc]}
+            </button>
+          </span>
+        ))}
+      </div>
+    );
+  }
 
   if (variant === "mobile") {
     return (

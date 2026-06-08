@@ -14,6 +14,7 @@ import TeamPage from "./pages/TeamPage.tsx";
 import CompanyNewsPage from "./pages/CompanyNewsPage.tsx";
 import JournalIndex from "./pages/JournalIndex.tsx";
 import JournalArticle from "./pages/JournalArticle.tsx";
+import LegalPage from "./pages/LegalPage.tsx";
 
 // Admin pages
 import AdminLogin from "./pages/admin/AdminLogin.tsx";
@@ -48,6 +49,11 @@ const App = () => (
             <Route path="/properties/:slug" element={<ListingPage />} />
             <Route path="/journal" element={<JournalIndex />} />
             <Route path="/journal/:slug" element={<JournalArticle />} />
+
+            {/* Legal pages (hardcoded content, see src/content/legal) */}
+            <Route path="/legal/terms" element={<LegalPage slug="legal-terms" />} />
+            <Route path="/privacy" element={<LegalPage slug="privacy-policy" />} />
+            <Route path="/legal/cookies" element={<LegalPage slug="cookies-policy" />} />
 
             {/* Admin routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
