@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="__HTML_LANG__">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,20 +10,32 @@
     <meta name="description" content="__PAGE_DESCRIPTION__" />
     <meta name="author" content="LUME by Mark" />
 
-    <!-- Open Graph (Facebook, LinkedIn, iMessage previews) -->
+    <!-- Canonical + hreflang (self-canonical, reciprocal locale alternates) -->
+    <link rel="canonical" href="__CANONICAL__" />
+    __HREFLANG__
+
+    <!-- Open Graph (Facebook, LinkedIn, WhatsApp, iMessage previews) -->
     <meta property="og:title" content="__OG_TITLE__" />
     <meta property="og:description" content="__OG_DESCRIPTION__" />
     <meta property="og:type" content="__OG_TYPE__" />
     <meta property="og:url" content="__OG_URL__" />
     <meta property="og:image" content="__OG_IMAGE__" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="__OG_IMAGE_ALT__" />
     <meta property="og:site_name" content="LUME by Mark" />
-    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale" content="__OG_LOCALE__" />
+    __OG_LOCALE_ALTERNATE__
 
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@lumebymark" />
+    <meta name="twitter:creator" content="@lumebymark" />
     <meta name="twitter:title" content="__OG_TITLE__" />
     <meta name="twitter:description" content="__OG_DESCRIPTION__" />
     <meta name="twitter:image" content="__OG_IMAGE__" />
+    <meta name="twitter:image:alt" content="__OG_IMAGE_ALT__" />
 
     <!-- JSON-LD structured data (injected server-side) -->
     __JSON_LD__
@@ -43,10 +55,11 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <!-- __ROOT_CONTENT__ is a real, visible server-rendered snapshot injected
+         by FastAPI/seo.py. The SPA boots with createRoot().render(), which
+         discards this snapshot and renders the app — so crawlers and no-JS
+         users get real content that matches what users ultimately see. -->
+    <div id="root">__ROOT_CONTENT__</div>
     <script type="module" src="/src/main.tsx"></script>
-
-    <!-- SEO content block (hidden from users, visible to crawlers & LLMs) -->
-    __SEO_CONTENT__
   </body>
 </html>

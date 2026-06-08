@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useI18n, type Locale } from "@/lib/i18n";
 import { useWave } from "@/components/WaveTransition";
@@ -138,6 +138,8 @@ const Navbar = () => {
     }
   };
 
+  const isHash = (href: string) => href.startsWith("/#");
+
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (!href.startsWith("/#")) return;
     e.preventDefault();
@@ -202,7 +204,7 @@ const Navbar = () => {
       >
 
         {/* Logo */}
-        <a href="/" className="flex items-center leading-none flex-shrink-0">
+        <Link to="/" className="flex items-center leading-none flex-shrink-0">
           <img
             src="/navbar-logo.png"
             alt="LUME by Mark"
@@ -214,7 +216,7 @@ const Navbar = () => {
               transition: "opacity 0.5s ease, filter 0.5s ease",
             }}
           />
-        </a>
+        </Link>
 
         {/* Nav items — a fixed-spacing cluster (no longer flex-1) so they stay
             grouped on wide screens instead of spreading to the edges; the
@@ -244,20 +246,23 @@ const Navbar = () => {
                       WebkitBackdropFilter: "blur(14px)",
                     }}
                   >
-                    {item.children.map((child) => (
-                      <a
-                        key={child.href}
-                        href={child.href}
-                        onClick={(e) => handleNavClick(e, child.href)}
-                        className="block px-5 py-2.5 text-[12px] tracking-[0.14em] uppercase text-muted-foreground hover:text-primary transition-colors duration-200 whitespace-nowrap"
-                      >
-                        {child.label}
-                      </a>
-                    ))}
+                    {item.children.map((child) => {
+                      const cls =
+                        "block px-5 py-2.5 text-[12px] tracking-[0.14em] uppercase text-muted-foreground hover:text-primary transition-colors duration-200 whitespace-nowrap";
+                      return isHash(child.href) ? (
+                        <a key={child.href} href={child.href} onClick={(e) => handleNavClick(e, child.href)} className={cls}>
+                          {child.label}
+                        </a>
+                      ) : (
+                        <Link key={child.href} to={child.href} className={cls}>
+                          {child.label}
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
-            ) : (
+            ) : isHash(item.href!) ? (
               <a
                 key={item.href}
                 href={item.href}
@@ -266,6 +271,14 @@ const Navbar = () => {
               >
                 {item.label}
               </a>
+            ) : (
+              <Link
+                key={item.href}
+                to={item.href!}
+                className="flex items-center h-12 px-1 text-[11px] lg:text-[13.92px] font-medium tracking-[0.18em] lg:tracking-[0.22em] uppercase text-muted-foreground hover:text-foreground transition-colors duration-300 whitespace-nowrap"
+              >
+                {item.label}
+              </Link>
             ),
           )}
         </div>
@@ -303,19 +316,21 @@ const Navbar = () => {
                       {item.label}
                     </span>
                     <div className="flex flex-col gap-3 pl-4 border-l border-border/50">
-                      {item.children.map((child) => (
-                        <a
-                          key={child.href}
-                          href={child.href}
-                          onClick={(e) => handleMobileNavClick(e, child.href)}
-                          className="text-[13.8px] tracking-[0.16em] uppercase text-primary"
-                        >
-                          {child.label}
-                        </a>
-                      ))}
+                      {item.children.map((child) => {
+                        const cls = "text-[13.8px] tracking-[0.16em] uppercase text-primary";
+                        return isHash(child.href) ? (
+                          <a key={child.href} href={child.href} onClick={(e) => handleMobileNavClick(e, child.href)} className={cls}>
+                            {child.label}
+                          </a>
+                        ) : (
+                          <Link key={child.href} to={child.href} onClick={() => setOpen(false)} className={cls}>
+                            {child.label}
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
-                ) : (
+                ) : isHash(item.href!) ? (
                   <a
                     key={item.href}
                     href={item.href}
@@ -324,6 +339,15 @@ const Navbar = () => {
                   >
                     {item.label}
                   </a>
+                ) : (
+                  <Link
+                    key={item.href}
+                    to={item.href!}
+                    onClick={() => setOpen(false)}
+                    className="text-[16.1px] tracking-[0.2em] uppercase text-foreground"
+                  >
+                    {item.label}
+                  </Link>
                 ),
               )}
               <div className="pt-4 border-t border-border/50">

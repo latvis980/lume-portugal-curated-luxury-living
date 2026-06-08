@@ -9,15 +9,25 @@ const Footer = () => {
   const t = useT();
   const year = new Date().getFullYear();
 
-  // Curated location links. Each points at a region-filtered properties view;
-  // if the region has no current listings, PropertiesPage falls back to the
-  // full collection (see frontend/src/pages/PropertiesPage.tsx).
+  // Curated location links. Each points at a dedicated, indexable region
+  // landing page (/properties/<region-slug>) — see SectionPage.tsx. These
+  // crawlable, descriptively-named links on every page are the primary driver
+  // of Google sitelinks for the site.
   const locationLinks = [
-    { key: "lisbon_cascais", fallback: "Lisbon & Cascais", region: "Lisbon" },
-    { key: "porto_douro", fallback: "Porto & Douro Valley", region: "Porto" },
-    { key: "alentejo", fallback: "Alentejo", region: "Alentejo" },
-    { key: "algarve", fallback: "Algarve", region: "Algarve" },
-    { key: "silver_coast", fallback: "Silver Coast", region: "Silver Coast" },
+    { key: "lisbon_cascais", fallback: "Lisbon & Cascais", to: "/properties/lisbon" },
+    { key: "porto_douro", fallback: "Porto & Douro Valley", to: "/properties/porto" },
+    { key: "alentejo", fallback: "Alentejo", to: "/properties/alentejo" },
+    { key: "algarve", fallback: "Algarve", to: "/properties/algarve" },
+    { key: "silver_coast", fallback: "Silver Coast", to: "/properties/silver-coast" },
+  ];
+
+  // Curated region × type landing pages.
+  const typeLinks = [
+    { key: "lisbon_apartments", fallback: "Apartments in Lisbon", to: "/properties/lisbon/apartments" },
+    { key: "algarve_villas", fallback: "Villas in Algarve", to: "/properties/algarve/villas" },
+    { key: "silver_coast_new", fallback: "New developments in Silver Coast", to: "/properties/silver-coast/new-developments" },
+    { key: "lisbon_penthouses", fallback: "Penthouses in Lisbon", to: "/properties/lisbon/penthouses" },
+    { key: "porto_apartments", fallback: "Apartments in Porto", to: "/properties/porto/apartments" },
   ];
 
   const legalLinks = [
@@ -41,7 +51,7 @@ const Footer = () => {
     >
       <div className="max-w-7xl mx-auto">
         {/* ── Top: brand/contact + link columns ──────────────────────────── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
           {/* Brand + registration + contact */}
           <div className="lg:col-span-2 flex flex-col items-center md:items-start text-center md:text-left gap-5">
             <img
@@ -105,8 +115,22 @@ const Footer = () => {
             <ul className="flex flex-col gap-3">
               {locationLinks.map((l) => (
                 <li key={l.key}>
-                  <Link to={`/properties?region=${encodeURIComponent(l.region)}`} className={linkClass}>
+                  <Link to={l.to} className={linkClass}>
                     {t("footer", `location_${l.key}`, l.fallback)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Property types */}
+          <nav className="flex flex-col items-center md:items-start text-center md:text-left">
+            <h3 className={headingClass}>{t("footer", "types_heading", "Property types")}</h3>
+            <ul className="flex flex-col gap-3">
+              {typeLinks.map((l) => (
+                <li key={l.key}>
+                  <Link to={l.to} className={linkClass}>
+                    {t("footer", `type_${l.key}`, l.fallback)}
                   </Link>
                 </li>
               ))}

@@ -52,6 +52,7 @@ async def robots():
     content = f"""User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /*/admin
 Disallow: /api/
 
 Sitemap: {SITE_URL}/sitemap.xml
@@ -105,16 +106,20 @@ async def llms_txt():
 
 - All properties: {SITE_URL}/properties
 - Property detail pages: {SITE_URL}/properties/[slug]
-- Properties by location: {SITE_URL}/locations/[city-slug]
-- Services: {SITE_URL}/services
+- Properties by region: {SITE_URL}/properties/lisbon, /properties/algarve,
+  /properties/silver-coast, /properties/porto, /properties/alentejo
+- Properties by region + type: {SITE_URL}/properties/algarve/villas,
+  /properties/lisbon/apartments, /properties/silver-coast/new-developments
 - About LUME: {SITE_URL}/about
-- Contact: {SITE_URL}/contact
+- About Portugal (journal): {SITE_URL}/journal
+
+Localised versions are available under /pt, /ru and /es prefixes
+(e.g. {SITE_URL}/pt/properties/algarve/villas).
 
 ## API access (for structured data)
 
 - Property listings: {SITE_URL}/api/properties
 - Single property: {SITE_URL}/api/properties/[slug]
-- Locations: {SITE_URL}/api/locations
 - Sitemap: {SITE_URL}/sitemap.xml
 
 ## Contact
@@ -131,69 +136,80 @@ async def llms_txt():
 
 @router.get("/sitemap.xml")
 async def sitemap():
-    today = date.today().isoformat()
-    urls = []
+    from seo import (
+        ALL_LOCALES, LOCALE_BCP47, _abs_url, CURATED_SECTIONS,
+    )
 
-    static_pages = [
-        ("/",           "1.0", "daily"),
-        ("/properties", "0.9", "daily"),
-        ("/services",   "0.7", "weekly"),
-        ("/about",      "0.5", "monthly"),
-        ("/contact",    "0.5", "monthly"),
-        ("/investment", "0.7", "weekly"),
-    ]
-    for path, priority, freq in static_pages:
-        full_url = SITE_URL if path == "/" else f"{SITE_URL}{path}"
-        urls.append(
-            f"  <url>"
-            f"<loc>{full_url}</loc>"
-            f"<lastmod>{today}</lastmod>"
-            f"<changefreq>{freq}</changefreq>"
-            f"<priority>{priority}</priority>"
-            f"</url>"
+    today = date.today().isoformat()
+    entries: list[str] = []
+
+    def add(rest: str, priority: str, freq: str, lastmod: str = today):
+        """Emit one <url> (English loc) with hreflang alternates for every locale."""
+        loc = _abs_url("en", rest)
+        alts = "".join(
+            f'<xhtml:link rel="alternate" hreflang="{LOCALE_BCP47[l]}" href="{_abs_url(l, rest)}"/>'
+            for l in ALL_LOCALES
+        )
+        alts += f'<xhtml:link rel="alternate" hreflang="x-default" href="{_abs_url("en", rest)}"/>'
+        entries.append(
+            f"  <url><loc>{loc}</loc><lastmod>{lastmod}</lastmod>"
+            f"<changefreq>{freq}</changefreq><priority>{priority}</priority>{alts}</url>"
         )
 
+    # ── Static pages ────────────────────────────────────────────────────────
+    for rest, priority, freq in [
+        ("/",           "1.0", "daily"),
+        ("/properties", "0.9", "daily"),
+        ("/journal",    "0.7", "weekly"),
+        ("/about",      "0.5", "monthly"),
+        ("/about/team", "0.4", "monthly"),
+        ("/about/news", "0.5", "weekly"),
+        ("/investment", "0.7", "weekly"),
+    ]:
+        add(rest, priority, freq)
+
+    # ── Curated section / landing pages ─────────────────────────────────────
+    for region_slug, type_slug in CURATED_SECTIONS:
+        rest = f"/properties/{region_slug}" + (f"/{type_slug}" if type_slug else "")
+        add(rest, "0.8", "weekly")
+
+    # ── Property detail pages ───────────────────────────────────────────────
     try:
         from database import get_all_property_slugs
-        slugs = get_all_property_slugs() or []
-        for item in slugs:
+        for item in get_all_property_slugs() or []:
             slug = item.get("slug") or ""
+            if not slug:
+                continue
             updated = item.get("updated_at") or item.get("created_at") or today
             if isinstance(updated, datetime):
                 updated = updated.date().isoformat()
             elif not isinstance(updated, str):
                 updated = today
-            urls.append(
-                f"  <url>"
-                f"<loc>{SITE_URL}/properties/{slug}</loc>"
-                f"<lastmod>{updated}</lastmod>"
-                f"<changefreq>weekly</changefreq>"
-                f"<priority>0.8</priority>"
-                f"</url>"
-            )
+            add(f"/properties/{slug}", "0.8", "weekly", updated)
     except Exception as e:
         print(f"[Sitemap] Error fetching property slugs: {e}")
 
+    # ── Journal articles ────────────────────────────────────────────────────
     try:
-        from database import get_all_location_slugs
-        loc_slugs = get_all_location_slugs() or []
-        for item in loc_slugs:
+        from database import get_all_journal_slugs
+        for item in get_all_journal_slugs() or []:
             slug = item.get("slug") or ""
-            urls.append(
-                f"  <url>"
-                f"<loc>{SITE_URL}/locations/{slug}</loc>"
-                f"<lastmod>{today}</lastmod>"
-                f"<changefreq>weekly</changefreq>"
-                f"<priority>0.7</priority>"
-                f"</url>"
-            )
+            if not slug:
+                continue
+            updated = item.get("updated_at") or item.get("published_at") or today
+            if isinstance(updated, datetime):
+                updated = updated.date().isoformat()
+            elif not isinstance(updated, str):
+                updated = today
+            add(f"/journal/{slug}", "0.6", "weekly", updated)
     except Exception as e:
-        print(f"[Sitemap] Error fetching location slugs: {e}")
+        print(f"[Sitemap] Error fetching journal slugs: {e}")
 
     xml = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        + "\n".join(urls)
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+        'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
+        + "\n".join(entries)
         + "\n</urlset>"
     )
     return Response(content=xml, media_type="application/xml")
@@ -230,6 +246,7 @@ async def list_properties(
 
     # ── Property classification ───────────────────────────────────────────────
     type:            Optional[str]   = Query(None, description="apartment | penthouse | townhouse | villa | project_apartment | project_villa"),
+    types:           Optional[str]   = Query(None, description="Comma-separated property_type values (match any) — used by section landing pages"),
     listing_type:    Optional[str]   = Query(None, description="sale | rent"),
 
     # ── Price range ───────────────────────────────────────────────────────────
@@ -266,6 +283,7 @@ async def list_properties(
 
         views_list    = [v.strip() for v in views.split(",")   if v.strip()] if views    else None
         features_list = [f.strip() for f in features.split(",") if f.strip()] if features else None
+        types_list    = [t.strip() for t in types.split(",")   if t.strip()] if types    else None
 
         result = query_properties(
             locale=locale or "en",
@@ -274,6 +292,7 @@ async def list_properties(
             area=area,
             lifestyle=lifestyle,
             property_type=type,
+            property_types=types_list,
             listing_type=listing_type,
             min_price=min_price,
             max_price=max_price,
