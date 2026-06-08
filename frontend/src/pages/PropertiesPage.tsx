@@ -11,7 +11,7 @@ import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { ToggleGroup } from "@/components/ui/ToggleGroup";
 import {
   fetchListings, fetchPropertyFacets,
-  type ListingsQuery, type PropertyFacets, type Listing,
+  type ListingsQuery, type ListingsResponse, type PropertyFacets, type Listing,
 } from "@/lib/public-api";
 import { useI18n, useT } from "@/lib/i18n";
 import { getPropertyTypeLabel } from "@/lib/property-types";
@@ -267,12 +267,28 @@ export default function PropertiesPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["listings", filters, page, locale],
-    queryFn: () => fetchListings({ ...filtersToQuery(filters, page * PAGE_SIZE), locale }),
+    queryFn: async (): Promise<ListingsResponse & { fallbackLocation?: string }> => {
+      const query = filtersToQuery(filters, page * PAGE_SIZE);
+      const res = await fetchListings({ ...query, locale });
+      // Footer location links ("Buy houses in …") should never dead-end: if a
+      // location filter returns no listings, fall back to the full collection.
+      const hasLocation = !!(filters.region || filters.city || filters.area);
+      if (res.total === 0 && hasLocation && page === 0) {
+        const fb = await fetchListings({
+          ...query, region: undefined, city: undefined, area: undefined, locale,
+        });
+        if (fb.total > 0) {
+          return { ...fb, fallbackLocation: filters.city || filters.area || filters.region };
+        }
+      }
+      return res;
+    },
     placeholderData: keepPreviousData,
   });
 
   const properties = data?.properties ?? [];
   const total      = data?.total ?? 0;
+  const fallbackLocation = data?.fallbackLocation;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const applyFilters = useCallback((f: Filters) => {
@@ -504,6 +520,13 @@ export default function PropertiesPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {!isLoading && fallbackLocation && properties.length > 0 && (
+          <div className="mb-6 rounded-sm border border-border bg-card/60 px-4 py-3 text-sm text-muted-foreground font-body">
+            {t("properties", "location_fallback", "No properties currently in {location} — showing our full collection.")
+              .replace("{location}", fallbackLocation)}
           </div>
         )}
 
