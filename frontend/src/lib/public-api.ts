@@ -257,6 +257,34 @@ export async function fetchPublicServices(locale = "en"): Promise<PublicService[
   return data?.services ?? [];
 }
 
+// ─── Collecting gallery (homepage Signature Services block) ──────────────────
+
+export interface CollectingMediaItem {
+  id: string;
+  media_type: "image" | "video";
+  src: string;
+  poster?: string | null;
+  tag?: string | null;    // locale-merged by backend (e.g. "Glassware")
+  label?: string | null;  // locale-merged caption (e.g. "Murano amber carafe")
+  sort_order: number;
+}
+
+/**
+ * Fetch active Collecting gallery items in display order.
+ * Pass locale so the backend returns translated tags/labels.
+ */
+export async function fetchCollectingMedia(locale = "en"): Promise<CollectingMediaItem[]> {
+  const params = locale && locale !== "en" ? `?locale=${locale}` : "";
+  try {
+    const res = await fetch(`/api/collecting-media${params}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data?.items ?? [];
+  } catch {
+    return [];
+  }
+}
+
 // ─── Facets — populate filter dropdowns + slider bounds ──────────────────────
 
 export interface PropertyFacets {

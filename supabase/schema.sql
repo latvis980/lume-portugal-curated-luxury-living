@@ -51,6 +51,15 @@ CREATE TYPE "public"."article_type" AS ENUM (
 ALTER TYPE "public"."article_type" OWNER TO "postgres";
 
 
+CREATE TYPE "public"."collecting_media_type" AS ENUM (
+    'image',
+    'video'
+);
+
+
+ALTER TYPE "public"."collecting_media_type" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."internal_status" AS ENUM (
     'draft',
     'ready_for_review',
@@ -221,6 +230,27 @@ ALTER FUNCTION "public"."translations_set_updated_at"() OWNER TO "postgres";
 SET default_tablespace = '';
 
 SET default_table_access_method = "heap";
+
+
+CREATE TABLE IF NOT EXISTS "public"."collecting_media" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "media_type" "public"."collecting_media_type" DEFAULT 'image'::"public"."collecting_media_type" NOT NULL,
+    "src" "text" NOT NULL,
+    "poster" "text",
+    "tag" "text",
+    "tag_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
+    "label" "text",
+    "label_i18n" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
+    "sort_order" integer DEFAULT 0 NOT NULL,
+    "is_active" boolean DEFAULT true NOT NULL,
+    "duration_seconds" numeric(8,2),
+    "file_size_bytes" bigint,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."collecting_media" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."contacts" (
@@ -483,6 +513,11 @@ CREATE TABLE IF NOT EXISTS "public"."translations" (
 ALTER TABLE "public"."translations" OWNER TO "postgres";
 
 
+ALTER TABLE ONLY "public"."collecting_media"
+    ADD CONSTRAINT "collecting_media_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."contacts"
     ADD CONSTRAINT "contacts_email_unique" UNIQUE ("email");
 
@@ -565,6 +600,14 @@ ALTER TABLE ONLY "public"."translations"
 
 ALTER TABLE ONLY "public"."translations"
     ADD CONSTRAINT "translations_pkey" PRIMARY KEY ("id");
+
+
+
+CREATE INDEX "idx_collecting_media_active" ON "public"."collecting_media" USING "btree" ("is_active");
+
+
+
+CREATE INDEX "idx_collecting_media_sort" ON "public"."collecting_media" USING "btree" ("sort_order");
 
 
 
@@ -668,6 +711,10 @@ CREATE OR REPLACE TRIGGER "translations_set_updated_at" BEFORE UPDATE ON "public
 
 
 
+CREATE OR REPLACE TRIGGER "trg_collecting_media_updated_at" BEFORE UPDATE ON "public"."collecting_media" FOR EACH ROW EXECUTE FUNCTION "public"."set_updated_at"();
+
+
+
 CREATE OR REPLACE TRIGGER "trg_contacts_updated_at" BEFORE UPDATE ON "public"."contacts" FOR EACH ROW EXECUTE FUNCTION "public"."set_updated_at"();
 
 
@@ -693,6 +740,10 @@ CREATE OR REPLACE TRIGGER "trg_locations_updated_at" BEFORE UPDATE ON "public"."
 
 
 CREATE OR REPLACE TRIGGER "trg_services_updated_at" BEFORE UPDATE ON "public"."services" FOR EACH ROW EXECUTE FUNCTION "public"."set_updated_at"();
+
+
+
+CREATE POLICY "Admin full access to collecting_media" ON "public"."collecting_media" TO "authenticated" USING (true) WITH CHECK (true);
 
 
 
@@ -728,6 +779,10 @@ CREATE POLICY "Anyone can submit contact form" ON "public"."contacts" FOR INSERT
 
 
 
+CREATE POLICY "Public can read active collecting_media" ON "public"."collecting_media" FOR SELECT TO "anon" USING (("is_active" = true));
+
+
+
 CREATE POLICY "Public can read active regions" ON "public"."regions" FOR SELECT USING (("active" = true));
 
 
@@ -750,6 +805,9 @@ CREATE POLICY "Public can read published journal_articles" ON "public"."journal_
 
 CREATE POLICY "Service role has full access to contacts" ON "public"."contacts" USING (true) WITH CHECK (true);
 
+
+
+ALTER TABLE "public"."collecting_media" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."contacts" ENABLE ROW LEVEL SECURITY;
@@ -812,6 +870,12 @@ GRANT ALL ON FUNCTION "public"."set_updated_at"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."translations_set_updated_at"() TO "anon";
 GRANT ALL ON FUNCTION "public"."translations_set_updated_at"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."translations_set_updated_at"() TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."collecting_media" TO "anon";
+GRANT ALL ON TABLE "public"."collecting_media" TO "authenticated";
+GRANT ALL ON TABLE "public"."collecting_media" TO "service_role";
 
 
 

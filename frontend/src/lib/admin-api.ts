@@ -582,3 +582,180 @@ export async function uploadJournalImage(file: File): Promise<{ url: string; pat
   }
   return res.json();
 }
+
+// ─── Collecting gallery media (homepage Signature Services block) ────────────
+
+export interface CollectingMediaItem {
+  id: string;
+  media_type: "image" | "video";
+  src: string;
+  poster: string | null;
+  tag: string | null;
+  tag_i18n: I18nValues;
+  label: string | null;
+  label_i18n: I18nValues;
+  sort_order: number;
+  is_active: boolean;
+  duration_seconds: number | null;
+  file_size_bytes: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getCollectingMedia(): Promise<{ items: CollectingMediaItem[] }> {
+  const res = await adminFetch("/collecting-media");
+  if (!res.ok) throw new Error("Failed to fetch gallery items");
+  return res.json();
+}
+
+export async function createCollectingMedia(
+  data: Partial<CollectingMediaItem> & { media_type: "image" | "video"; src: string },
+): Promise<CollectingMediaItem> {
+  const res = await adminFetch("/collecting-media", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Failed to add gallery item");
+  }
+  return res.json();
+}
+
+export async function updateCollectingMedia(
+  id: string,
+  data: Partial<CollectingMediaItem>,
+): Promise<CollectingMediaItem> {
+  const res = await adminFetch(`/collecting-media/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Failed to update gallery item");
+  }
+  return res.json();
+}
+
+export async function deleteCollectingMedia(id: string) {
+  const res = await adminFetch(`/collecting-media/${id}`, { method: "DELETE" });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Failed to delete gallery item");
+  }
+  return res.json();
+}
+
+export async function reorderCollectingMedia(
+  ids: string[],
+): Promise<{ items: CollectingMediaItem[] }> {
+  const res = await adminFetch("/collecting-media/reorder", {
+    method: "PUT",
+    body: JSON.stringify({ ids }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Failed to reorder gallery");
+  }
+  return res.json();
+}
+
+export type CollectingTranslatableField = "tag" | "label";
+
+export async function translateCollectingField(
+  id: string,
+  options: { field: CollectingTranslatableField; source_locale?: Locale; overwrite?: boolean },
+): Promise<CollectingMediaItem> {
+  const res = await adminFetch(`/collecting-media/${id}/translate`, {
+    method: "POST",
+    body: JSON.stringify({
+      field: options.field,
+      source_locale: options.source_locale ?? "en",
+      overwrite: options.overwrite ?? false,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as any).detail || "Translation failed");
+  }
+  return res.json();
+}
+
+export interface CollectingImageUploadResult {
+  url: string;
+  path: string;
+  file_size_bytes: number;
+}
+
+export interface CollectingVideoUploadResult {
+  url: string;
+  path: string;
+  poster_url?: string;
+  duration_seconds: number | null;
+  file_size_bytes: number;
+  original_size_bytes: number;
+}
+
+/**
+ * Multipart upload via XHR so big video files can report progress.
+ * `onProgress` receives 0–100 (upload phase only — server-side processing
+ * time after 100% is the optimisation pass).
+ */
+function uploadCollectingFile<T>(
+  endpoint: string,
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<T> {
+  const token = getToken();
+  return new Promise<T>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `/api/admin/collecting-media/${endpoint}`);
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status === 401) {
+        clearToken();
+        window.location.href = "/admin/login";
+        reject(new Error("Session expired"));
+        return;
+      }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText) as T);
+        } catch {
+          reject(new Error("Invalid server response"));
+        }
+      } else {
+        let detail = "Upload failed";
+        try {
+          detail = JSON.parse(xhr.responseText)?.detail || detail;
+        } catch {
+          /* keep default */
+        }
+        reject(new Error(detail));
+      }
+    };
+    xhr.onerror = () => reject(new Error("Upload failed — network error"));
+    const form = new FormData();
+    form.append("file", file);
+    xhr.send(form);
+  });
+}
+
+export function uploadCollectingImage(
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<CollectingImageUploadResult> {
+  return uploadCollectingFile<CollectingImageUploadResult>("upload-image", file, onProgress);
+}
+
+export function uploadCollectingVideo(
+  file: File,
+  onProgress?: (percent: number) => void,
+): Promise<CollectingVideoUploadResult> {
+  return uploadCollectingFile<CollectingVideoUploadResult>("upload-video", file, onProgress);
+}
