@@ -597,14 +597,15 @@ function EditItemModal({
   });
   const [error, setError] = useState("");
 
+  const formPayload = () => ({
+    tag: form.tag || null,
+    tag_i18n: form.tag_i18n,
+    label: form.label || null,
+    label_i18n: form.label_i18n,
+  });
+
   const saveM = useMutation({
-    mutationFn: () =>
-      updateCollectingMedia(item.id, {
-        tag: form.tag || null,
-        tag_i18n: form.tag_i18n,
-        label: form.label || null,
-        label_i18n: form.label_i18n,
-      }),
+    mutationFn: () => updateCollectingMedia(item.id, formPayload()),
     onSuccess: onSaved,
     onError: (e: Error) => setError(e.message),
   });
@@ -622,12 +623,7 @@ function EditItemModal({
   // DeepL reads from the database, so unsaved edits must be persisted before
   // a translate call (the modal often opens straight after an upload).
   const persistForm = async () => {
-    await updateCollectingMedia(item.id, {
-      tag: form.tag || null,
-      tag_i18n: form.tag_i18n,
-      label: form.label || null,
-      label_i18n: form.label_i18n,
-    });
+    await updateCollectingMedia(item.id, formPayload());
   };
 
   return (

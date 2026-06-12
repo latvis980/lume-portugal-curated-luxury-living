@@ -143,7 +143,7 @@ function MediaFill({
           muted
           loop
           playsInline
-          preload="metadata"
+          preload={active ? "metadata" : "none"}
           className="absolute inset-0 h-full w-full object-cover"
         />
         <WarmWash />

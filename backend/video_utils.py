@@ -53,20 +53,13 @@ def _ffmpeg_exe() -> Optional[str]:
         return None
 
 
-def probe_video(data: bytes) -> Dict[str, Any]:
-    """Best-effort metadata: duration (s), width, height.
+def _probe_path(exe: str, src_path: str) -> Dict[str, Any]:
+    """Best-effort metadata for a video file: duration (s), width, height.
 
     imageio-ffmpeg ships ffmpeg but not ffprobe, so we parse the stream
     info ffmpeg prints to stderr when invoked without an output.
     """
-    exe = _ffmpeg_exe()
     meta: Dict[str, Any] = {"duration_seconds": None, "width": None, "height": None}
-    if not exe:
-        return meta
-
-    with tempfile.NamedTemporaryFile(suffix=".video", delete=False) as src:
-        src.write(data)
-        src_path = src.name
     try:
         proc = subprocess.run(
             [exe, "-hide_banner", "-i", src_path],
@@ -84,9 +77,21 @@ def probe_video(data: bytes) -> Dict[str, Any]:
             meta["width"], meta["height"] = int(m.group(1)), int(m.group(2))
     except Exception:
         pass
+    return meta
+
+
+def probe_video(data: bytes) -> Dict[str, Any]:
+    """Best-effort metadata for video bytes: duration (s), width, height."""
+    exe = _ffmpeg_exe()
+    if not exe:
+        return {"duration_seconds": None, "width": None, "height": None}
+    with tempfile.NamedTemporaryFile(suffix=".video", delete=False) as src:
+        src.write(data)
+        src_path = src.name
+    try:
+        return _probe_path(exe, src_path)
     finally:
         os.unlink(src_path)
-    return meta
 
 
 def optimize_video(
@@ -99,15 +104,22 @@ def optimize_video(
     If ffmpeg is unavailable or the encode fails, the original bytes are
     returned unchanged with a sensible extension/content-type.
     """
-    meta = probe_video(data)
     exe = _ffmpeg_exe()
     if not exe:
-        return data, _ext_for(content_type), content_type or "video/mp4", meta
+        return (
+            data,
+            _ext_for(content_type),
+            content_type or "video/mp4",
+            {"duration_seconds": None, "width": None, "height": None},
+        )
 
+    # One temp copy serves both the metadata probe and the encode — these
+    # uploads can be huge, so don't write them to disk twice.
     with tempfile.NamedTemporaryFile(suffix=".video", delete=False) as src:
         src.write(data)
         src_path = src.name
     dst_path = src_path + ".out.mp4"
+    meta = _probe_path(exe, src_path)
 
     # Downscale only — never upscale a small source. Dimensions must stay
     # even for yuv420p, hence the -2.
