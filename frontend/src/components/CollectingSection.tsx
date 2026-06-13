@@ -3,8 +3,9 @@
 // "Lume Signature Services" block — the editorial collecting pitch that
 // sits between Services and Investment. Two-column on desktop: a media
 // gallery (photos + looped clips, managed in Admin → Collecting) on the
-// left with a decorative honey frame, copy on the right. Falls back to
-// the original static photo while loading or if no gallery items exist.
+// left with a decorative honey frame, copy on the right. While media
+// loads (or if no gallery items exist) it shows a neutral placeholder
+// rather than a static photo, so nothing flashes before the gallery mounts.
 
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -50,27 +51,13 @@ const CollectingSection = () => {
           {items.length > 0 ? (
             <CollectingGallery items={items} />
           ) : (
-            <div className="relative aspect-[4/5] overflow-hidden">
-              <div
-                className="absolute inset-0 transition-transform duration-[1400ms] ease-out"
-                style={{
-                  backgroundImage: "url(/collecting-glass.jpg)",
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  transform: "scale(1.04)",
-                }}
-              />
-              {/* Warm wash overlay */}
-              <div
-                aria-hidden
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(140deg, rgba(241,196,84,0) 40%, rgba(231,148,70,0.18) 100%)",
-                  mixBlendMode: "multiply",
-                }}
-              />
-            </div>
+            // Neutral placeholder that reserves the gallery's footprint while
+            // media loads — no static image, so nothing flashes before the
+            // gallery mounts.
+            <div
+              className="relative aspect-[4/5] overflow-hidden"
+              style={{ background: "#241608" }}
+            />
           )}
         </motion.div>
 
