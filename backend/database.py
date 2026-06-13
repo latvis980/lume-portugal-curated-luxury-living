@@ -1366,3 +1366,187 @@ def admin_upload_journal_image(
     if isinstance(public_url, str):
         public_url = public_url.rstrip("?")
     return {"url": public_url, "path": object_path}
+
+
+# ---------------------------------------------------------------------------
+# Collecting gallery media (homepage "Lume Signature Services" block)
+# ---------------------------------------------------------------------------
+
+_COLLECTING_I18N_FIELDS = ("tag", "label")
+_COLLECTING_BUCKET = "collecting-media"
+
+
+def public_list_collecting_media(locale: str = "en") -> List[Dict[str, Any]]:
+    """List active gallery items in display order, locale-merged."""
+    try:
+        client = _get_client()
+        result = (
+            client.table("collecting_media")
+            .select("*")
+            .eq("is_active", True)
+            .order("sort_order")
+            .order("created_at")
+            .execute()
+        )
+        rows = result.data or []
+        return [_merge_locale(r, locale, _COLLECTING_I18N_FIELDS) for r in rows]
+    except Exception as e:
+        print(f"[DB] Error listing public collecting media: {e}")
+        return []
+
+
+def admin_list_collecting_media() -> List[Dict[str, Any]]:
+    """List all gallery items for the CMS (including hidden)."""
+    try:
+        client = _get_admin_client()
+        result = (
+            client.table("collecting_media")
+            .select("*")
+            .order("sort_order")
+            .order("created_at")
+            .execute()
+        )
+        return result.data or []
+    except Exception as e:
+        print(f"[DB] Error listing collecting media: {e}")
+        return []
+
+
+def admin_get_collecting_media(item_id: str) -> Optional[Dict[str, Any]]:
+    try:
+        client = _get_admin_client()
+        result = (
+            client.table("collecting_media")
+            .select("*")
+            .eq("id", item_id)
+            .limit(1)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"[DB] Error fetching collecting media {item_id}: {e}")
+        return None
+
+
+def admin_create_collecting_media(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    try:
+        client = _get_admin_client()
+        result = client.table("collecting_media").insert(data).execute()
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"[DB] Error creating collecting media: {e}")
+        raise
+
+
+def admin_update_collecting_media(item_id: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    try:
+        client = _get_admin_client()
+        result = (
+            client.table("collecting_media")
+            .update(data)
+            .eq("id", item_id)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"[DB] Error updating collecting media {item_id}: {e}")
+        raise
+
+
+def admin_delete_collecting_media(item_id: str) -> bool:
+    """Delete a gallery item and its stored files (best-effort)."""
+    try:
+        client = _get_admin_client()
+        row = admin_get_collecting_media(item_id)
+        client.table("collecting_media").delete().eq("id", item_id).execute()
+        if row:
+            paths = [
+                _collecting_object_path(row.get("src")),
+                _collecting_object_path(row.get("poster")),
+            ]
+            paths = [p for p in paths if p]
+            if paths:
+                try:
+                    client.storage.from_(_COLLECTING_BUCKET).remove(paths)
+                except Exception as e:
+                    print(f"[DB] Could not remove collecting media files {paths}: {e}")
+        return True
+    except Exception as e:
+        print(f"[DB] Error deleting collecting media {item_id}: {e}")
+        return False
+
+
+def _collecting_object_path(url: Optional[str]) -> Optional[str]:
+    """Extract the object path from a collecting-media public URL."""
+    if not url:
+        return None
+    marker = f"/object/public/{_COLLECTING_BUCKET}/"
+    if marker not in url:
+        return None
+    return url.split(marker, 1)[1].split("?", 1)[0] or None
+
+
+def _upload_to_collecting_bucket(
+    file_bytes: bytes, filename: str, suffix: str, content_type: str
+) -> Dict[str, str]:
+    import uuid
+    from pathlib import PurePosixPath
+
+    client = _get_admin_client()
+    safe_stem = generate_slug(PurePosixPath(filename).stem) or "media"
+    object_path = f"{safe_stem}-{uuid.uuid4().hex[:8]}{suffix}"
+    client.storage.from_(_COLLECTING_BUCKET).upload(
+        path=object_path,
+        file=file_bytes,
+        file_options={"content-type": content_type or "application/octet-stream"},
+    )
+    public_url = client.storage.from_(_COLLECTING_BUCKET).get_public_url(object_path)
+    if isinstance(public_url, str):
+        public_url = public_url.rstrip("?")
+    return {"url": public_url, "path": object_path}
+
+
+def admin_upload_collecting_image(
+    file_bytes: bytes,
+    filename: str,
+    content_type: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Optimise a photo (resized WebP) and upload it to `collecting-media`."""
+    from image_utils import optimize_image
+
+    file_bytes, suffix, content_type = optimize_image(file_bytes, content_type)
+    result = _upload_to_collecting_bucket(file_bytes, filename, suffix, content_type)
+    result["file_size_bytes"] = len(file_bytes)
+    return result
+
+
+def admin_upload_collecting_video(
+    file_bytes: bytes,
+    filename: str,
+    content_type: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Optimise a video clip and upload it (plus a poster still).
+
+    The clip is re-encoded to a small, muted, faststart MP4 (see
+    ``video_utils.optimize_video``); the first frame is stored as a WebP
+    poster so the gallery paints before the clip buffers.
+    """
+    from video_utils import extract_poster, optimize_video
+
+    original_size = len(file_bytes)
+    file_bytes, suffix, content_type, meta = optimize_video(file_bytes, content_type)
+    result: Dict[str, Any] = _upload_to_collecting_bucket(
+        file_bytes, filename, suffix, content_type
+    )
+
+    poster_bytes = extract_poster(file_bytes)
+    if poster_bytes:
+        poster = _upload_to_collecting_bucket(
+            poster_bytes, f"{filename}-poster", ".webp", "image/webp"
+        )
+        result["poster_url"] = poster["url"]
+
+    result["duration_seconds"] = meta.get("duration_seconds")
+    result["file_size_bytes"] = len(file_bytes)
+    result["original_size_bytes"] = original_size
+    return result

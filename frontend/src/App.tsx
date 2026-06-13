@@ -27,6 +27,7 @@ import AdminListings from "./pages/admin/AdminListings.tsx";
 import AdminListingForm from "./pages/admin/AdminListingForm.tsx";
 import AdminContacts from "./pages/admin/AdminContacts.tsx";
 import AdminServices from "./pages/admin/AdminServices.tsx";
+import AdminCollecting from "./pages/admin/AdminCollecting.tsx";
 import AdminAbout from "./pages/admin/AdminAbout.tsx";
 import AdminInvestment from "./pages/admin/AdminInvestment.tsx";
 import AdminContactPage from "./pages/admin/AdminContactPage.tsx";
@@ -86,6 +87,7 @@ const App = () => (
               <Route path="listings/:id" element={<AdminListingForm />} />
               <Route path="contacts" element={<AdminContacts />} />
               <Route path="services" element={<AdminServices />} />
+              <Route path="collecting" element={<AdminCollecting />} />
               <Route path="about" element={<AdminAbout />} />
               <Route path="investment" element={<AdminInvestment />} />
               <Route path="contact-page" element={<AdminContactPage />} />

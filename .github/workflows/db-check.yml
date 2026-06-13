@@ -21,7 +21,10 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pinned: `latest` floats, and a newer CLI bundles a newer pg_dump
+          # that reformats grants, drifting the committed snapshot. Keep this
+          # in lockstep with the version in db-bootstrap.yml.
+          version: 2.106.0
 
       - name: Start local Supabase (applies migrations to a fresh Postgres)
         run: supabase start --exclude studio,inbucket,storage-api,imgproxy,realtime,edge-runtime,pgadmin-schema-diff,pgbouncer

@@ -1,14 +1,26 @@
 // frontend/src/components/CollectingSection.tsx
 //
 // "Lume Signature Services" block — the editorial collecting pitch that
-// sits between Services and Investment. Two-column on desktop: image on
-// the left with a decorative honey frame, copy on the right.
+// sits between Services and Investment. Two-column on desktop: a media
+// gallery (photos + looped clips, managed in Admin → Collecting) on the
+// left with a decorative honey frame, copy on the right. Falls back to
+// the original static photo while loading or if no gallery items exist.
 
 import { motion } from "framer-motion";
-import { useT } from "@/lib/i18n";
+import { useQuery } from "@tanstack/react-query";
+import { useI18n, useT } from "@/lib/i18n";
+import { fetchCollectingMedia } from "@/lib/public-api";
+import CollectingGallery from "./CollectingGallery";
 
 const CollectingSection = () => {
   const t = useT();
+  const { locale } = useI18n();
+
+  const { data: items = [] } = useQuery({
+    queryKey: ["collecting-media", locale],
+    queryFn: () => fetchCollectingMedia(locale),
+    staleTime: 5 * 60 * 1000,
+  });
 
   const bullets = [
     t(
@@ -28,46 +40,51 @@ const CollectingSection = () => {
       style={{ background: "hsl(var(--sand))" }}
     >
       <div className="max-w-[1180px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
-        {/* Image with decorative honey frame in the lower-right */}
+        {/* Media gallery (or the original single photo until items exist) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.15 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="relative aspect-[4/5] overflow-hidden"
         >
-          <div
-            className="absolute inset-0 transition-transform duration-[1400ms] ease-out"
-            style={{
-              backgroundImage: "url(/collecting-glass.jpg)",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              transform: "scale(1.04)",
-            }}
-          />
-          {/* Warm wash overlay */}
-          <div
-            aria-hidden
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(140deg, rgba(241,196,84,0) 40%, rgba(231,148,70,0.18) 100%)",
-              mixBlendMode: "multiply",
-            }}
-          />
-          {/* Honey outline that peeks out the lower-right corner */}
-          <div
-            aria-hidden
-            className="absolute pointer-events-none"
-            style={{
-              right: "-28px",
-              bottom: "-28px",
-              width: "180px",
-              height: "180px",
-              border: "1px solid #e9a92e",
-              zIndex: 1,
-            }}
-          />
+          {items.length > 0 ? (
+            <CollectingGallery items={items} />
+          ) : (
+            <div className="relative aspect-[4/5] overflow-hidden">
+              <div
+                className="absolute inset-0 transition-transform duration-[1400ms] ease-out"
+                style={{
+                  backgroundImage: "url(/collecting-glass.jpg)",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  transform: "scale(1.04)",
+                }}
+              />
+              {/* Warm wash overlay */}
+              <div
+                aria-hidden
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(140deg, rgba(241,196,84,0) 40%, rgba(231,148,70,0.18) 100%)",
+                  mixBlendMode: "multiply",
+                }}
+              />
+              {/* Honey outline that peeks out the lower-right corner */}
+              <div
+                aria-hidden
+                className="absolute pointer-events-none"
+                style={{
+                  right: "-28px",
+                  bottom: "-28px",
+                  width: "180px",
+                  height: "180px",
+                  border: "1px solid #e9a92e",
+                  zIndex: 1,
+                }}
+              />
+            </div>
+          )}
         </motion.div>
 
         {/* Editorial copy */}

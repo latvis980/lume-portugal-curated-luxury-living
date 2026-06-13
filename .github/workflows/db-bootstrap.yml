@@ -21,7 +21,9 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pinned to match db-check.yml so the snapshot this workflow dumps
+          # uses the same pg_dump as the PR guard. Bump both together.
+          version: 2.106.0
 
       - name: Diagnostic — list projects this token can access
         env:

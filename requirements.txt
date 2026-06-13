@@ -23,6 +23,10 @@ python-dotenv>=1.0.0
 # Image optimisation (journal uploads -> resized WebP)
 Pillow>=10.3.0
 
+# Video optimisation (collecting gallery uploads -> web-friendly MP4)
+# Ships a static ffmpeg binary — no system package needed.
+imageio-ffmpeg>=0.5.1
+
 # AI editing
 python-multipart>=0.0.9
 anthropic>=0.40.0

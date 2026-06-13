@@ -45,6 +45,7 @@ from routes.admin import router as admin_router
 from routes.public_forms import router as forms_router
 from routes.translations import router as translations_router
 from routes.journal import router as journal_router
+from routes.collecting import router as collecting_router
 
 from routes.public import robots, llms_txt, sitemap
 from seo import inject_seo
@@ -108,6 +109,7 @@ app.include_router(forms_router)
 app.include_router(translations_router)
 app.include_router(ai_listing_router)
 app.include_router(journal_router)
+app.include_router(collecting_router)
 # TODO: Add these as you build them:
 # app.include_router(webhook_router) # Supabase webhook handlers
 
