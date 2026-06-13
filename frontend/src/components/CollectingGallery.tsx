@@ -399,20 +399,6 @@ export default function CollectingGallery({ items }: { items: CollectingMediaIte
             ))}
           </div>
         </div>
-
-        {/* Honey outline that peeks out the lower-right corner */}
-        <div
-          aria-hidden
-          className="absolute pointer-events-none"
-          style={{
-            right: "-28px",
-            bottom: "-28px",
-            width: "180px",
-            height: "180px",
-            border: `1px solid ${HONEY}`,
-            zIndex: 1,
-          }}
-        />
       </div>
 
       {!single && (
