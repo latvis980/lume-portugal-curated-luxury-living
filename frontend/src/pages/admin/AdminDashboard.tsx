@@ -19,7 +19,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
         <StatCard label="Total Listings" value={stats?.total_listings ?? "—"} loading={statsLoading} />
         <StatCard label="Available" value={stats?.available_listings ?? "—"} loading={statsLoading} accent />
-        <StatCard label="Contacts" value={stats?.total_contacts ?? "—"} loading={statsLoading} />
+        <StatCard label="Leads and clients" value={stats?.total_contacts ?? "—"} loading={statsLoading} />
       </div>
 
       <div>

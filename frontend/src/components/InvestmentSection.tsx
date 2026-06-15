@@ -3,11 +3,10 @@
 // "Investing in real estate in Portugal" — the editorial pitch for working
 // with Mark. Sunny-redesign layout (matches the mockup):
 //   1. Eyebrow + heading + honey hairline
-//   2. Three project image cards in a row, each with a Roman-numeral label
-//   3. Three numbered pillars (01 / 02 / 03) with bullet list on the third
-//   4. Honey hairline divider
-//   5. Word-by-word animated quote with shimmer on the first words
-//   6. Closing CTA → onemark.pt
+//   2. Three numbered pillars (01 / 02 / 03) with bullet list on the third
+//   3. Honey hairline divider
+//   4. Word-by-word animated quote with shimmer on the first words
+//   5. Closing CTA → onemark.pt
 
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
@@ -19,27 +18,6 @@ const TEXT_SOFT = "rgba(237, 226, 200, 0.78)";
 const TEXT_MUTED = "rgba(237, 226, 200, 0.5)";
 const HAIRLINE = "rgba(241, 196, 84, 0.25)";
 const MARK_UNDERLINE = "rgba(241, 196, 84, 0.45)";
-
-const PROJECTS = [
-  {
-    src: "/project-1.jpg",
-    numeral: "I",
-    captionKey: "project1.caption",
-    captionDefault: "Silver Coast · Residential",
-  },
-  {
-    src: "/project-2.jpg",
-    numeral: "II",
-    captionKey: "project2.caption",
-    captionDefault: "Comporta · Villas",
-  },
-  {
-    src: "/project-3.jpg",
-    numeral: "III",
-    captionKey: "project3.caption",
-    captionDefault: "Alentejo · Estate",
-  },
-];
 
 const InvestmentSection = () => {
   const t = useT();
@@ -132,57 +110,6 @@ const InvestmentSection = () => {
             className="mx-auto"
             style={{ width: "56px", height: "1px", background: HONEY, marginTop: "22px" }}
           />
-        </div>
-
-        {/* Three project images */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 mb-16 md:mb-20">
-          {PROJECTS.map((p) => (
-            <a
-              key={p.src}
-              href="/properties"
-              className="group relative overflow-hidden block"
-              style={{ aspectRatio: "4 / 3", background: "#1a120c", borderRadius: "2px" }}
-            >
-              <img
-                src={p.src}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover transition-[transform,filter] duration-[1400ms] ease-out group-hover:scale-105"
-                style={{ filter: "saturate(0.85) brightness(0.78)" }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.filter = "saturate(1) brightness(0.92)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.filter = "saturate(0.85) brightness(0.78)";
-                }}
-              />
-              <div
-                className="absolute left-6 right-6 bottom-5 flex items-baseline gap-4 pointer-events-none"
-                style={{ color: TEXT }}
-              >
-                <span
-                  className="font-display italic"
-                  style={{
-                    fontSize: "13px",
-                    letterSpacing: "0.3em",
-                    color: HONEY,
-                    opacity: 0.85,
-                  }}
-                >
-                  {p.numeral}
-                </span>
-                <span
-                  style={{
-                    fontSize: "11px",
-                    letterSpacing: "0.28em",
-                    textTransform: "uppercase",
-                    opacity: 0.9,
-                  }}
-                >
-                  {t("investment", p.captionKey, p.captionDefault)}
-                </span>
-              </div>
-            </a>
-          ))}
         </div>
 
         {/* Three numbered pillars */}
