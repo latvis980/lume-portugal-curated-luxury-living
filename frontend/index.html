@@ -40,6 +40,21 @@
     <!-- JSON-LD structured data (injected server-side) -->
     __JSON_LD__
 
+    <!-- The server-rendered SEO snapshot below (#seo-ssr inside #root) is real,
+         visible content for crawlers and no-JS users. In a JS-capable browser it
+         would otherwise flash on screen — a list of listing links — until the
+         React bundle boots and replaces #root with the app (the hero video).
+         The inline script runs synchronously before the body is parsed, so the
+         snapshot is hidden before it can paint and users go straight to the app.
+         React discards the snapshot on mount, and non-JS crawlers (which never
+         add the class) still read it from the raw HTML, so SEO is unchanged. -->
+    <style>
+      html.js-ready #seo-ssr { display: none !important; }
+      /* Match the app background so the pre-mount frame doesn't flash white. */
+      body { background: #fbf4e6; }
+    </style>
+    <script>document.documentElement.classList.add("js-ready");</script>
+
     <!-- Favicon & PWA -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
