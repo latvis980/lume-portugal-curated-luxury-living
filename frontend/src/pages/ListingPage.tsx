@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { HomesComingSoon, HOMES_COMING_SOON } from "@/components/ComingSoonBanner";
 import { fetchListingBySlug, type Listing } from "@/lib/public-api";
 import { useI18n, useT } from "@/lib/i18n";
 import { getPropertyTypeLabel } from "@/lib/property-types";
@@ -500,6 +501,7 @@ export default function ListingPage() {
   } = useQuery({
     queryKey: ["listing", slug, locale],   // ← locale added to key
     queryFn: () => fetchListingBySlug(slug!, locale),  // ← pass locale
+    enabled: !HOMES_COMING_SOON,
   });
 
   // Scroll to top on mount
@@ -519,6 +521,10 @@ export default function ListingPage() {
     () => (listing ? collectFeatures(listing) : []),
     [listing]
   );
+
+  // Homes section closed for now — individual property pages under
+  // /properties/* show the "Coming Soon" banner too.
+  if (HOMES_COMING_SOON) return <HomesComingSoon />;
 
   // ── Loading State ──────────────────────────────────────────────────────
 

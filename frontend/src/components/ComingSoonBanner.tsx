@@ -1,19 +1,29 @@
 // frontend/src/components/ComingSoonBanner.tsx
 //
-// Full-page "Coming Soon" banner used to close the Homes (/properties)
-// section while the curated collection is being assembled. A warm
-// stained-glass backdrop (see .lume-stained-glass in index.css) covers the
-// page; a frosted card carries the copy and a single-field email capture.
+// "Coming Soon" banner used to close the whole Homes (/properties) section —
+// the listings index, the curated region/type landing pages, and individual
+// property pages — while the collection is being assembled.
+//
+// A warm stained-glass backdrop (see .lume-stained-glass in index.css) covers
+// the page; a frosted card carries the copy and a single-field email capture.
 //
 // The email is sent to the existing newsletter endpoint
 // (POST /api/submit/newsletter) — the same lightweight contact-capture used
 // elsewhere on the site, so no new backend wiring is needed.
 //
-// Copy is translatable via the `coming_soon` namespace; English fallbacks are
-// inlined so the banner renders correctly before any translation rows exist.
+// Copy is translatable via the `coming_soon` namespace (seeded for all locales
+// in supabase/migrations/..._coming_soon_translations.sql); English fallbacks
+// are inlined so the banner renders correctly before the rows exist.
 import { useState } from "react";
 import { motion } from "framer-motion";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { useT } from "@/lib/i18n";
+
+// Single source of truth for whether the Homes section is closed. Flip to
+// `false` to restore the full listings experience across every page that
+// imports it (PropertiesPage, SectionPage, ListingPage).
+export const HOMES_COMING_SOON = true;
 
 const ComingSoonBanner = () => {
   const t = useT();
@@ -76,9 +86,14 @@ const ComingSoonBanner = () => {
         <p className="mx-auto mb-9 max-w-md text-base font-light leading-relaxed text-muted-foreground md:text-lg">
           {t(
             "coming_soon",
-            "body",
-            "We are gathering the best homes in Portugal for you. Leave your contact to get notified when LUME by Mark homes offers are live.",
+            "body_before",
+            "We are gathering the best homes in Portugal for you. Leave your contact to get notified when",
           )}
+          <br />
+          <span className="font-semibold text-foreground">
+            {t("coming_soon", "brand", "LUME by Mark")}
+          </span>{" "}
+          {t("coming_soon", "body_after", "homes offers are live.")}
         </p>
 
         {!submitted ? (
@@ -131,5 +146,18 @@ const ComingSoonBanner = () => {
     </section>
   );
 };
+
+// Full-page version: navbar + stained-glass banner + footer. Pages in the
+// Homes section render this in place of their normal content while
+// HOMES_COMING_SOON is set, so every /properties/* route shows the banner.
+export function HomesComingSoon() {
+  return (
+    <div className="flex min-h-screen flex-col bg-background">
+      <Navbar />
+      <ComingSoonBanner />
+      <Footer />
+    </div>
+  );
+}
 
 export default ComingSoonBanner;

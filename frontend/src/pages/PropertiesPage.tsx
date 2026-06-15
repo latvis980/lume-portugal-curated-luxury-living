@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, X, LayoutGrid, List, RotateCcw, MapPin } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ComingSoonBanner from "@/components/ComingSoonBanner";
+import { HomesComingSoon, HOMES_COMING_SOON } from "@/components/ComingSoonBanner";
 import PropertyCard from "@/components/PropertyCard";
 import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { ToggleGroup } from "@/components/ui/ToggleGroup";
@@ -18,11 +18,6 @@ import { useI18n, useT } from "@/lib/i18n";
 import { getPropertyTypeLabel } from "@/lib/property-types";
 
 const PAGE_SIZE = 24;
-
-// The Homes section is temporarily closed behind a "Coming Soon" banner while
-// the curated collection is assembled. Flip this to `false` to restore the
-// full listings experience below — no other changes needed.
-const COMING_SOON = true;
 
 const CONDITION_LABELS: Record<string, string> = {
   new: "New", excellent: "Excellent", renovated: "Renovated",
@@ -269,7 +264,7 @@ export default function PropertiesPage() {
     queryKey: ["property-facets"],
     queryFn: fetchPropertyFacets,
     staleTime: 5 * 60 * 1000,
-    enabled: !COMING_SOON,
+    enabled: !HOMES_COMING_SOON,
   });
 
   const { data, isLoading } = useQuery({
@@ -291,7 +286,7 @@ export default function PropertiesPage() {
       return res;
     },
     placeholderData: keepPreviousData,
-    enabled: !COMING_SOON,
+    enabled: !HOMES_COMING_SOON,
   });
 
   const properties = data?.properties ?? [];
@@ -370,15 +365,7 @@ export default function PropertiesPage() {
 
   // Homes section closed for now — show the "Coming Soon" banner in place of
   // the listings UI. Everything above runs harmlessly (queries are disabled).
-  if (COMING_SOON) {
-    return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <Navbar />
-        <ComingSoonBanner />
-        <Footer />
-      </div>
-    );
-  }
+  if (HOMES_COMING_SOON) return <HomesComingSoon />;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">

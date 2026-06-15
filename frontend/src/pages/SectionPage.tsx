@@ -12,6 +12,7 @@ import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
+import { HomesComingSoon, HOMES_COMING_SOON } from "@/components/ComingSoonBanner";
 import NotFound from "./NotFound";
 import { fetchListings } from "@/lib/public-api";
 import { useI18n } from "@/lib/i18n";
@@ -24,7 +25,7 @@ export default function SectionPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["section", slug, typeSlug, locale],
-    enabled: !!section,
+    enabled: !!section && !HOMES_COMING_SOON,
     placeholderData: keepPreviousData,
     queryFn: () =>
       fetchListings({
@@ -39,6 +40,10 @@ export default function SectionPage() {
   useEffect(() => {
     if (section) document.title = section.title;
   }, [section]);
+
+  // Homes section closed for now — the curated region/type landing pages
+  // (linked from the footer) show the "Coming Soon" banner too.
+  if (HOMES_COMING_SOON) return <HomesComingSoon />;
 
   // Unknown region slug → this isn't a section page (the App dispatcher only
   // routes known region slugs here, but guard defensively).
