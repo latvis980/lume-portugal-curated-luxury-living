@@ -844,6 +844,14 @@ def _build_home_seo(html: str, locale: str, rest: str) -> str:
         + _wrap_jsonld(_jsonld_website())
         + _wrap_jsonld(_jsonld_site_navigation(locale))
     )
+    title = DEFAULT_TITLE
+    description = (
+        "Your light to living in Portugal. LUME by Mark helps you find your home, "
+        "build your life, and collect with meaning — curated luxury real estate "
+        "across Lisbon, Porto, Cascais, the Algarve and beyond."
+    )
+    image = DEFAULT_OG_IMAGE
+    image_alt = "LUME by Mark — your light to living in Portugal"
     inner = (
         "<h1>LUME by Mark — Homes, Life & Art Advisory in Portugal</h1>"
         "<p class=\"intro\">Your light to living in Portugal. LUME helps you find "
@@ -851,7 +859,8 @@ def _build_home_seo(html: str, locale: str, rest: str) -> str:
         + _ssr_cards(properties, locale, limit=10)
     )
     return _replace_placeholders(
-        html, locale=locale, rest=rest, jsonld=jsonld, root_content=inner,
+        html, locale=locale, rest=rest, title=title, description=description,
+        image=image, image_alt=image_alt, jsonld=jsonld, root_content=inner,
     )
 
 
