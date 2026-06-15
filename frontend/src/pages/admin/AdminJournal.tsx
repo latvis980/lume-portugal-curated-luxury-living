@@ -51,7 +51,7 @@ export default function AdminJournal() {
     <div className="p-8 max-w-6xl">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-light text-admin-text">Journal</h1>
+          <h1 className="text-2xl font-light text-admin-text">About Portugal</h1>
           <p className="mt-1 text-sm text-admin-text-muted">
             News and Memoranda about Portugal
           </p>

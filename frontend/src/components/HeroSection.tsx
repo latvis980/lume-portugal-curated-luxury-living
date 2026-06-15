@@ -1,8 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useT } from "@/lib/i18n";
 import SunWave from "@/components/SunWave";
+
+// Two encodes of the hero footage: the full desktop video and a lighter
+// portrait-friendly crop for phones. The mobile file is added later — until it
+// exists (or if it ever fails to load) we fall back to the desktop video so the
+// hero is never blank.
+const HERO_VIDEO_DESKTOP = "/hero-video.mp4";
+const HERO_VIDEO_MOBILE = "/hero-video-mobile.mp4";
 
 const HeroSection = () => {
   const t = useT();
@@ -10,16 +17,33 @@ const HeroSection = () => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Choose the source up front (lazy initial state) so phones load the mobile
+  // video directly instead of fetching the desktop one first and swapping.
+  const [videoSrc, setVideoSrc] = useState(() =>
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width: 768px)").matches
+      ? HERO_VIDEO_MOBILE
+      : HERO_VIDEO_DESKTOP,
+  );
+
+  // If the mobile video can't be loaded (not uploaded yet, network error),
+  // drop back to the desktop video.
+  const handleVideoError = () => {
+    if (videoSrc !== HERO_VIDEO_DESKTOP) setVideoSrc(HERO_VIDEO_DESKTOP);
+  };
+
   // iOS only autoplays a video that is genuinely muted + inline. React doesn't
   // always reflect the `muted` prop to the DOM property, so set it imperatively
   // and kick off playback once mounted (the promise rejects silently if the
-  // browser still blocks it, e.g. Low Power Mode).
+  // browser still blocks it, e.g. Low Power Mode). Re-run when the source
+  // changes so the fallback video also autoplays.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     v.muted = true;
+    v.load();
     v.play().catch(() => {});
-  }, []);
+  }, [videoSrc]);
 
   const handleGuideClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -36,15 +60,16 @@ const HeroSection = () => {
       <div className="absolute inset-0 z-0">
         <video
           ref={videoRef}
+          key={videoSrc}
+          src={videoSrc}
+          onError={handleVideoError}
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
           className="w-full h-full object-cover"
-        >
-          <source src="/hero-video.mp4" type="video/mp4" />
-        </video>
+        />
         {/* Warm sunset wash on top of the footage so the cream/honey palette
             reads consistently with the rest of the page. */}
         <div
@@ -95,13 +120,13 @@ const HeroSection = () => {
           transition={{ duration: 2, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
           className="m-0"
           style={{
-            fontFamily: '"Caveat", cursive',
+            fontFamily: '"Niconne", cursive',
             color: "#fbf4e6",
             fontSize: "clamp(24px, min(2.97vw, 5.28vh), 52px)",
             fontWeight: 400,
             lineHeight: 1.32,
             maxWidth: "min(46vw, 82vh)",
-            // Caveat's glyphs overshoot the text box; without right padding the
+            // Niconne's glyphs overshoot the text box; without right padding the
             // clip-path reveal shaves the last letter (e.g. the "l" in Portugal).
             paddingRight: "0.5em",
             paddingBottom: "min(1.88vw, 3.33vh)",

@@ -21,7 +21,7 @@ const NAV_LABELS: Record<Locale, NavItem[]> = {
       { label: "Collecting", href: "/#collecting" },
     ] },
     { label: "Investment", href: "/#investment" },
-    { label: "About Us", children: [
+    { label: "Company", children: [
       { label: "Our Vision", href: "/about" },
       { label: "Team", href: "/about/team" },
       { label: "Company News", href: "/about/news" },
@@ -36,7 +36,7 @@ const NAV_LABELS: Record<Locale, NavItem[]> = {
       { label: "Colecionar", href: "/#collecting" },
     ] },
     { label: "Investimento", href: "/#investment" },
-    { label: "Sobre Nós", children: [
+    { label: "Empresa", children: [
       { label: "A Nossa Visão", href: "/about" },
       { label: "Equipa", href: "/about/team" },
       { label: "Media", href: "/about/news" },
@@ -51,7 +51,7 @@ const NAV_LABELS: Record<Locale, NavItem[]> = {
       { label: "Коллекционирование", href: "/#collecting" },
     ] },
     { label: "Инвестиции", href: "/#investment" },
-    { label: "О нас", children: [
+    { label: "Компания", children: [
       { label: "Наше видение", href: "/about" },
       { label: "Команда", href: "/about/team" },
       { label: "Новости компании", href: "/about/news" },
@@ -66,7 +66,7 @@ const NAV_LABELS: Record<Locale, NavItem[]> = {
       { label: "Coleccionismo", href: "/#collecting" },
     ] },
     { label: "Inversión", href: "/#investment" },
-    { label: "Sobre Nosotros", children: [
+    { label: "Empresa", children: [
       { label: "Nuestra Visión", href: "/about" },
       { label: "Equipo", href: "/about/team" },
       { label: "Noticias", href: "/about/news" },

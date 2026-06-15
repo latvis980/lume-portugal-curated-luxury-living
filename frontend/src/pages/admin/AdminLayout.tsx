@@ -13,8 +13,8 @@ import { UnsavedChangesProvider, useUnsavedChanges } from "./UnsavedChangesConte
 const NAV_ITEMS = [
   { to: "/admin",                label: "Dashboard",    icon: "◻" },
   { to: "/admin/listings",       label: "Listings",     icon: "⌂" },
-  { to: "/admin/journal",        label: "Journal",      icon: "❍" },
-  { to: "/admin/contacts",       label: "Contacts",     icon: "✉" },
+  { to: "/admin/journal",        label: "About Portugal",     icon: "❍" },
+  { to: "/admin/contacts",       label: "Leads and clients",  icon: "✉" },
   { to: "/admin/services",       label: "Services",     icon: "✦" },
   { to: "/admin/collecting",     label: "Collecting",   icon: "❖" },
   { to: "/admin/about",          label: "About",        icon: "✎" },

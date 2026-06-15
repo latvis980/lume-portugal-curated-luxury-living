@@ -26,7 +26,7 @@ export default function AdminContacts() {
   return (
     <div className="p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-light text-admin-text">Contacts</h1>
+        <h1 className="text-2xl font-light text-admin-text">Leads and clients</h1>
         <p className="text-sm text-admin-text-muted mt-1">{total} total</p>
       </div>
 
