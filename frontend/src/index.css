@@ -268,6 +268,63 @@ body.lume-wave-frozen .lume-wave-front {
   }
 }
 
+/* ─── Stained-glass "Coming Soon" banner ─────────────────────────────────
+   A warm cathedral-glass backdrop used to close the Homes section while the
+   collection is being curated. Built from layered radial "shards" in the
+   Lume palette, a dark diamond "leading" lattice (::before, multiply), and a
+   soft top sheen (::after). A very slow hue/position drift gives the glass a
+   gentle living-light quality; disabled under prefers-reduced-motion. */
+
+.lume-stained-glass {
+  position: relative;
+  isolation: isolate;
+  background-color: hsl(var(--espresso));
+  background-image:
+    radial-gradient(closest-side at 18% 24%, hsla(41, 84%, 64%, 0.95), transparent 70%),
+    radial-gradient(closest-side at 80% 18%, hsla(23, 70%, 49%, 0.92), transparent 72%),
+    radial-gradient(closest-side at 28% 80%, hsla(18, 75%, 40%, 0.92), transparent 72%),
+    radial-gradient(closest-side at 74% 76%, hsla(27, 78%, 59%, 0.92), transparent 72%),
+    radial-gradient(closest-side at 50% 46%, hsla(41, 90%, 75%, 0.85), transparent 64%),
+    radial-gradient(closest-side at 6% 62%, hsla(190, 42%, 52%, 0.55), transparent 70%),
+    radial-gradient(closest-side at 94% 56%, hsla(38, 81%, 54%, 0.82), transparent 72%);
+  background-size: 160% 160%;
+  background-position: 50% 50%;
+  animation: lume-glass-drift 28s ease-in-out infinite alternate;
+}
+
+.lume-stained-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    repeating-linear-gradient(30deg, hsla(27, 41%, 7%, 0.55) 0 2px, transparent 2px 58px),
+    repeating-linear-gradient(-30deg, hsla(27, 41%, 7%, 0.55) 0 2px, transparent 2px 58px),
+    repeating-linear-gradient(90deg, hsla(27, 41%, 7%, 0.38) 0 2px, transparent 2px 58px);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.lume-stained-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(120% 80% at 50% -12%, hsla(48, 100%, 92%, 0.45), transparent 55%);
+  pointer-events: none;
+}
+
+@keyframes lume-glass-drift {
+  from { background-position: 42% 38%; }
+  to   { background-position: 58% 62%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lume-stained-glass {
+    animation: none;
+  }
+}
+
 /* ─── Collecting gallery (homepage Signature Services block) ─────────────
    Slow Ken Burns drift applied to the active photo slide, and the fade-in
    used by the lightbox overlay. Used by CollectingGallery.tsx. */
