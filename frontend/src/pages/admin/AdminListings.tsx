@@ -38,7 +38,7 @@ export default function AdminListings() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-light text-admin-text">Listings</h1>
+          <h1 className="text-2xl font-light text-admin-text">Homes / Properties</h1>
           <p className="text-sm text-admin-text-muted mt-1">{total} total</p>
         </div>
         <button onClick={() => navigate("/admin/listings/new")} className="rounded-md bg-admin-btn px-4 py-2 text-sm font-medium text-white transition hover:bg-admin-btn-hover">

@@ -208,13 +208,21 @@ const PrivateAccessSection = () => {
                 </p>
                 <div className="flex flex-col gap-2">
                   {phoneLandline && (
-                    <a
-                      href={`tel:${phoneLandline.replace(/\s/g, "")}`}
-                      className="font-display text-base font-light transition-colors"
-                      style={{ color: "#2a1d10" }}
-                    >
-                      {phoneLandline}
-                    </a>
+                    <div className="flex items-baseline gap-2">
+                      <a
+                        href={`tel:${phoneLandline.replace(/\s/g, "")}`}
+                        className="font-display text-base font-light transition-colors"
+                        style={{ color: "#2a1d10" }}
+                      >
+                        {phoneLandline}
+                      </a>
+                      <span
+                        className="text-xs"
+                        style={{ color: "rgba(42,29,16,0.55)" }}
+                      >
+                        ({t("contact", "phone_calls_note", "calls")})
+                      </span>
+                    </div>
                   )}
                   {phone && (
                     <div className="flex items-center gap-3">
@@ -225,6 +233,12 @@ const PrivateAccessSection = () => {
                       >
                         {phone}
                       </a>
+                      <span
+                        className="text-xs"
+                        style={{ color: "rgba(42,29,16,0.55)" }}
+                      >
+                        ({t("contact", "whatsapp_text_note", "text")})
+                      </span>
                       {whatsappNumber && (
                         <a
                           href={`https://wa.me/${whatsappNumber}`}

@@ -104,7 +104,7 @@ export default function AdminContactPage() {
     <div className="p-8 max-w-4xl">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-light text-admin-text">Contact page</h1>
+        <h1 className="text-2xl font-light text-admin-text">Contact Block</h1>
         <p className="text-sm text-admin-text-muted mt-1">
           Edit the content shown in the Contact section at the bottom of the homepage.
           The Save button activates when you make changes to a field.

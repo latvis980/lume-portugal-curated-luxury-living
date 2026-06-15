@@ -174,7 +174,7 @@ export default function AdminAbout() {
     <div className="p-8 max-w-5xl">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-light text-admin-text">About page</h1>
+        <h1 className="text-2xl font-light text-admin-text">Company</h1>
         <p className="text-sm text-admin-text-muted mt-1">
           Edit content in any language. Click{" "}
           <span className="inline-flex items-center rounded bg-admin-accent-soft px-1.5 py-0.5 text-[10px] font-medium text-admin-accent">

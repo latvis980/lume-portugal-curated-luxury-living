@@ -12,14 +12,14 @@ import { UnsavedChangesProvider, useUnsavedChanges } from "./UnsavedChangesConte
 
 const NAV_ITEMS = [
   { to: "/admin",                label: "Dashboard",    icon: "◻" },
-  { to: "/admin/listings",       label: "Listings",     icon: "⌂" },
+  { to: "/admin/listings",       label: "Homes / Properties", icon: "⌂" },
   { to: "/admin/journal",        label: "About Portugal",     icon: "❍" },
   { to: "/admin/contacts",       label: "Leads and clients",  icon: "✉" },
   { to: "/admin/services",       label: "Services",     icon: "✦" },
   { to: "/admin/collecting",     label: "Collecting",   icon: "❖" },
-  { to: "/admin/about",          label: "About",        icon: "✎" },
+  { to: "/admin/about",          label: "Company",      icon: "✎" },
   { to: "/admin/investment",     label: "Investment",   icon: "◉" },
-  { to: "/admin/contact-page",   label: "Contact page", icon: "☎" },
+  { to: "/admin/contact-page",   label: "Contact Block", icon: "☎" },
 ];
 
 export default function AdminLayout() {
