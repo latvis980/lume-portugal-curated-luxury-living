@@ -32,21 +32,23 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { SunWaveLayers, SUN_WAVE_BASE } from "@/components/SunWave";
 
 // ─── Tunable constants ─────────────────────────────────────────────────────
-// "OCEAN_COLOR" name kept for continuity, but with the sunny redesign the
-// wave-takeover colour now matches the top of the contact section's warm
-// gradient (honey #ecbe5b) so the crest reads as molten sunshine rather
-// than seawater.
-export const OCEAN_COLOR  = "#ecbe5b";  // exported — must match PrivateAccessSection top edge
-export const WAVE_HEIGHT  = 60;         // px — height of the wavy crest strip
+// "OCEAN_COLOR" name kept for continuity, but the wave-takeover now reuses the
+// hero's layered sunlit wave (SunWaveLayers), so the solid body below the
+// crest is the hero wave's base gold (SUN_WAVE_BASE) — that's the colour the
+// hero wave settles into at its waterline, and it must match the top of the
+// contact section's warm gradient so the seam is invisible.
+export const OCEAN_COLOR  = SUN_WAVE_BASE;  // exported — must match PrivateAccessSection top edge
+export const WAVE_HEIGHT  = 86;         // px — height of the wavy crest strip (matches the hero's .sun-wave height)
 export const SEAM_OVERLAP = 2;          // px — crest extends this far into the section
 const FADE_START   = 600;              // px — section.top above this: wave invisible
 const FADE_END     = 80;               // px — section.top below this: wave fully opaque
 // Submerge trigger: when the wave's crest line is within ~30px of the viewport
 // top, flip the navbar to its submerged state (transparent bg, white text).
-// Matches wave_demo_2's `waveCrestY < 30` heuristic. anchorY ≤ 90 ⇒ crest top
-// (anchorY - 60) ≤ 30, i.e., wave has reached the upper edge of the navbar.
+// Matches wave_demo_2's `waveCrestY < 30` heuristic: once the section's top
+// reaches the navbar zone, flip the navbar to its submerged state.
 const SUBMERGE_AT  = 90;
 // ───────────────────────────────────────────────────────────────────────────
 
@@ -162,10 +164,18 @@ export const WaveProvider = ({
  * so as the wave climbs into the navbar zone the wavy edge visibly draws
  * on top of the navbar, exactly like wave_demo_2.
  *
+ * The crest reuses the hero's layered sunlit wave (SunWaveLayers), so the
+ * takeover wave is visually identical to the one at the bottom of the hero:
+ * three stacked gradient strips drifting horizontally, fading from a
+ * transparent crest down to the gold waterline (SUN_WAVE_BASE). It carries
+ * the `sun-wave` class so it inherits the hero's layer animations, blur and
+ * reduced-motion handling; `.lume-wave-crest` only re-anchors it to a fixed,
+ * scroll-driven strip.
+ *
  * Position is driven by --lume-wave-crest-y (set by WaveProvider): the top
  * edge of the crest sits at viewport y = anchorY - WAVE_HEIGHT + SEAM_OVERLAP,
- * so the crest's solid teal bottom edge meets (and slightly overlaps) the
- * section's top edge. Any rAF lag is harmless: the section's own teal bg
+ * so the crest's solid gold bottom edge meets (and slightly overlaps) the
+ * section's top edge. Any rAF lag is harmless: the section's own warm bg
  * (z-32) fills any gap below the lagging crest.
  *
  * Drop anywhere inside <WaveProvider>.
@@ -173,8 +183,16 @@ export const WaveProvider = ({
 export const WaveCrest = () => (
   <div
     aria-hidden
-    className="pointer-events-none fixed inset-x-0 top-0 overflow-hidden"
+    className="sun-wave lume-wave-crest pointer-events-none"
     style={{
+      // Positioning is set inline so it always wins over the shared
+      // `.sun-wave` rule (which is `position: absolute; bottom: -2px`),
+      // regardless of stylesheet source order.
+      position: "fixed",
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: "auto",
       height: `${WAVE_HEIGHT}px`,
       transform: "translate3d(0, var(--lume-wave-crest-y, -100px), 0)",
       opacity: "var(--lume-wave-opacity, 0)",
@@ -182,43 +200,8 @@ export const WaveCrest = () => (
       willChange: "transform, opacity",
     }}
   >
-    {/* Back layer — slower drift, slightly transparent for depth */}
-    <div className="absolute inset-0 overflow-hidden">
-      <div
-        className="lume-wave-back absolute top-0 h-full"
-        style={{ left: "-50%", width: "200%", opacity: 0.55 }}
-      >
-        <svg
-          viewBox="0 0 2880 60"
-          preserveAspectRatio="none"
-          style={{ display: "block", width: "100%", height: "100%" }}
-        >
-          <path
-            d="M0,36 C240,6 480,60 720,36 C960,6 1200,60 1440,36 C1680,6 1920,60 2160,36 C2400,6 2640,60 2880,36 L2880,60 L0,60 Z"
-            fill={OCEAN_COLOR}
-          />
-        </svg>
-      </div>
-    </div>
-
-    {/* Front layer — faster drift, opposite direction */}
-    <div className="absolute inset-0 overflow-hidden" style={{ top: 6 }}>
-      <div
-        className="lume-wave-front absolute top-0 h-full"
-        style={{ left: "-50%", width: "200%" }}
-      >
-        <svg
-          viewBox="0 0 2880 54"
-          preserveAspectRatio="none"
-          style={{ display: "block", width: "100%", height: "100%" }}
-        >
-          <path
-            d="M0,28 C180,2 420,52 720,28 C1020,6 1140,54 1440,28 C1740,2 1980,52 2160,28 C2340,6 2580,54 2880,28 L2880,54 L0,54 Z"
-            fill={OCEAN_COLOR}
-          />
-        </svg>
-      </div>
-    </div>
+    <div className="sun-wave-glow" />
+    <SunWaveLayers idPrefix="lume-wave-crest" />
   </div>
 );
 

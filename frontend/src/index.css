@@ -183,42 +183,19 @@
   }
 }
 
-/* ─── Wave-takeover effect ─────────────────────────────────────────────────
-   These styles power the WaveTransition overlay on the homepage. Append
-   them to the END of frontend/src/index.css (outside of any @layer block,
-   or inside @layer utilities — both work).
-
-   The animations translate two SVG strips horizontally in opposite
-   directions, creating the illusion of an undulating ocean surface.
-   When body.lume-wave-frozen is set (added by WaveProvider once the
-   navbar is fully submerged), both animations pause in place.
-   ─────────────────────────────────────────────────────────────────────── */
-
-@keyframes lume-wave-drift-back {
-  from { transform: translate3d(0, 0, 0); }
-  to   { transform: translate3d(-25%, 0, 0); }
-}
-
-@keyframes lume-wave-drift-front {
-  from { transform: translate3d(-25%, 0, 0); }
-  to   { transform: translate3d(0, 0, 0); }
-}
-
-.lume-wave-back  { animation: lume-wave-drift-back  9s   linear infinite; }
-.lume-wave-front { animation: lume-wave-drift-front 5.5s linear infinite; }
+/* ─── Wave-takeover crest ──────────────────────────────────────────────────
+   The crest that climbs over the navbar as the contact section rises reuses
+   the hero's layered sunlit wave (.sun-wave + SunWaveLayers). It is re-anchored
+   as a fixed, scroll-driven strip via inline styles in WaveTransition.tsx
+   (position/height/transform/opacity); the layer animations, blur and
+   reduced-motion handling all come from .sun-wave. The `.lume-wave-crest`
+   class is kept as a hook so the drift can be frozen once submerged. */
 
 /* Freeze the drift once the navbar is fully covered. */
-body.lume-wave-frozen .lume-wave-back,
-body.lume-wave-frozen .lume-wave-front {
+body.lume-wave-frozen .lume-wave-crest .sun-wave-back,
+body.lume-wave-frozen .lume-wave-crest .sun-wave-mid,
+body.lume-wave-frozen .lume-wave-crest .sun-wave-front {
   animation-play-state: paused;
-}
-
-/* Respect users who prefer reduced motion — no horizontal drift at all. */
-@media (prefers-reduced-motion: reduce) {
-  .lume-wave-back,
-  .lume-wave-front {
-    animation: none;
-  }
 }
 
 /* ─── Sun-wave at the bottom of the hero ─────────────────────────────────
