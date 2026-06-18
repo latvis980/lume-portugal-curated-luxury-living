@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useT } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import SunWave from "@/components/SunWave";
 
 // Two encodes of the hero footage: the full desktop video and a lighter
@@ -58,8 +58,15 @@ const SOURCE_TYPE = { mp4: "video/mp4", webm: "video/webm" } as const;
 type HeroVariant = keyof typeof HERO_SOURCES;
 
 const HeroSection = () => {
-  const t = useT();
+  const { t, locale } = useI18n();
   const location = useLocation();
+
+  // The handwritten tagline switches script-appropriate display faces: Latin
+  // locales (en, pt_pt, es) use "Oooh Baby", which has no Cyrillic glyphs, so
+  // Russian falls back to "Caveat" — a script that covers Cyrillic — at its
+  // regular weight (400).
+  const taglineFont =
+    locale === "ru" ? '"Caveat", cursive' : '"Oooh Baby", cursive';
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -181,14 +188,15 @@ const HeroSection = () => {
           transition={{ duration: 2, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
           className="m-0"
           style={{
-            fontFamily: '"Niconne", cursive',
+            fontFamily: taglineFont,
             color: "#fbf4e6",
             fontSize: "clamp(24px, min(2.97vw, 5.28vh), 52px)",
             fontWeight: 400,
             lineHeight: 1.32,
             maxWidth: "min(46vw, 82vh)",
-            // Niconne's glyphs overshoot the text box; without right padding the
-            // clip-path reveal shaves the last letter (e.g. the "l" in Portugal).
+            // The script faces' glyphs overshoot the text box; without right
+            // padding the clip-path reveal shaves the last letter (e.g. the
+            // "l" in Portugal).
             paddingRight: "0.5em",
             paddingBottom: "min(1.88vw, 3.33vh)",
             textShadow: "0 2px 24px rgba(0,0,0,0.35)",
