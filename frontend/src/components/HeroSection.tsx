@@ -9,11 +9,13 @@ import SunWave from "@/components/SunWave";
 // exists (or if it ever fails to load) we fall back to the desktop video so the
 // hero is never blank.
 //
-// Each variant lists an H.264 MP4 first and the VP9 WebM second. MP4/H.264 is
-// hardware-decoded on virtually every device, so it plays back without the
-// frame stutter that software-decoded VP9 can cause — even on fast machines.
-// The browser walks the <source> list and uses the first it can play, so until
-// the .mp4 files are uploaded it simply falls through to the existing .webm.
+// Each variant lists the VP9 WebM first and an H.264 MP4 second. The browser
+// walks the <source> list and uses the first it can play — it does NOT pick the
+// smallest — so order is our codec preference. VP9/WebM is ~25-35% smaller than
+// H.264 at the same quality, so modern browsers load the lighter WebM and the
+// hero appears faster. The MP4 is the universal fallback for the few browsers
+// that can't play WebM. (Now that the footage is 1080p rather than 4K, VP9
+// decode is light and hardware-accelerated, so it no longer stutters.)
 // The poster paints instantly while the video streams in behind it.
 const HERO_SOURCES = {
   desktop: {
@@ -94,10 +96,10 @@ const HeroSection = () => {
           preload="metadata"
           className="w-full h-full object-cover"
         >
-          {/* H.264 first (hardware-decoded everywhere → no stutter), VP9 WebM as
-              the fallback for browsers that prefer it / before the .mp4 exists. */}
-          <source src={sources.mp4} type="video/mp4" />
+          {/* VP9 WebM first (smaller → faster load), H.264 MP4 as the universal
+              fallback for browsers that can't play WebM. */}
           <source src={sources.webm} type="video/webm" />
+          <source src={sources.mp4} type="video/mp4" />
         </video>
         {/* Warm sunset wash on top of the footage so the cream/honey palette
             reads consistently with the rest of the page. */}
