@@ -8,8 +8,8 @@ import SunWave from "@/components/SunWave";
 // portrait-friendly crop for phones. The mobile file is added later — until it
 // exists (or if it ever fails to load) we fall back to the desktop video so the
 // hero is never blank.
-const HERO_VIDEO_DESKTOP = "/hero-video.mp4";
-const HERO_VIDEO_MOBILE = "/hero-video-mobile.mp4";
+const HERO_VIDEO_DESKTOP = "/hero-desktop.webm";
+const HERO_VIDEO_MOBILE = "/hero-mobile.webm";
 
 const HeroSection = () => {
   const t = useT();
