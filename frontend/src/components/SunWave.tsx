@@ -32,50 +32,64 @@ function tilePath(base: number, amp: number): string {
   return d;
 }
 
-const SunWave = () => {
-  const viewBox = `0 0 ${WAVE_W} ${WAVE_H}`;
-  return (
-    <div className="sun-wave" aria-hidden="true">
-      <div className="sun-wave-glow" />
+const VIEW_BOX = `0 0 ${WAVE_W} ${WAVE_H}`;
 
-      {/* back — soft amber, slowest */}
-      <svg className="sun-wave-svg sun-wave-back" viewBox={viewBox} preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="lume-sun-wave-back" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#f1c454" stopOpacity="0" />
-            <stop offset="40%" stopColor="#e89446" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="#d36a25" stopOpacity="0.85" />
-          </linearGradient>
-        </defs>
-        <path d={tilePath(200, 70)} fill="url(#lume-sun-wave-back)" />
-      </svg>
+/**
+ * The three stacked, sunlit wave strips (back / mid / front) shared by the
+ * hero horizon and the contact-section wave-takeover crest. `idPrefix` keeps
+ * each instance's gradient ids unique, so mounting more than one on the same
+ * page (hero + crest) doesn't cause `<linearGradient>` id collisions.
+ */
+export const SunWaveLayers = ({ idPrefix }: { idPrefix: string }) => (
+  <>
+    {/* back — soft amber, slowest */}
+    <svg className="sun-wave-svg sun-wave-back" viewBox={VIEW_BOX} preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={`${idPrefix}-back`} x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#f1c454" stopOpacity="0" />
+          <stop offset="40%" stopColor="#e89446" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#d36a25" stopOpacity="0.85" />
+        </linearGradient>
+      </defs>
+      <path d={tilePath(200, 70)} fill={`url(#${idPrefix}-back)`} />
+    </svg>
 
-      {/* mid — honey, medium */}
-      <svg className="sun-wave-svg sun-wave-mid" viewBox={viewBox} preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="lume-sun-wave-mid" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#ffe17a" stopOpacity="0" />
-            <stop offset="35%" stopColor="#f1c454" stopOpacity="0.85" />
-            <stop offset="100%" stopColor="#e89446" stopOpacity="1" />
-          </linearGradient>
-        </defs>
-        <path d={tilePath(245, 55)} fill="url(#lume-sun-wave-mid)" />
-      </svg>
+    {/* mid — honey, medium */}
+    <svg className="sun-wave-svg sun-wave-mid" viewBox={VIEW_BOX} preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={`${idPrefix}-mid`} x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#ffe17a" stopOpacity="0" />
+          <stop offset="35%" stopColor="#f1c454" stopOpacity="0.85" />
+          <stop offset="100%" stopColor="#e89446" stopOpacity="1" />
+        </linearGradient>
+      </defs>
+      <path d={tilePath(245, 55)} fill={`url(#${idPrefix}-mid)`} />
+    </svg>
 
-      {/* front — bright sunshine, fastest */}
-      <svg className="sun-wave-svg sun-wave-front" viewBox={viewBox} preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="lume-sun-wave-front" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#fff4c2" stopOpacity="0" />
-            <stop offset="20%" stopColor="#ffd968" stopOpacity="0.7" />
-            <stop offset="60%" stopColor="#f1c454" stopOpacity="1" />
-            <stop offset="100%" stopColor="#e9a92e" stopOpacity="1" />
-          </linearGradient>
-        </defs>
-        <path d={tilePath(290, 45)} fill="url(#lume-sun-wave-front)" />
-      </svg>
-    </div>
-  );
-};
+    {/* front — bright sunshine, fastest */}
+    <svg className="sun-wave-svg sun-wave-front" viewBox={VIEW_BOX} preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={`${idPrefix}-front`} x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#fff4c2" stopOpacity="0" />
+          <stop offset="20%" stopColor="#ffd968" stopOpacity="0.7" />
+          <stop offset="60%" stopColor="#f1c454" stopOpacity="1" />
+          <stop offset="100%" stopColor="#e9a92e" stopOpacity="1" />
+        </linearGradient>
+      </defs>
+      <path d={tilePath(290, 45)} fill={`url(#${idPrefix}-front)`} />
+    </svg>
+  </>
+);
+
+/** Front gradient's deepest stop — the colour the wave settles into at the
+ *  waterline. Shared so the contact crest's solid body matches the hero. */
+export const SUN_WAVE_BASE = "#e9a92e";
+
+const SunWave = () => (
+  <div className="sun-wave" aria-hidden="true">
+    <div className="sun-wave-glow" />
+    <SunWaveLayers idPrefix="lume-sun-wave" />
+  </div>
+);
 
 export default SunWave;

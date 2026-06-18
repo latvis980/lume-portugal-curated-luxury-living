@@ -57,7 +57,7 @@ const PrivateAccessSection = () => {
       className="relative z-[32] section-padding overflow-hidden"
       style={{
         background:
-          "linear-gradient(180deg, #ecbe5b 0%, #e89446 60%, #d36a25 100%)",
+          "linear-gradient(180deg, #e9a92e 0%, #e89446 60%, #d36a25 100%)",
         color: "#2a1d10",
       }}
     >
