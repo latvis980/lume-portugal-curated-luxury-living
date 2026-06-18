@@ -238,17 +238,18 @@ const Navbar = () => {
                 {/* Hover-revealed dropdown panel */}
                 <div className="absolute left-1/2 top-full -translate-x-1/2 pt-3 opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300">
                   <div
-                    className="min-w-[200px] py-2 rounded-sm border shadow-lg"
+                    className="nav-child-menu min-w-[200px] py-2 rounded-sm border shadow-lg"
                     style={{
-                      backgroundColor: lightText || darkScrolled ? "#1a1108" : "rgba(251, 244, 230, 0.98)",
-                      borderColor: lightText || darkScrolled ? "rgba(237, 217, 168, 0.14)" : "rgba(176, 78, 26, 0.14)",
-                      backdropFilter: "blur(14px)",
-                      WebkitBackdropFilter: "blur(14px)",
+                      // Matches the CTA buttons' orange-honey gradient (see
+                      // HeroSection / InvestmentSection) so the dropdown reads as
+                      // a continuation of the brand's primary action colour.
+                      background: "linear-gradient(120deg, #f1c454 0%, #e89446 100%)",
+                      borderColor: "rgba(176, 78, 26, 0.22)",
                     }}
                   >
                     {item.children.map((child) => {
                       const cls =
-                        "block px-5 py-2.5 text-[12px] tracking-[0.14em] uppercase text-muted-foreground hover:text-primary transition-colors duration-200 whitespace-nowrap";
+                        "nav-child-link block px-5 py-2.5 text-[12px] tracking-[0.14em] uppercase transition-opacity duration-200 whitespace-nowrap";
                       return isHash(child.href) ? (
                         <a key={child.href} href={child.href} onClick={(e) => handleNavClick(e, child.href)} className={cls}>
                           {child.label}
@@ -357,6 +358,14 @@ const Navbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Child-menu link colour. The nav wrapper forces `!text-warm-white` over
+          dark surfaces; these higher-specificity rules keep the dropdown copy
+          black on its honey gradient regardless of the surface behind the bar. */}
+      <style>{`
+        .nav-child-menu .nav-child-link { color: #1a1108 !important; }
+        .nav-child-menu .nav-child-link:hover { color: #1a1108 !important; opacity: 0.62; }
+      `}</style>
     </nav>
   );
 };
