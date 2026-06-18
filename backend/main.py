@@ -193,6 +193,31 @@ def _get_html_template() -> str:
     return _html_template
 
 
+# Long-lived caching for static media served from the origin. Without a
+# Cache-Control header an in-front CDN (e.g. Cloudflare) will NOT cache the
+# response, so every request — including mid-playback re-buffers of the hero
+# video — hits this single-region origin. That is the main cause of background
+# video stutter on mobile networks. Marking the media public + cacheable lets
+# the CDN serve it from an edge node close to the user. Filenames are stable, so
+# bump the name (e.g. hero-desktop.v2.mp4) when you replace a file to bust caches.
+_MEDIA_CACHE_EXTS = {
+    ".mp4", ".webm", ".mov", ".m4v",        # video
+    ".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif", ".svg",  # images
+    ".woff", ".woff2", ".ttf", ".otf",      # fonts
+}
+_STATIC_MEDIA_CACHE = "public, max-age=604800, stale-while-revalidate=86400"
+
+
+def _static_file_response(file_path: Path) -> FileResponse:
+    """FileResponse for a built static file. Starlette's FileResponse already
+    honours HTTP Range requests (206 + Accept-Ranges), which is what lets the
+    browser stream and seek the video; we add caching so the CDN/browser keep it."""
+    headers = {}
+    if file_path.suffix.lower() in _MEDIA_CACHE_EXTS:
+        headers["Cache-Control"] = _STATIC_MEDIA_CACHE
+    return FileResponse(file_path, headers=headers)
+
+
 if frontend_path.exists():
     # ── Mount static assets (JS, CSS, images) ──
     assets_path = frontend_path / "assets"
@@ -224,10 +249,10 @@ if frontend_path.exists():
     # ── Catch-all: SPA routing with SEO injection ──
     @app.get("/{path:path}")
     async def serve_spa(request: Request, path: str):
-        # Serve actual static files directly (JS bundles, images, etc.)
+        # Serve actual static files directly (JS bundles, images, video, etc.)
         file_path = frontend_path / path
         if file_path.exists() and file_path.is_file():
-            return FileResponse(file_path)
+            return _static_file_response(file_path)
 
         # Everything else: inject SEO into the SPA template
         template = _get_html_template()

@@ -104,10 +104,13 @@ const HeroSection = () => {
           muted
           loop
           playsInline
-          // "metadata" lets the browser stream the footage progressively instead
-          // of eagerly buffering the whole file the way "auto" does; autoplay
-          // still kicks off playback. The poster fills the hero in the meantime.
-          preload="metadata"
+          // For an autoplay background loop the footage is small (~1-4 MB) and
+          // *always* plays, so "auto" is the right call: it lets the browser
+          // buffer ahead of the playhead, which is what prevents stutter when a
+          // mobile connection briefly drops packets. "metadata" keeps the buffer
+          // razor-thin, so any network hiccup starves the decoder. The poster
+          // still paints instantly while the first frames stream in.
+          preload="auto"
           className="w-full h-full object-cover"
         >
           {/* Codec preference is per-variant (see HERO_SOURCES): desktop favours
