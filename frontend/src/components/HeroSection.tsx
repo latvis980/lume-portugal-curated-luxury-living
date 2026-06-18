@@ -8,8 +8,27 @@ import SunWave from "@/components/SunWave";
 // portrait-friendly crop for phones. The mobile file is added later — until it
 // exists (or if it ever fails to load) we fall back to the desktop video so the
 // hero is never blank.
-const HERO_VIDEO_DESKTOP = "/hero-desktop.webm";
-const HERO_VIDEO_MOBILE = "/hero-mobile.webm";
+//
+// Each variant lists an H.264 MP4 first and the VP9 WebM second. MP4/H.264 is
+// hardware-decoded on virtually every device, so it plays back without the
+// frame stutter that software-decoded VP9 can cause — even on fast machines.
+// The browser walks the <source> list and uses the first it can play, so until
+// the .mp4 files are uploaded it simply falls through to the existing .webm.
+// The poster paints instantly while the video streams in behind it.
+const HERO_SOURCES = {
+  desktop: {
+    mp4: "/hero-desktop.mp4",
+    webm: "/hero-desktop.webm",
+    poster: "/hero-desktop-poster.jpg",
+  },
+  mobile: {
+    mp4: "/hero-mobile.mp4",
+    webm: "/hero-mobile.webm",
+    poster: "/hero-mobile-poster.jpg",
+  },
+} as const;
+
+type HeroVariant = keyof typeof HERO_SOURCES;
 
 const HeroSection = () => {
   const t = useT();
@@ -17,19 +36,21 @@ const HeroSection = () => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Choose the source up front (lazy initial state) so phones load the mobile
+  // Choose the variant up front (lazy initial state) so phones load the mobile
   // video directly instead of fetching the desktop one first and swapping.
-  const [videoSrc, setVideoSrc] = useState(() =>
+  const [variant, setVariant] = useState<HeroVariant>(() =>
     typeof window !== "undefined" &&
     window.matchMedia("(max-width: 768px)").matches
-      ? HERO_VIDEO_MOBILE
-      : HERO_VIDEO_DESKTOP,
+      ? "mobile"
+      : "desktop",
   );
+  const sources = HERO_SOURCES[variant];
 
-  // If the mobile video can't be loaded (not uploaded yet, network error),
-  // drop back to the desktop video.
+  // The video only errors once *every* <source> has failed. So if the mobile
+  // encodes can't be loaded at all (not uploaded yet, network error), drop back
+  // to the desktop variant so the hero is never blank.
   const handleVideoError = () => {
-    if (videoSrc !== HERO_VIDEO_DESKTOP) setVideoSrc(HERO_VIDEO_DESKTOP);
+    if (variant !== "desktop") setVariant("desktop");
   };
 
   // iOS only autoplays a video that is genuinely muted + inline. React doesn't
@@ -43,7 +64,7 @@ const HeroSection = () => {
     v.muted = true;
     v.load();
     v.play().catch(() => {});
-  }, [videoSrc]);
+  }, [variant]);
 
   const handleGuideClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -60,16 +81,24 @@ const HeroSection = () => {
       <div className="absolute inset-0 z-0">
         <video
           ref={videoRef}
-          key={videoSrc}
-          src={videoSrc}
+          key={variant}
           onError={handleVideoError}
+          poster={sources.poster}
           autoPlay
           muted
           loop
           playsInline
-          preload="auto"
+          // "metadata" lets the browser stream the footage progressively instead
+          // of eagerly buffering the whole file the way "auto" does; autoplay
+          // still kicks off playback. The poster fills the hero in the meantime.
+          preload="metadata"
           className="w-full h-full object-cover"
-        />
+        >
+          {/* H.264 first (hardware-decoded everywhere → no stutter), VP9 WebM as
+              the fallback for browsers that prefer it / before the .mp4 exists. */}
+          <source src={sources.mp4} type="video/mp4" />
+          <source src={sources.webm} type="video/webm" />
+        </video>
         {/* Warm sunset wash on top of the footage so the cream/honey palette
             reads consistently with the rest of the page. */}
         <div
