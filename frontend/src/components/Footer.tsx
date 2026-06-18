@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Phone, MessageCircle, Facebook, Instagram, ChevronUp } from "lucide-react";
+import { Phone, Facebook, Instagram, ChevronUp } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
@@ -84,10 +84,6 @@ const Footer = () => {
                 <Phone size={14} strokeWidth={1.5} className="shrink-0 text-[#edd9a8]/70" />
                 <span>+351 21 3212 800</span>
               </a>
-              <span className="flex items-center gap-2.5 justify-center md:justify-start text-[13px]">
-                <MessageCircle size={14} strokeWidth={1.5} className="shrink-0 text-[#edd9a8]/70" />
-                <span>{t("footer", "whatsapp_label", "WhatsApp")}: XXXX</span>
-              </span>
             </div>
 
             {/* Social */}
