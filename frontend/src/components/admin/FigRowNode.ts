@@ -72,10 +72,15 @@ export const FigRowNode = Node.create({
     return [{ tag: "div[data-fig-row]" }];
   },
 
-  renderHTML({ HTMLAttributes }) {
+  renderHTML({ HTMLAttributes, node }) {
+    const cols = (node.attrs.columns as number) ?? 4;
     return [
       "div",
-      mergeAttributes(HTMLAttributes, { "data-fig-row": "", class: "figrow" }),
+      mergeAttributes(HTMLAttributes, {
+        "data-fig-row": "",
+        class: "figrow",
+        style: `--fig-cols:${cols}`,
+      }),
       0,
     ];
   },
